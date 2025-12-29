@@ -1,0 +1,71 @@
+services:
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: user_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
+  subscription-db:
+    image: postgres:15
+    container_name: subscription-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: subscription_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - subscription_db_data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:15
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payment_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@user-db:5432/user_db
+    depends_on:
+      - user-db
+    ports:
+      - "5005:5000"
+
+  subscription-service:
+    build: ./services/subscription-service
+    container_name: subscription-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@subscription-db:5432/subscription_db
+    depends_on:
+      - subscription-db
+    ports:
+      - "5001:5001"
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@payment-db:5432/payment_db
+    depends_on:
+      - payment-db
+    ports:
+      - "5002:5002"
+
+volumes:
+  user_db_data:
+  subscription_db_data:
+  payment_db_data:
