@@ -3,7 +3,10 @@ import whisper
 from fastapi import FastAPI, UploadFile, File, Depends
 from groq import Groq
 from sqlalchemy.orm import Session
-import models, database # Dựa trên sơ đồ xdpm bạn đã vẽ
+import models, database 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -11,7 +14,7 @@ app = FastAPI()
 model_whisper = whisper.load_model("base") 
 
 # 2. Cấu hình Groq API (Dùng Llama 3 - Miễn phí)
-client_groq = Groq(api_key="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")
+client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 @app.post("/ai-core/analyze")
 async def analyze_speaking(
