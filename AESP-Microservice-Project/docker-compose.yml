@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   user-db:
     image: postgres:15
@@ -11,6 +13,18 @@ services:
     volumes:
       - user_db_data:/var/lib/postgresql/data
 
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@user-db:5432/user_db
+      JWT_SECRET_KEY: "change_me_to_a_long_random_secret"
+    depends_on:
+      - user-db
+    ports:
+      - "5005:5000"
+    restart: unless-stopped
+
   subscription-db:
     image: postgres:15
     container_name: subscription-db
@@ -22,6 +36,17 @@ services:
       - "5436:5432"
     volumes:
       - subscription_db_data:/var/lib/postgresql/data
+
+  subscription-service:
+    build: ./services/subscription-service
+    container_name: subscription-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@subscription-db:5432/subscription_db
+    depends_on:
+      - subscription-db
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
 
   payment-db:
     image: postgres:15
@@ -35,35 +60,19 @@ services:
     volumes:
       - payment_db_data:/var/lib/postgresql/data
 
-  user-service:
-    build: ./services/user-service
-    container_name: user-service
-    environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@user-db:5432/user_db
-    depends_on:
-      - user-db
-    ports:
-      - "5005:5000"
-
-  subscription-service:
-    build: ./services/subscription-service
-    container_name: subscription-service
-    environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@subscription-db:5432/subscription_db
-    depends_on:
-      - subscription-db
-    ports:
-      - "5001:5001"
-
   payment-service:
     build: ./services/payment-service
     container_name: payment-service
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@payment-db:5432/payment_db
+      SUBSCRIPTION_SERVICE_URL: http://subscription-service:5001
+      STRICT_PAYMENT_TRANSITIONS: "true"
+      PAYMENT_ACTIVATES_SUBSCRIPTION: "true"
     depends_on:
       - payment-db
     ports:
       - "5002:5002"
+    restart: unless-stopped
 
 volumes:
   user_db_data:
