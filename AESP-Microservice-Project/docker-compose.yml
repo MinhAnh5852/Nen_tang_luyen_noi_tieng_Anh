@@ -1,6 +1,31 @@
 version: "3.9"
 
 services:
+  ai-db:
+    image: mysql:8.0
+    container_name: ai-db
+    environment:
+      MYSQL_DATABASE: xdpm
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - ai_db_data:/var/lib/mysql
+
+  ai-core-service:
+    build: 
+      context: .
+      dockerfile: services/AI-core-service/Dockerfile
+    container_name: ai-core-service
+    environment:
+      - SQLALCHEMY_DATABASE_URL=mysql+mysqlconnector://root:root@ai-db:3306/xdpm
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      - ai-db
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
   user-db:
     image: postgres:15
     container_name: user-db
