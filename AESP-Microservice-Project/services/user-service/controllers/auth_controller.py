@@ -1,11 +1,15 @@
 from flask import Blueprint, request, jsonify
+from flask_limiter import Limiter
 
 from services.user_service import AuthService
 from models.user import User
 
 auth_bp = Blueprint("auth", __name__)
 
+limiter = Limiter()
+
 @auth_bp.route("/auth/login", methods=["POST"])
+@limiter.limit("5 per minute")
 def login():
     if not request.is_json:
         return jsonify({"error": "Content-Type must be application/json"}), 415
