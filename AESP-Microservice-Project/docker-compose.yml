@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # --- AI SERVICE GROUP ---
   ai-db:
     image: mysql:8.0
     container_name: ai-db
@@ -11,11 +12,11 @@ services:
       - "3307:3306"
     volumes:
       - ai_db_data:/var/lib/mysql
+    networks:          # <--- Đã thêm
+      - app-network
 
   ai-core-service:
-    build: 
-      context: .
-      dockerfile: services/AI-core-service/Dockerfile
+    build: ./services/ai-core-service
     container_name: ai-core-service
     environment:
       - SQLALCHEMY_DATABASE_URL=mysql+mysqlconnector://root:root@ai-db:3306/xdpm
@@ -25,7 +26,12 @@ services:
     ports:
       - "8001:8001"
     restart: unless-stopped
+    volumes:
+      - ./services/ai-core-service:/app
+    networks:          # <--- Đã thêm
+      - app-network
 
+  # --- USER SERVICE GROUP ---
   user-db:
     image: postgres:15
     container_name: user-db
@@ -37,6 +43,8 @@ services:
       - "5435:5432"
     volumes:
       - user_db_data:/var/lib/postgresql/data
+    networks:          # <--- Đã thêm
+      - app-network
 
   user-service:
     build: ./services/user-service
@@ -49,7 +57,10 @@ services:
     ports:
       - "5005:5000"
     restart: unless-stopped
+    networks:          # <--- Đã thêm
+      - app-network
 
+  # --- SUBSCRIPTION SERVICE GROUP ---
   subscription-db:
     image: postgres:15
     container_name: subscription-db
@@ -61,6 +72,8 @@ services:
       - "5436:5432"
     volumes:
       - subscription_db_data:/var/lib/postgresql/data
+    networks:          # <--- Đã thêm
+      - app-network
 
   subscription-service:
     build: ./services/subscription-service
@@ -72,7 +85,10 @@ services:
     ports:
       - "5001:5001"
     restart: unless-stopped
+    networks:          # <--- Đã thêm
+      - app-network
 
+  # --- PAYMENT SERVICE GROUP ---
   payment-db:
     image: postgres:15
     container_name: payment-db
@@ -84,6 +100,8 @@ services:
       - "5437:5432"
     volumes:
       - payment_db_data:/var/lib/postgresql/data
+    networks:          # <--- Đã thêm
+      - app-network
 
   payment-service:
     build: ./services/payment-service
@@ -98,8 +116,40 @@ services:
     ports:
       - "5002:5002"
     restart: unless-stopped
+    networks:          # <--- Đã thêm
+      - app-network
+
+  # --- ANALYTICS & GATEWAY ---
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    ports:
+      - "8006:5000"
+    environment:
+      - USER_SERVICE_URL=http://user-service:5000
+      - PAYMENT_SERVICE_URL=http://payment-service:5002
+    networks:
+      - app-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "80:80"
+    depends_on:
+      - analytics-service
+      - user-service
+      - payment-service
+      - subscription-service
+    networks:
+      - app-network
 
 volumes:
   user_db_data:
   subscription_db_data:
   payment_db_data:
+  ai_db_data:
+
+networks:
+  app-network:
+    driver: bridge
