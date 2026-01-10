@@ -22,7 +22,7 @@ def verify():
         role = payload.get("role")
 
         # role có thể đang là enum hoặc string
-        role_str = getattr(role, "value", None) or (str(role) if role is not None else None)
+        role_str = user.role_str
 
         # Nếu trước đây role bị dạng "UserRole.LEARNER" thì normalize về "learner"
         if isinstance(role_str, str) and "." in role_str:

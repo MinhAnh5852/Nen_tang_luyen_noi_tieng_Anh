@@ -25,7 +25,7 @@ class AuthService:
         payload = {
             "user_id": user.id,
             # ✅ thêm role vào token (string)
-            "role": getattr(user.role, "value", str(user.role)).lower(),
+            "role": user.role_str,
             "exp": exp,
         }
 
