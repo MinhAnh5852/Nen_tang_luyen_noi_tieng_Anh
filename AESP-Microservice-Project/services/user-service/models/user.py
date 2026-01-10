@@ -13,5 +13,7 @@ class User(db.Model):
     @property
     def role_str(self):
         if self.role:
-            return self.role.value.lower()
+            if hasattr(self.role, 'value'):
+                return self.role.value.lower()
+            return str(self.role).lower()
         return None
