@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+from flask_cors import CORS
+
+load_dotenv(dotenv_path=".env")
+
 from flask import Flask
 from database import db
 from config import Config
@@ -11,6 +16,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
+
+    CORS(app)  # Enable CORS
 
     # Add rate limiting
     limiter = Limiter(
@@ -33,8 +40,14 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        print("DB created")
+    print("App created")
     return app
 
 app = create_app()
+print("App started")
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    try:
+        app.run(host="0.0.0.0", port=5000)
+    except Exception as e:
+        print(f"Error running app: {e}")
