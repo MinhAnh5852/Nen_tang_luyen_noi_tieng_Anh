@@ -1,660 +1,1753 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mentor - AI English Speaking Platform</title>
 
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Fonts: đổi font sang Inter (giữ icon) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --border:#e6eaf2;
+      --text:#0f172a;
+      --muted:#64748b;
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --sidebar1:#0b1220;
+      --sidebar2:#07121d;
+      --sidebar3:#06101a;
+      --pill:#f8fafc;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height:1.5;
+    }
+    a{ color:inherit; }
+
+    /* ===== Layout giống ảnh sidebar + topbar ===== */
+    .app{ display:flex; min-height:100vh; }
+    .sidebar{
+      width: 260px;
+      background: linear-gradient(180deg, var(--sidebar1) 0%, var(--sidebar2) 60%, var(--sidebar3) 100%);
+      color:#e2e8f0;
+      padding:18px 14px;
+      position: sticky;
+      top:0;
+      height:100vh;
+      box-shadow: 0 10px 30px rgba(2, 8, 23, .25);
+    }
+    .sb-brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:10px 10px 18px;
+      border-bottom: 1px solid rgba(148,163,184,.12);
+      margin-bottom: 14px;
+    }
+    .sb-brand .sb-logo{
+      width:44px;height:44px;border-radius:14px;
+      background: rgba(59,130,246,.15);
+      border:1px solid rgba(59,130,246,.25);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .sb-brand h3{ margin:0; font-size:16px; font-weight:900; letter-spacing:.2px; }
+    .sb-brand p{ margin:2px 0 0; font-size:12px; color: rgba(226,232,240,.75); }
+
+    .sb-group-title{
+      margin: 18px 10px 8px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .9px;
+      color: rgba(148,163,184,.8);
+    }
+    .sb-link{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 12px;
+      margin:6px 6px;
+      border-radius: 14px;
+      color:#e2e8f0;
+      text-decoration:none;
+      font-weight:800;
+      transition: .15s;
+      border:1px solid transparent;
+      user-select:none;
+    }
+    .sb-link i{ width:18px; text-align:center; opacity:.9; }
+    .sb-link:hover{
+      background: rgba(148,163,184,.10);
+      border-color: rgba(148,163,184,.10);
+    }
+    .sb-link.active{
+      background: linear-gradient(90deg, rgba(16,185,129,.18), rgba(59,130,246,.12));
+      border-color: rgba(16,185,129,.20);
+      box-shadow: inset 0 0 0 1px rgba(16,185,129,.08);
+    }
+
+    .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+    .topbar{
+      height:64px;
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position: sticky;
+      top:0;
+      z-index:10;
+    }
+    .topbar-inner{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position: relative;
+      padding: 0 18px;
+    }
+    .topbar-title{
+      font-size: 22px;
+      font-weight: 900;
+      color:var(--text);
+      margin:0;
+    }
+    .topbar-right{
+      position:absolute;
+      right:18px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* ===== Base components ===== */
+    .container{
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .content-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+      padding: 16px;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid transparent;
+      background:#fff;
+      color:var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor:pointer;
+      transition: .15s;
+      user-select:none;
+      font-family: inherit;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{
+      background: var(--primary);
+      color:#fff;
+      border-color: rgba(37,99,235,.25);
+      box-shadow: 0 10px 18px rgba(37,99,235,.18);
+    }
+    .btn-primary:hover{ background: var(--primary2); }
+    .btn-outline{
+      background:#fff;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover{ background: #f8fafc; }
+    .btn-sm{
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 12px;
+    }
+
+    .pill{
+      display:inline-block;
+      padding: 6px 10px;
+      border:1px solid var(--border);
+      border-radius: 999px;
+      background:var(--pill);
+      font-size: 12px;
+      font-weight: 700;
+      color:#334155;
+    }
+    .muted{ color:var(--muted); font-size:13px; }
+
+    .table-container{
+      width:100%;
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius: 14px;
+      background:#fff;
+    }
+    table.data-table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 880px;
+    }
+    .data-table thead th{
+      text-align:left;
+      font-size: 12px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color:#475569;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+      padding: 12px 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .data-table tbody td{
+      border-bottom:1px solid var(--border);
+      padding: 12px 12px;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    .data-table tbody tr:hover{ background:#fafcff; }
+
+    .grid-2{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+
+    .mini-card{
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .mini-card h4{ margin:0 0 6px; font-size: 14px; font-weight: 900; }
+    .mini-card p{ margin:0; color:var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .section{ display:none; }
+    .section.active{ display:block; }
+
+    @media (max-width: 980px){
+      .sidebar{ display:none; }
+      .grid-3{ grid-template-columns: 1fr; }
+      .grid-2{ grid-template-columns: 1fr; }
+      .topbar-title{ font-size:18px; }
+      table.data-table{ min-width: 740px; }
+    }
+
+    /* ===== Mentor modal ===== */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background: rgba(2,6,23,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding: 18px;
+    }
+    .modal-backdrop.show{ display:flex; }
+    .modal{
+      width: min(720px, 100%);
+      background:#fff;
+      border-radius: 16px;
+      border:1px solid var(--border);
+      box-shadow: 0 30px 70px rgba(2, 8, 23, .25);
+      overflow:hidden;
+    }
+    .modal-hd{
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid var(--border);
+      background:#f8fafc;
+    }
+    .modal-hd h3{ margin:0; font-size:16px; font-weight: 900; color:var(--text); }
+    .modal-bd{ padding: 16px; }
+    .form-row{ display:grid; grid-template-columns: 160px 1fr; gap:10px; padding:8px 0; align-items:center; }
+    .form-row label{ font-weight:900; color:var(--text); font-size:13px; }
+    .form-row input, .form-row select, .form-row textarea{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      outline:none;
+      font-family: inherit;
+    }
+    .modal-ft{
+      padding: 14px 16px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      border-top:1px solid var(--border);
+      background:#fff;
+    }
+
+    /* dropdown */
+    .dd{ position: relative; }
+    .dd-menu{
+      display:none;
+      position:absolute;
+      right:0;
+      top:44px;
+      background:#fff;
+      min-width:240px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.10);
+      overflow:hidden;
+      z-index:200;
+    }
+    .dd-menu a{
+      display:block;
+      padding:12px 14px;
+      text-decoration:none;
+      color:var(--text);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .dd-menu a:hover{ background:#f8fafc; }
+  </style>
 </head>
 
 <body>
-  <!-- Header -->
-  <header>
-    <div class="container header-container">
-      <a href="mentor.html" class="logo">
-        <i class="fas fa-robot logo-icon"></i>
-        <span class="logo-text">AI English Speaking</span>
-      </a>
+<div class="app">
 
-      <!-- Menu (link theo section của bạn) -->
-      <nav class="nav-links">
-        <a href="#" class="active" data-section="learners" onclick="showSection('learners'); return false;" id="menuLearnersTop">Học viên</a>
-        <a href="#" data-section="progress" onclick="showSection('progress'); return false;" id="menuProgressTop">Tiến độ</a>
-        <a href="#" data-section="feedback" onclick="showSection('feedback'); return false;" id="menuFeedbackTop">Phản hồi</a>
-        <a href="#" data-section="tasks" onclick="showSection('tasks'); return false;" id="menuTasksTop">Giao bài</a>
-        <a href="#" data-section="settings" onclick="showSection('settings'); return false;" id="menuSettingsTop">Cài đặt</a>
-      </nav>
-
-      <div class="user-menu">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">MT</div>
-          <span class="user-name" id="userName">Mentor Trần</span>
-        </div>
-
-        <!-- Dropdown: đổi ngôn ngữ + logout (giữ của bạn) -->
-        <div style="position: relative; display:flex; gap:10px; align-items:center;">
-          <button class="btn btn-outline btn-sm" id="profileBtn" onclick="toggleDropdown()">Mentor Profile ▼</button>
-          <div id="dropdown" style="
-              display:none; position:absolute; right:0; top:44px; background:#fff;
-              min-width:180px; border:1px solid #e6eaf2; border-radius:12px;
-              box-shadow: 0 10px 30px rgba(15,23,42,0.06); overflow:hidden; z-index:50;">
-            <a href="#" style="display:block; padding:12px 14px; text-decoration:none; color:#111; font-weight:600;" onclick="switchLanguage('en'); return false;">EN</a>
-            <a href="#" style="display:block; padding:12px 14px; text-decoration:none; color:#111; font-weight:600;" onclick="switchLanguage('vi'); return false;">VI</a>
-            <a href="#" style="display:block; padding:12px 14px; text-decoration:none; color:#111; font-weight:600;" onclick="logout(); return false;" id="logoutText">Đăng xuất</a>
-          </div>
-
-          <a href="index.html" class="btn btn-outline">Đăng xuất</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="container">
-    <div class="dashboard-header">
-      <h1 id="title">Bảng Điều Khiển Mentor</h1>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <a href="#" class="btn btn-primary" onclick="showSection('tasks'); return false;">
-          <i class="fas fa-calendar-plus"></i> <span id="assignNewTaskBtnTextTop">Giao bài mới</span>
-        </a>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo"><i class="fa-solid fa-robot"></i></div>
+      <div>
+        <h3>AESP</h3>
+        <p data-i18n="roleMentor">Mentor</p>
       </div>
     </div>
 
-    <!-- Alerts (giữ của bạn) -->
-    <div class="content-card" style="margin-bottom: 16px; background:#fff7db; border:1px solid #ffe6a3;">
-      <strong id="alertsLabel">Cảnh báo:</strong>
-      <span id="alertsText">3 học viên chưa luyện tập 7 ngày. 2 học viên cần phản hồi.</span>
-    </div>
+    <div class="sb-group-title" data-i18n="groupDashboard">DASHBOARD</div>
+    <a class="sb-link active" href="#" data-section="learners">
+      <i class="fa-solid fa-user-group"></i> <span data-i18n="menuLearners">Học viên</span>
+    </a>
 
-    <!-- Sections -->
-    <section class="content-card section active" id="learnersSection">
-      <h2 id="learnersTitle">Học Viên Của Tôi</h2>
+    <div class="sb-group-title" data-i18n="groupManage">QUẢN LÝ</div>
+    <a class="sb-link" href="#" data-section="progress">
+      <i class="fa-solid fa-chart-line"></i> <span data-i18n="menuProgress">Tiến độ</span>
+    </a>
+    <a class="sb-link" href="#" data-section="feedback">
+      <i class="fa-regular fa-comment-dots"></i> <span data-i18n="menuFeedback">Phản hồi</span>
+    </a>
+    <a class="sb-link" href="#" data-section="tasks">
+      <i class="fa-solid fa-list-check"></i> <span data-i18n="menuTasks">Giao bài</span>
+    </a>
+    <a class="sb-link" href="#" data-section="ranking">
+      <i class="fa-solid fa-ranking-star"></i> <span data-i18n="menuRanking">Xếp hạng</span>
+    </a>
+    <a class="sb-link" href="#" data-section="resources">
+      <i class="fa-regular fa-folder-open"></i> <span data-i18n="menuResources">Tài liệu</span>
+    </a>
+    <a class="sb-link" href="#" data-section="topics">
+      <i class="fa-regular fa-comments"></i> <span data-i18n="menuTopics">Chủ đề</span>
+    </a>
+    <a class="sb-link" href="#" data-section="submissions">
+      <i class="fa-regular fa-file-lines"></i> <span data-i18n="menuSubmissions">Bài nộp</span>
+    </a>
+    <a class="sb-link" href="#" data-section="settings">
+      <i class="fa-solid fa-gear"></i> <span data-i18n="menuSettings">Cài đặt</span>
+    </a>
+  </aside>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
-        <input type="text" id="search" placeholder="Tìm theo tên hoặc email" onkeyup="filterLearners()"
-               style="padding:10px 12px; border:1px solid #e6eaf2; border-radius:12px; min-width:240px;">
-        <select id="filterStatus" onchange="filterLearners()"
-                style="padding:10px 12px; border:1px solid #e6eaf2; border-radius:12px; min-width:220px;">
-          <option value="" id="allStatusOption">Tất Cả Trạng Thái</option>
-          <option value="active" id="activeOption">Hoạt Động</option>
-          <option value="inactive" id="inactiveOption">Không Hoạt Động</option>
-        </select>
-      </div>
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <h1 class="topbar-title" id="pageTitle" data-i18n="pageTitle">Mentor Dashboard</h1>
 
-      <div class="table-container">
-        <table class="data-table" id="learnersTable">
-          <thead>
-            <tr>
-              <th id="idHeader">ID</th>
-              <th id="nameHeader">Tên</th>
-              <th id="levelHeader">Cấp Độ</th>
-              <th id="lastPracticeHeader">Lần Luyện Gần Nhất</th>
-              <th id="avgScoreHeader">Điểm TB</th>
-              <th id="weakSkillHeader">Kỹ Năng Yếu</th>
-              <th id="statusHeader">Trạng Thái</th>
-              <th id="actionsHeader">Hành Động</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div id="noData" style="display:none; text-align:center; padding: 18px; color:#64748b;">
-        Chưa có học viên nào được phân công.
-      </div>
-    </section>
-
-    <section class="content-card section" id="progressSection" style="margin-top:16px;">
-      <h2 id="progressTitle">Tiến Độ Học Viên</h2>
-
-      <div style="margin-bottom: 12px;">
-        <select id="learnerSelect" style="width:100%; max-width:520px; padding:10px 12px; border:1px solid #e6eaf2; border-radius:12px;">
-          <option value="" id="selectOption">Chọn Học Viên</option>
-        </select>
-      </div>
-
-      <div id="progressDetails">
-        <p style="color:#64748b;" id="progressHint">Chọn học viên để xem tiến độ.</p>
-      </div>
-    </section>
-
-    <section class="content-card section" id="feedbackSection" style="margin-top:16px;">
-      <h2 id="feedbackTitle">Phản Hồi AI</h2>
-
-      <div id="aiFeedback" style="background:#f1f7ff; border:1px solid #dbeafe; padding:14px; border-radius:12px;">
-        <p style="color:#64748b;" id="feedbackHint">Chọn học viên (mục Tiến độ) để xem phản hồi AI.</p>
-
-        <div id="aiFeedbackBody" style="display:none;">
-          <h3 style="margin: 0 0 8px; font-weight:800;" id="fbFor">Phản hồi cho:</h3>
-
-          <div style="margin-top: 10px;">
-            <strong id="fbErrTitle">Lỗi phát âm phát hiện</strong>
-            <ul id="fbErrList"></ul>
-          </div>
-
-          <div style="margin-top: 10px;">
-            <strong id="fbSugTitle">Gợi ý sửa lỗi</strong>
-            <p id="fbSug"></p>
-          </div>
-
-          <div style="margin-top: 10px;">
-            <strong id="fbVocabTitle">Gợi ý từ vựng thay thế</strong>
-            <p id="fbVocab"></p>
-          </div>
-
-          <div style="margin-top: 10px;">
-            <strong id="fbPracticeTitle">Câu luyện tập</strong>
-            <p id="fbPractice"></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="content-card section" id="tasksSection" style="margin-top:16px;">
-      <h2 id="tasksTitle">Giao Bài</h2>
-
-      <button class="btn btn-primary" id="assignNewTaskBtn" onclick="assignTask()">Giao Bài Mới</button>
-
-      <div id="tasksList" style="margin-top: 12px;">
-        <ul id="tasksUl">
-          <li>Task 1: Practice pronunciation for learner 1</li>
-          <li>Task 2: Review vocabulary for learner 2</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="content-card section" id="settingsSection" style="margin-top:16px;">
-      <h2 id="settingsTitle">Cài Đặt</h2>
-      <p style="color:#64748b;" id="settingsText">Các tuỳ chọn cài đặt ở đây.</p>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-column">
-          <h3>AI English Speaking</h3>
-          <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp học viên cải thiện kỹ năng giao tiếp một cách hiệu quả.</p>
-        </div>
-
-        <div class="footer-column">
-          <h3>Hỗ trợ Mentor</h3>
-          <a href="#">Hướng dẫn giảng dạy</a>
-          <a href="#">Tài liệu Mentor</a>
-          <a href="#">Chính sách thanh toán</a>
-          <a href="#">Liên hệ hỗ trợ</a>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    /* =========================================================
-       CONFIG (DEMO)
-    ========================================================= */
-    const DEMO_MODE = true;
-    const API_BASE  = "http://localhost:5000";
-    const TOKEN_KEY = "token";
-    const token     = localStorage.getItem(TOKEN_KEY);
-
-    function canUseApi() {
-      return !DEMO_MODE && !!token;
-    }
-
-    /* =========================================================
-       I18N
-    ========================================================= */
-    const translations = {
-      en: {
-        title: "Mentor Dashboard",
-        menuTop: { learners: "Learners", progress: "Progress", feedback: "Feedback", tasks: "Tasks", settings: "Settings" },
-        learnersTitle: "My Learners",
-        progressTitle: "Learner Progress",
-        feedbackTitle: "AI Feedback",
-        tasksTitle: "Tasks",
-        settingsTitle: "Settings",
-        settingsText: "Settings options here.",
-        alertsLabel: "Alerts:",
-        alertsText: "3 learners haven't practiced in 7 days. 2 need feedback.",
-        searchPlaceholder: "Search by name or email",
-        allStatus: "All Status",
-        active: "Active",
-        inactive: "Inactive",
-        headers: {
-          id: "ID", name: "Name", level: "Level", lastPractice: "Last Practice",
-          avgScore: "Avg Score", weakSkill: "Weak Skill", status: "Status", actions: "Actions"
-        },
-        actions: { view: "View", feedback: "Send Feedback", assign: "Assign Task" },
-        selectOption: "Select Learner",
-        noData: "No learners assigned yet.",
-        progressHint: "Select a learner to view progress.",
-        feedbackHint: "Select a learner (Progress) to see AI feedback.",
-        logout: "Logout",
-        assignNewTask: "Assign New Task",
-        recent: "Recent Speaking Efforts",
-        date: "Date",
-        score: "Score",
-        fbFor: (name) => `Feedback for: ${name}`,
-        fbErrTitle: "Pronunciation errors detected",
-        fbSugTitle: "Suggested corrections",
-        fbVocabTitle: "Vocabulary alternatives",
-        fbPracticeTitle: "Practice sentences",
-        profileBtn: "Mentor Profile ▼",
-      },
-      vi: {
-        title: "Bảng Điều Khiển Mentor",
-        menuTop: { learners: "Học viên", progress: "Tiến độ", feedback: "Phản hồi", tasks: "Giao bài", settings: "Cài đặt" },
-        learnersTitle: "Học Viên Của Tôi",
-        progressTitle: "Tiến Độ Học Viên",
-        feedbackTitle: "Phản Hồi AI",
-        tasksTitle: "Giao Bài",
-        settingsTitle: "Cài Đặt",
-        settingsText: "Các tuỳ chọn cài đặt ở đây.",
-        alertsLabel: "Cảnh báo:",
-        alertsText: "3 học viên chưa luyện tập 7 ngày. 2 học viên cần phản hồi.",
-        searchPlaceholder: "Tìm theo tên hoặc email",
-        allStatus: "Tất Cả Trạng Thái",
-        active: "Hoạt Động",
-        inactive: "Không Hoạt Động",
-        headers: {
-          id: "ID", name: "Tên", level: "Cấp Độ", lastPractice: "Lần Luyện Gần Nhất",
-          avgScore: "Điểm TB", weakSkill: "Kỹ Năng Yếu", status: "Trạng Thái", actions: "Hành Động"
-        },
-        actions: { view: "Xem", feedback: "Gửi nhận xét", assign: "Giao bài" },
-        selectOption: "Chọn Học Viên",
-        noData: "Chưa có học viên nào được phân công.",
-        progressHint: "Chọn học viên để xem tiến độ.",
-        feedbackHint: "Chọn học viên (mục Tiến độ) để xem phản hồi AI.",
-        logout: "Đăng Xuất",
-        assignNewTask: "Giao Bài Mới",
-        recent: "Các lần luyện nói gần đây",
-        date: "Ngày",
-        score: "Điểm",
-        fbFor: (name) => `Phản hồi cho: ${name}`,
-        fbErrTitle: "Lỗi phát âm phát hiện",
-        fbSugTitle: "Gợi ý sửa lỗi",
-        fbVocabTitle: "Gợi ý từ vựng thay thế",
-        fbPracticeTitle: "Câu luyện tập",
-        profileBtn: "Hồ Sơ Mentor ▼",
-      }
-    };
-
-    let currentLang = localStorage.getItem("lang") || "vi";
-
-    /* =========================================================
-       STATE
-    ========================================================= */
-    let learnersCache = [];
-    let progressChart = null;
-    let selectedLearnerName = "";
-
-    /* =========================================================
-       HELPERS
-    ========================================================= */
-    function $(id){ return document.getElementById(id); }
-    function escapeHtml(str){
-      return String(str ?? '').replace(/[&<>"']/g, s => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-      }[s]));
-    }
-
-    function setActiveMenu(section){
-      const links = document.querySelectorAll(".nav-links a[data-section]");
-      links.forEach(a => a.classList.toggle("active", a.dataset.section === section));
-    }
-
-    function showSection(section){
-      setActiveMenu(section);
-
-      const ids = ["learnersSection","progressSection","feedbackSection","tasksSection","settingsSection"];
-      ids.forEach(id => $(id).classList.remove("active"));
-
-      const map = {
-        learners: "learnersSection",
-        progress: "progressSection",
-        feedback: "feedbackSection",
-        tasks: "tasksSection",
-        settings: "settingsSection"
-      };
-      $(map[section]).classList.add("active");
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function toggleDropdown(){
-      const dd = $("dropdown");
-      dd.style.display = (dd.style.display === "block") ? "none" : "block";
-    }
-
-    window.addEventListener("click", (e) => {
-      const dd = $("dropdown");
-      const btn = $("profileBtn");
-      if (!dd || !btn) return;
-      if (!dd.contains(e.target) && !btn.contains(e.target)) dd.style.display = "none";
-    });
-
-    function logout(){
-      localStorage.removeItem(TOKEN_KEY);
-      alert(currentLang === "vi" ? "Đã đăng xuất (đã xoá token)." : "Logged out (token cleared).");
-    }
-
-    function switchLanguage(lang){
-      currentLang = lang;
-      localStorage.setItem("lang", lang);
-      updateLanguage();
-      renderLearners(learnersCache);
-
-      const learnerId = $("learnerSelect").value;
-      if ($("progressSection").classList.contains("active") && learnerId) {
-        viewProgress(learnerId);
-      }
-      $("dropdown").style.display = "none";
-    }
-
-    function updateLanguage(){
-      const t = translations[currentLang];
-
-      $("title").textContent = t.title;
-
-      $("menuLearnersTop").textContent = t.menuTop.learners;
-      $("menuProgressTop").textContent = t.menuTop.progress;
-      $("menuFeedbackTop").textContent = t.menuTop.feedback;
-      $("menuTasksTop").textContent = t.menuTop.tasks;
-      $("menuSettingsTop").textContent = t.menuTop.settings;
-
-      $("learnersTitle").textContent = t.learnersTitle;
-      $("progressTitle").textContent = t.progressTitle;
-      $("feedbackTitle").textContent = t.feedbackTitle;
-      $("tasksTitle").textContent = t.tasksTitle;
-      $("settingsTitle").textContent = t.settingsTitle;
-      $("settingsText").textContent = t.settingsText;
-
-      $("alertsLabel").textContent = t.alertsLabel;
-      $("alertsText").textContent = t.alertsText;
-
-      $("search").placeholder = t.searchPlaceholder;
-      $("allStatusOption").textContent = t.allStatus;
-      $("activeOption").textContent = t.active;
-      $("inactiveOption").textContent = t.inactive;
-
-      $("idHeader").textContent = t.headers.id;
-      $("nameHeader").textContent = t.headers.name;
-      $("levelHeader").textContent = t.headers.level;
-      $("lastPracticeHeader").textContent = t.headers.lastPractice;
-      $("avgScoreHeader").textContent = t.headers.avgScore;
-      $("weakSkillHeader").textContent = t.headers.weakSkill;
-      $("statusHeader").textContent = t.headers.status;
-      $("actionsHeader").textContent = t.headers.actions;
-
-      $("logoutText").textContent = t.logout;
-      $("assignNewTaskBtn").textContent = t.assignNewTask;
-      $("assignNewTaskBtnTextTop").textContent = t.assignNewTask;
-
-      $("profileBtn").textContent = t.profileBtn;
-
-      $("fbErrTitle").textContent = t.fbErrTitle;
-      $("fbSugTitle").textContent = t.fbSugTitle;
-      $("fbVocabTitle").textContent = t.fbVocabTitle;
-      $("fbPracticeTitle").textContent = t.fbPracticeTitle;
-
-      if (selectedLearnerName) $("fbFor").textContent = t.fbFor(selectedLearnerName);
-    }
-
-    /* =========================================================
-       DATA
-    ========================================================= */
-    function getMockLearners(){
-      return [
-        { id: 1, email: "learner1@example.com", name: "Nguyễn Văn A", level: "B1", lastPractice: "2026-01-05", avgScore: 78, weakSkill: "Pronunciation", status: "active" },
-        { id: 2, email: "learner2@example.com", name: "Trần Thị B", level: "A2", lastPractice: "2025-12-28", avgScore: 62, weakSkill: "Vocabulary", status: "inactive" },
-        { id: 3, email: "learner3@example.com", name: "Lê Minh C", level: "B2", lastPractice: "2026-01-09", avgScore: 85, weakSkill: "Grammar", status: "active" }
-      ];
-    }
-
-    async function loadLearners(){
-      if (!canUseApi()){
-        renderLearners(getMockLearners());
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/internal/learners`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (!res.ok){
-          renderLearners(getMockLearners());
-          return;
-        }
-
-        const learners = await res.json();
-        renderLearners(Array.isArray(learners) ? learners : []);
-      } catch (e){
-        console.error("loadLearners error:", e);
-        renderLearners(getMockLearners());
-      }
-    }
-
-    function renderLearners(learners){
-      learnersCache = learners || [];
-      const t = translations[currentLang];
-
-      const tbody = document.querySelector("#learnersTable tbody");
-      tbody.innerHTML = "";
-
-      const select = $("learnerSelect");
-      select.innerHTML = `<option value="">${t.selectOption}</option>`;
-
-      if (!learnersCache.length){
-        $("noData").style.display = "block";
-        return;
-      }
-      $("noData").style.display = "none";
-
-      learnersCache.forEach(learner => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${escapeHtml(learner.id)}</td>
-          <td>
-            <div style="font-weight:700;">${escapeHtml(learner.name || "N/A")}</div>
-            <div style="color:#64748b; font-size:12px;">${escapeHtml(learner.email || "")}</div>
-          </td>
-          <td>${escapeHtml(learner.level || "N/A")}</td>
-          <td>${escapeHtml(learner.lastPractice || "N/A")}</td>
-          <td>${escapeHtml(learner.avgScore ?? "N/A")}</td>
-          <td>${escapeHtml(learner.weakSkill || "N/A")}</td>
-          <td>${escapeHtml(learner.status || "N/A")}</td>
-          <td>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-primary btn-sm" onclick="viewDetails(${learner.id})">${t.actions.view}</button>
-              <button class="btn btn-outline btn-sm" onclick="sendFeedback(${learner.id})">${t.actions.feedback}</button>
-              <button class="btn btn-outline btn-sm" onclick="assignTask(${learner.id})">${t.actions.assign}</button>
+        <div class="topbar-right">
+          <div class="dd">
+            <button class="btn btn-primary btn-sm" id="profileBtn" type="button">
+              <span data-i18n="mentorProfile">Mentor Profile</span> ▼
+            </button>
+            <div class="dd-menu" id="dropdown">
+              <a href="#" data-profile="info" data-i18n="ddInfo">Personal info</a>
+              <a href="#" data-profile="availability" data-i18n="ddAvailability">Availability</a>
+              <a href="#" data-profile="notifications" data-i18n="ddNotifications">Notifications</a>
+              <a href="#" data-profile="security" data-i18n="ddSecurity">Change password</a>
+              <a href="#" data-profile="lang" data-i18n="ddLang">Language (VI/EN)</a>
+              <a href="#" data-profile="logout" style="color:#dc2626;" data-i18n="ddLogout">Logout</a>
             </div>
-          </td>
-        `;
-        tbody.appendChild(row);
-
-        const opt = document.createElement("option");
-        opt.value = learner.id;
-        opt.textContent = `${learner.name || learner.email}`;
-        select.appendChild(opt);
-      });
-    }
-
-    /* =========================================================
-       FILTER
-    ========================================================= */
-    function filterLearners(){
-      const q = $("search").value.trim().toLowerCase();
-      const st = $("filterStatus").value.trim().toLowerCase();
-
-      const rows = document.querySelectorAll("#learnersTable tbody tr");
-      rows.forEach(row => {
-        const nameEmail = row.cells[1].innerText.toLowerCase();
-        const rowStatus = row.cells[6].innerText.toLowerCase();
-
-        const okQ = !q || nameEmail.includes(q);
-        const okS = !st || rowStatus === st;
-
-        row.style.display = (okQ && okS) ? "" : "none";
-      });
-    }
-
-    /* =========================================================
-       PROGRESS + CHART
-    ========================================================= */
-    function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-
-    function mockProgress(){
-      const history = [
-        { date: "2025-12-28", score: 60 },
-        { date: "2026-01-04", score: 68 },
-        { date: "2026-01-07", score: 72 },
-        { date: "2026-01-09", score: 78 },
-        { date: "2026-01-11", score: 81 }
-      ];
-      return {
-        pronunciation: rand(55, 95),
-        fluency: rand(50, 92),
-        vocabulary: rand(52, 94),
-        grammar: rand(48, 90),
-        history
-      };
-    }
-
-    function viewProgress(learnerId){
-      const t = translations[currentLang];
-      const learner = learnersCache.find(x => String(x.id) === String(learnerId));
-      selectedLearnerName = learner ? `${learner.name} (${learner.email})` : "";
-
-      const p = mockProgress();
-
-      const html = `
-        <div style="display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:12px;">
-          <div style="background:#f8fafc; border:1px solid #e6eaf2; border-radius:12px; padding:12px; font-weight:700;">
-            ${currentLang === "vi" ? "Phát Âm" : "Pronunciation"} <div style="color:#64748b; margin-top:6px;">${p.pronunciation}%</div>
-          </div>
-          <div style="background:#f8fafc; border:1px solid #e6eaf2; border-radius:12px; padding:12px; font-weight:700;">
-            ${currentLang === "vi" ? "Trôi Chảy" : "Fluency"} <div style="color:#64748b; margin-top:6px;">${p.fluency}%</div>
-          </div>
-          <div style="background:#f8fafc; border:1px solid #e6eaf2; border-radius:12px; padding:12px; font-weight:700;">
-            ${currentLang === "vi" ? "Từ Vựng" : "Vocabulary"} <div style="color:#64748b; margin-top:6px;">${p.vocabulary}%</div>
-          </div>
-          <div style="background:#f8fafc; border:1px solid #e6eaf2; border-radius:12px; padding:12px; font-weight:700;">
-            ${currentLang === "vi" ? "Ngữ Pháp" : "Grammar"} <div style="color:#64748b; margin-top:6px;">${p.grammar}%</div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div style="padding:12px; border-radius:12px; border:1px solid #e6eaf2; margin-bottom:12px; background:#fff;">
-          <canvas id="progressChart" height="120"></canvas>
+    <!-- CONTENT -->
+    <main class="container">
+
+      <!-- Alerts -->
+      <div class="content-card" style="margin-bottom: 16px; background:#fff7db; border:1px solid #ffe6a3;">
+        <strong id="alertsLabel" data-i18n="alertsLabel">Alerts:</strong>
+        <span id="alertsText"></span>
+      </div>
+
+      <!-- LEARNERS -->
+      <section class="content-card section active" id="learnersSection">
+        <h2 id="learnersTitle" data-i18n="learnersTitle">My Learners</h2>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
+          <input type="text" id="search" data-i18n-placeholder="phSearch"
+                 placeholder="Search by name or email" onkeyup="filterLearners()"
+                 style="padding:10px 12px; border:1px solid var(--border); border-radius:12px; min-width:240px;">
+          <select id="filterStatus" onchange="filterLearners()"
+                  style="padding:10px 12px; border:1px solid var(--border); border-radius:12px; min-width:220px;">
+            <option value="" id="allStatusOption" data-i18n="allStatus">All Status</option>
+            <option value="active" id="activeOption" data-i18n="active">Active</option>
+            <option value="inactive" id="inactiveOption" data-i18n="inactive">Inactive</option>
+          </select>
         </div>
 
-        <h3 style="margin: 0 0 8px; font-weight:700;">${t.recent}</h3>
         <div class="table-container">
-          <table class="data-table">
-            <thead><tr><th>${t.date}</th><th>${t.score}</th></tr></thead>
-            <tbody>
-              ${p.history.map(h => `<tr><td>${h.date}</td><td>${h.score}</td></tr>`).join("")}
-            </tbody>
+          <table class="data-table" id="learnersTable">
+            <thead>
+              <tr>
+                <th id="idHeader" data-i18n="thId">ID</th>
+                <th id="nameHeader" data-i18n="thName">Name</th>
+                <th id="levelHeader" data-i18n="thLevel">Level</th>
+                <th id="lastPracticeHeader" data-i18n="thLastPractice">Last practice</th>
+                <th id="avgScoreHeader" data-i18n="thAvg">Avg score</th>
+                <th id="weakSkillHeader" data-i18n="thWeak">Weak skill</th>
+                <th id="statusHeader" data-i18n="thStatus">Status</th>
+                <th id="actionsHeader" data-i18n="thActions">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
-      `;
-      $("progressDetails").innerHTML = html;
 
-      if (progressChart) progressChart.destroy();
+        <div id="noData" style="display:none; text-align:center; padding: 18px; color:var(--muted);" data-i18n="noLearners">
+          No learners assigned.
+        </div>
+      </section>
 
-      const ctx = document.getElementById("progressChart").getContext("2d");
-      progressChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: p.history.map(h => h.date),
-          datasets: [{
-            label: t.score,
-            data: p.history.map(h => h.score),
-            borderWidth: 2,
-            tension: 0.25
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 100 } }
-        }
-      });
+      <!-- PROGRESS -->
+      <section class="content-card section" id="progressSection" style="margin-top:16px;">
+        <h2 id="progressTitle" data-i18n="progressTitle">Learner Progress</h2>
+        <div style="margin-bottom: 12px;">
+          <select id="learnerSelect" style="width:100%; max-width:520px; padding:10px 12px; border:1px solid var(--border); border-radius:12px;">
+            <option value="" id="selectOption" data-i18n="selectLearner">Select a learner</option>
+          </select>
+        </div>
+        <div id="progressDetails">
+          <p style="color:var(--muted);" id="progressHint" data-i18n="progressHint">Select a learner to view progress.</p>
+        </div>
+      </section>
 
-      renderAIFeedback(learner);
+      <!-- FEEDBACK -->
+      <section class="content-card section" id="feedbackSection" style="margin-top:16px;">
+        <h2 id="feedbackTitle" data-i18n="feedbackTitle">AI Feedback</h2>
+
+        <div id="aiFeedback" style="background:#f1f7ff; border:1px solid #dbeafe; padding:14px; border-radius:12px;">
+          <p style="color:var(--muted);" id="feedbackHint" data-i18n="feedbackHint">Select a learner (in Progress) to see AI feedback.</p>
+
+          <div id="aiFeedbackBody" style="display:none;">
+            <h3 style="margin: 0 0 8px; font-weight:900;" id="fbFor">Feedback for:</h3>
+
+            <div class="grid-2">
+              <div class="mini-card">
+                <h4 id="fbErrTitle" data-i18n="fbErrTitle">Pronunciation issues found</h4>
+                <ul id="fbErrList" style="margin:0; padding-left: 18px;"></ul>
+              </div>
+
+              <div class="mini-card">
+                <h4 id="fbSugTitle" data-i18n="fbSugTitle">Fix suggestions</h4>
+                <p id="fbSug"></p>
+              </div>
+
+              <div class="mini-card">
+                <h4 id="fbVocabTitle" data-i18n="fbVocabTitle">Vocabulary suggestions</h4>
+                <p id="fbVocab"></p>
+              </div>
+
+              <div class="mini-card">
+                <h4 id="fbPracticeTitle" data-i18n="fbPracticeTitle">Practice sentence</h4>
+                <p id="fbPractice"></p>
+              </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 12px;">
+              <div class="mini-card">
+                <h4 id="fbClarityTitle" data-i18n="fbClarityTitle">Clarity & confidence tips</h4>
+                <p id="fbClarity"></p>
+              </div>
+              <div class="mini-card">
+                <h4 id="fbVocabTipsTitle" data-i18n="fbVocabTipsTitle">Vocabulary / phrases tips</h4>
+                <p id="fbVocabTips"></p>
+              </div>
+              <div class="mini-card">
+                <h4 id="fbNativeTipsTitle" data-i18n="fbNativeTipsTitle">Tips for talking to natives</h4>
+                <p id="fbNativeTips"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TASKS -->
+      <section class="content-card section" id="tasksSection" style="margin-top:16px;">
+        <h2 id="tasksTitle" data-i18n="tasksTitle">Tasks</h2>
+        <button class="btn btn-primary" id="assignNewTaskBtn" onclick="assignTask()"
+                data-i18n="assignNewTask">Assign new task</button>
+        <div id="tasksList" style="margin-top: 12px;">
+          <ul id="tasksUl"></ul>
+        </div>
+      </section>
+
+      <!-- RANKING -->
+      <section class="content-card section" id="rankingSection" style="margin-top:16px;">
+        <h2 id="rankingTitle" data-i18n="rankingTitle">Learner Ranking</h2>
+
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <div class="mini-card">
+            <h4 id="rankingTopTitle" data-i18n="rankingTopTitle">Top learners by avg score</h4>
+            <div id="topRankingList"></div>
+          </div>
+          <div class="mini-card">
+            <h4 id="rankingNeedHelpTitle" data-i18n="rankingNeedHelpTitle">Learners who need more support</h4>
+            <div id="bottomRankingList"></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h4 id="rankingNoteTitle" data-i18n="rankingNoteTitle">Evaluation tips</h4>
+          <p id="rankingNote" style="color:var(--muted);" data-i18n="rankingNote">
+            Based on avg score + recent practice status, prioritize feedback for low-score or inactive learners.
+          </p>
+        </div>
+      </section>
+
+      <!-- RESOURCES -->
+      <section class="content-card section" id="resourcesSection" style="margin-top:16px;">
+        <h2 id="resourcesTitle" data-i18n="resourcesTitle">Resources</h2>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
+          <select id="resourceFilter" style="padding:10px 12px; border:1px solid var(--border); border-radius:12px; min-width:260px;">
+            <option value="all" id="resourceAll"></option>
+            <option value="Pronunciation" id="resPron"></option>
+            <option value="Vocabulary" id="resVocab"></option>
+            <option value="Grammar" id="resGram"></option>
+            <option value="Fluency" id="resFlu"></option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="renderResources()" id="resourceFilterBtn" data-i18n="filterBtn">Filter</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="resourcesTable">
+            <thead>
+              <tr>
+                <th id="resColType" data-i18n="resColType">Skill</th>
+                <th id="resColTitle" data-i18n="resColTitle">Resource</th>
+                <th id="resColDesc" data-i18n="resColDesc">Description</th>
+                <th id="resColAction" data-i18n="resColAction">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p style="color:var(--muted); margin-top: 10px;" id="resourceHint" data-i18n="resourceHint">
+          Mentor can share suitable links/resources based on each learner's weak skill.
+        </p>
+      </section>
+
+      <!-- TOPICS -->
+      <section class="content-card section" id="topicsSection" style="margin-top:16px;">
+        <h2 id="topicsTitle" data-i18n="topicsTitle">Topics & Speaking Scenarios</h2>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
+          <select id="topicLearnerSelect" style="padding:10px 12px; border:1px solid var(--border); border-radius:12px; min-width:260px;">
+            <option value="" id="topicSelectLearner"></option>
+          </select>
+          <select id="topicSelect" style="padding:10px 12px; border:1px solid var(--border); border-radius:12px; min-width:320px;">
+            <option value="" id="topicSelectTopic"></option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="assignTopic()" id="topicAssignBtn"></button>
+        </div>
+
+        <div class="mini-card">
+          <h4 id="topicLibraryTitle" data-i18n="topicLibraryTitle">Topic library</h4>
+          <div id="topicsLibrary" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="mini-card" style="margin-top: 12px;">
+          <h4 id="topicAssignedTitle" data-i18n="topicAssignedTitle">Assigned topics (demo)</h4>
+          <ul id="assignedTopics" style="margin:0; padding-left: 18px;"></ul>
+        </div>
+      </section>
+
+      <!-- SUBMISSIONS -->
+      <section class="content-card section" id="submissionsSection" style="margin-top:16px;">
+        <h2 id="submissionsTitle" data-i18n="submissionsTitle">New Submissions</h2>
+
+        <div class="table-container">
+          <table class="data-table" id="submissionsTable">
+            <thead>
+              <tr>
+                <th id="subColLearner" data-i18n="subColLearner">Learner</th>
+                <th id="subColTopic" data-i18n="subColTopic">Topic</th>
+                <th id="subColTime" data-i18n="subColTime">Submitted at</th>
+                <th id="subColAction" data-i18n="subColAction">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p style="color:var(--muted); margin-top: 10px;" id="submissionsHint" data-i18n="submissionsHint">
+          After learners submit, you can listen and reply quickly to help them improve faster.
+        </p>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="content-card section" id="settingsSection" style="margin-top:16px;">
+        <h2 id="settingsTitle" data-i18n="settingsTitle">Settings</h2>
+        <p style="color:var(--muted);" id="settingsText" data-i18n="settingsText">Settings options go here.</p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== Mentor Profile Modal ===== -->
+<div class="modal-backdrop" id="mentorModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hd">
+      <h3 id="mentorModalTitle">Mentor</h3>
+      <button class="btn btn-outline btn-sm" type="button" id="closeMentorModal">✕</button>
+    </div>
+    <div class="modal-bd" id="mentorModalBody"></div>
+    <div class="modal-ft" id="mentorModalFooter"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG (DEMO)
+========================================================= */
+const DEMO_MODE = true;
+const API_BASE  = "http://localhost:5000";
+const TOKEN_KEY = "token";
+const token     = localStorage.getItem(TOKEN_KEY);
+function canUseApi() { return !DEMO_MODE && !!token; }
+
+/* =========================================================
+   I18N
+========================================================= */
+let currentLang = localStorage.getItem("lang") || "en";
+
+const I18N = {
+  vi: {
+    roleMentor:"Mentor",
+    groupDashboard:"DASHBOARD",
+    groupManage:"QUẢN LÝ",
+    menuLearners:"Học viên",
+    menuProgress:"Tiến độ",
+    menuFeedback:"Phản hồi",
+    menuTasks:"Giao bài",
+    menuRanking:"Xếp hạng",
+    menuResources:"Tài liệu",
+    menuTopics:"Chủ đề",
+    menuSubmissions:"Bài nộp",
+    menuSettings:"Cài đặt",
+
+    pageTitle:"Bảng Điều Khiển Mentor",
+    mentorProfile:"Hồ Sơ Mentor",
+
+    ddInfo:"Thông tin cá nhân",
+    ddAvailability:"Lịch & thời gian rảnh",
+    ddNotifications:"Thông báo",
+    ddSecurity:"Đổi mật khẩu",
+    ddLang:"Đổi ngôn ngữ (VI/EN)",
+    ddLogout:"Đăng xuất",
+
+    alertsLabel:"Cảnh báo:",
+    alertsText:"3 học viên chưa luyện tập 7 ngày. 2 học viên cần phản hồi.",
+
+    learnersTitle:"Học Viên Của Tôi",
+    phSearch:"Tìm theo tên hoặc email",
+    allStatus:"Tất Cả Trạng Thái",
+    active:"Hoạt Động",
+    inactive:"Không Hoạt Động",
+
+    thId:"ID",
+    thName:"Tên",
+    thLevel:"Cấp độ",
+    thLastPractice:"Lần luyện gần nhất",
+    thAvg:"Điểm TB",
+    thWeak:"Kỹ năng yếu",
+    thStatus:"Trạng thái",
+    thActions:"Hành động",
+    noLearners:"Chưa có học viên nào được phân công.",
+
+    btnView:"Xem",
+    btnSendFeedback:"Gửi nhận xét",
+    btnAssignTask:"Giao bài",
+    btnOpen:"Mở",
+    btnFilter:"Lọc",
+
+    progressTitle:"Tiến Độ Học Viên",
+    selectLearner:"Chọn học viên",
+    progressHint:"Chọn học viên để xem tiến độ.",
+
+    skillPron:"Phát âm",
+    skillFlu:"Trôi chảy",
+    skillVocab:"Từ vựng",
+    skillGram:"Ngữ pháp",
+    recentPractice:"Các lần luyện nói gần đây",
+    colDate:"Ngày",
+    colScore:"Điểm",
+
+    feedbackTitle:"Phản Hồi AI",
+    feedbackHint:"Chọn học viên (mục Tiến độ) để xem phản hồi AI.",
+    fbForPrefix:"Phản hồi cho:",
+    fbErrTitle:"Lỗi phát âm phát hiện",
+    fbSugTitle:"Gợi ý sửa lỗi",
+    fbVocabTitle:"Gợi ý từ vựng thay thế",
+    fbPracticeTitle:"Câu luyện tập",
+    fbClarityTitle:"Gợi ý diễn đạt rõ ràng & tự tin",
+    fbVocabTipsTitle:"Mẹo học từ vựng / cụm từ / thành ngữ",
+    fbNativeTipsTitle:"Kinh nghiệm giao tiếp với người bản ngữ",
+
+    tasksTitle:"Giao Bài",
+    assignNewTask:"Giao Bài Mới",
+    task1:"Bài 1: Luyện phát âm cho học viên 1",
+    task2:"Bài 2: Ôn từ vựng cho học viên 2",
+
+    rankingTitle:"Xếp Hạng Học Viên",
+    rankingTopTitle:"Top học viên theo điểm TB",
+    rankingNeedHelpTitle:"Học viên cần hỗ trợ thêm",
+    rankingNoteTitle:"Gợi ý đánh giá",
+    rankingNote:"Dựa trên điểm TB + trạng thái luyện tập gần đây, mentor có thể ưu tiên phản hồi cho học viên thấp điểm hoặc lâu không luyện.",
+    avgScoreLabel:"Điểm TB",
+    statusLabel:"Trạng thái",
+    weakLabel:"Kỹ năng yếu",
+
+    resourcesTitle:"Tài Liệu Hỗ Trợ",
+    resourceAll:"Tất cả kỹ năng",
+    resPron:"Phát âm",
+    resVocab:"Từ vựng",
+    resGram:"Ngữ pháp",
+    resFlu:"Trôi chảy",
+    filterBtn:"Lọc",
+    resColType:"Kỹ năng",
+    resColTitle:"Tài liệu",
+    resColDesc:"Mô tả",
+    resColAction:"Hành động",
+    resourceHint:"Mentor có thể gửi link/tài liệu phù hợp theo “Kỹ năng yếu” của từng học viên.",
+    noResource:"Không có tài liệu phù hợp.",
+
+    topicsTitle:"Chủ Đề & Tình Huống Giao Tiếp",
+    topicSelectLearner:"Chọn học viên",
+    topicSelectTopic:"Chọn chủ đề",
+    topicAssignBtn:"Giao chủ đề",
+    topicLibraryTitle:"Thư viện chủ đề",
+    topicAssignedTitle:"Chủ đề đã giao (demo)",
+    noAssignedTopics:"Chưa giao chủ đề nào.",
+    msgPickBoth:"Vui lòng chọn học viên và chủ đề.",
+    msgAssignedPrefix:"Đã giao chủ đề",
+
+    submissionsTitle:"Bài Nói Mới Nộp",
+    subColLearner:"Học viên",
+    subColTopic:"Chủ đề",
+    subColTime:"Thời gian nộp",
+    subColAction:"Hành động",
+    submissionsHint:"Sau khi học viên nộp bài nói, mentor có thể nghe và phản hồi ngay để học viên tiến bộ nhanh hơn.",
+    noSubmissions:"Chưa có bài nộp mới.",
+    btnListen:"Nghe & phản hồi",
+    btnReviewed:"Đánh dấu đã xem",
+    msgReviewed:"Đã đánh dấu đã xem.",
+    msgListenDemo:"Demo: đang mở bài nói và chuẩn bị phản hồi.",
+
+    settingsTitle:"Cài Đặt",
+    settingsText:"Các tuỳ chọn cài đặt ở đây.",
+
+    modalInfoTitle:"Thông tin cá nhân",
+    modalAvailabilityTitle:"Lịch & thời gian rảnh",
+    modalNotificationsTitle:"Thông báo",
+    modalSecurityTitle:"Đổi mật khẩu (demo)",
+    modalLangTitle:"Đổi ngôn ngữ",
+    btnClose:"Đóng",
+    btnCancel:"Hủy",
+    btnSave:"Lưu",
+    btnChangePass:"Đổi mật khẩu",
+    msgSavedProfile:"Đã lưu hồ sơ mentor!",
+    msgSavedAvail:"Đã lưu lịch rảnh!",
+    msgSavedNoti:"Đã lưu cài đặt thông báo!",
+    msgPassMismatch:"Mật khẩu mới không khớp!",
+    msgPassOk:"Demo: Đổi mật khẩu thành công (bạn nối API sau).",
+    msgLoggedOut:"Đã đăng xuất (đã xoá token).",
+    msgLangVI:"Đã chọn VI",
+    msgLangEN:"Đã chọn EN"
+  },
+
+  en: {
+    roleMentor:"Mentor",
+    groupDashboard:"DASHBOARD",
+    groupManage:"MANAGEMENT",
+    menuLearners:"Learners",
+    menuProgress:"Progress",
+    menuFeedback:"Feedback",
+    menuTasks:"Tasks",
+    menuRanking:"Ranking",
+    menuResources:"Resources",
+    menuTopics:"Topics",
+    menuSubmissions:"Submissions",
+    menuSettings:"Settings",
+
+    pageTitle:"Mentor Dashboard",
+    mentorProfile:"Mentor Profile",
+
+    ddInfo:"Personal info",
+    ddAvailability:"Availability",
+    ddNotifications:"Notifications",
+    ddSecurity:"Change password",
+    ddLang:"Language (VI/EN)",
+    ddLogout:"Logout",
+
+    alertsLabel:"Alerts:",
+    alertsText:"3 learners haven't practiced for 7 days. 2 learners need feedback.",
+
+    learnersTitle:"My Learners",
+    phSearch:"Search by name or email",
+    allStatus:"All Status",
+    active:"Active",
+    inactive:"Inactive",
+
+    thId:"ID",
+    thName:"Name",
+    thLevel:"Level",
+    thLastPractice:"Last practice",
+    thAvg:"Avg score",
+    thWeak:"Weak skill",
+    thStatus:"Status",
+    thActions:"Actions",
+    noLearners:"No learners assigned.",
+
+    btnView:"View",
+    btnSendFeedback:"Send feedback",
+    btnAssignTask:"Assign task",
+    btnOpen:"Open",
+    btnFilter:"Filter",
+
+    progressTitle:"Learner Progress",
+    selectLearner:"Select a learner",
+    progressHint:"Select a learner to view progress.",
+
+    skillPron:"Pronunciation",
+    skillFlu:"Fluency",
+    skillVocab:"Vocabulary",
+    skillGram:"Grammar",
+    recentPractice:"Recent speaking practices",
+    colDate:"Date",
+    colScore:"Score",
+
+    feedbackTitle:"AI Feedback",
+    feedbackHint:"Select a learner (in Progress) to see AI feedback.",
+    fbForPrefix:"Feedback for:",
+    fbErrTitle:"Pronunciation issues found",
+    fbSugTitle:"Fix suggestions",
+    fbVocabTitle:"Vocabulary suggestions",
+    fbPracticeTitle:"Practice sentence",
+    fbClarityTitle:"Clarity & confidence tips",
+    fbVocabTipsTitle:"Vocabulary / phrases tips",
+    fbNativeTipsTitle:"Tips for talking to natives",
+
+    tasksTitle:"Tasks",
+    assignNewTask:"Assign new task",
+    task1:"Task 1: Practice pronunciation for learner 1",
+    task2:"Task 2: Review vocabulary for learner 2",
+
+    rankingTitle:"Learner Ranking",
+    rankingTopTitle:"Top learners by avg score",
+    rankingNeedHelpTitle:"Learners who need more support",
+    rankingNoteTitle:"Evaluation tips",
+    rankingNote:"Based on avg score + recent practice status, prioritize feedback for low-score or inactive learners.",
+    avgScoreLabel:"Avg score",
+    statusLabel:"Status",
+    weakLabel:"Weak skill",
+
+    resourcesTitle:"Resources",
+    resourceAll:"All skills",
+    resPron:"Pronunciation",
+    resVocab:"Vocabulary",
+    resGram:"Grammar",
+    resFlu:"Fluency",
+    filterBtn:"Filter",
+    resColType:"Skill",
+    resColTitle:"Resource",
+    resColDesc:"Description",
+    resColAction:"Action",
+    resourceHint:"Mentor can share suitable links/resources based on each learner's weak skill.",
+    noResource:"No matching resources.",
+
+    topicsTitle:"Topics & Speaking Scenarios",
+    topicSelectLearner:"Select learner",
+    topicSelectTopic:"Select topic",
+    topicAssignBtn:"Assign topic",
+    topicLibraryTitle:"Topic library",
+    topicAssignedTitle:"Assigned topics (demo)",
+    noAssignedTopics:"No topics assigned yet.",
+    msgPickBoth:"Please select a learner and a topic.",
+    msgAssignedPrefix:"Assigned topic",
+
+    submissionsTitle:"New Submissions",
+    subColLearner:"Learner",
+    subColTopic:"Topic",
+    subColTime:"Submitted at",
+    subColAction:"Action",
+    submissionsHint:"After learners submit, you can listen and reply quickly to help them improve faster.",
+    noSubmissions:"No new submissions.",
+    btnListen:"Listen & feedback",
+    btnReviewed:"Mark reviewed",
+    msgReviewed:"Marked as reviewed.",
+    msgListenDemo:"Demo: opening submission and preparing feedback.",
+
+    settingsTitle:"Settings",
+    settingsText:"Settings options go here.",
+
+    modalInfoTitle:"Personal info",
+    modalAvailabilityTitle:"Availability",
+    modalNotificationsTitle:"Notifications",
+    modalSecurityTitle:"Change password (demo)",
+    modalLangTitle:"Language",
+    btnClose:"Close",
+    btnCancel:"Cancel",
+    btnSave:"Save",
+    btnChangePass:"Change password",
+    msgSavedProfile:"Saved mentor profile!",
+    msgSavedAvail:"Saved availability!",
+    msgSavedNoti:"Saved notification settings!",
+    msgPassMismatch:"New passwords do not match!",
+    msgPassOk:"Demo: Password changed successfully (connect API later).",
+    msgLoggedOut:"Logged out (token removed).",
+    msgLangVI:"Selected VI",
+    msgLangEN:"Selected EN"
+  }
+};
+
+function t(key){
+  const dict = I18N[currentLang] || I18N.en;
+  return dict[key] ?? key;
+}
+
+/* Apply language to static nodes + placeholders + some fixed options */
+function applyLanguage(){
+  document.documentElement.lang = currentLang === "vi" ? "vi" : "en";
+
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.setAttribute("placeholder", t(key));
+  });
+
+  // Alerts text (dynamic string)
+  const alertsText = document.getElementById("alertsText");
+  if (alertsText) alertsText.textContent = t("alertsText");
+
+  // Resources select option labels
+  const setOpt = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+  setOpt("resourceAll", "resourceAll");
+  setOpt("resPron", "resPron");
+  setOpt("resVocab", "resVocab");
+  setOpt("resGram", "resGram");
+  setOpt("resFlu", "resFlu");
+
+  // Topics select placeholders + button
+  setOpt("topicSelectLearner", "topicSelectLearner");
+  setOpt("topicSelectTopic", "topicSelectTopic");
+  const btn = document.getElementById("topicAssignBtn");
+  if (btn) btn.textContent = t("topicAssignBtn");
+
+  // Learner select placeholder
+  setOpt("selectOption", "selectLearner");
+
+  // Tasks demo list
+  const tasksUl = document.getElementById("tasksUl");
+  if (tasksUl){
+    tasksUl.innerHTML = `<li>${t("task1")}</li><li>${t("task2")}</li>`;
+  }
+
+  // Rerender dynamic sections to update texts
+  renderLearners(learnersCache.length ? learnersCache : getMockLearners());
+  renderResources();
+  renderTopics();
+  renderSubmissions();
+
+  // If a learner already selected, rerender progress in current language
+  const sel = document.getElementById("learnerSelect")?.value;
+  if (sel) viewProgress(sel);
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+let learnersCache = [];
+let progressChart = null;
+let assignedTopicsState = [];
+let submissionsState = [];
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function $(id){ return document.getElementById(id); }
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, s => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[s]));
+}
+
+/* =========================================================
+   SECTION NAV
+========================================================= */
+function setActiveSidebar(section){
+  document.querySelectorAll(".sb-link[data-section]").forEach(a=>{
+    a.classList.toggle("active", a.dataset.section === section);
+  });
+}
+function showSection(section){
+  setActiveSidebar(section);
+
+  const ids = [
+    "learnersSection","progressSection","feedbackSection","tasksSection",
+    "rankingSection","resourcesSection","topicsSection","submissionsSection",
+    "settingsSection"
+  ];
+  ids.forEach(id => $(id)?.classList.remove("active"));
+
+  const map = {
+    learners: "learnersSection",
+    progress: "progressSection",
+    feedback: "feedbackSection",
+    tasks: "tasksSection",
+    ranking: "rankingSection",
+    resources: "resourcesSection",
+    topics: "topicsSection",
+    submissions: "submissionsSection",
+    settings: "settingsSection"
+  };
+  const target = $(map[section] || "learnersSection");
+  target?.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* Bind sidebar click */
+document.querySelectorAll(".sb-link[data-section]").forEach(a=>{
+  a.addEventListener("click", (e)=>{
+    e.preventDefault();
+    showSection(a.dataset.section);
+  });
+});
+
+/* =========================================================
+   DATA (DEMO)
+========================================================= */
+function getMockLearners(){
+  return [
+    { id: 1, email: "learner1@example.com", name: "Nguyễn Văn A", level: "B1", lastPractice: "2026-01-05", avgScore: 78, weakSkill: "Pronunciation", status: "active" },
+    { id: 2, email: "learner2@example.com", name: "Trần Thị B", level: "A2", lastPractice: "2025-12-28", avgScore: 62, weakSkill: "Vocabulary", status: "inactive" },
+    { id: 3, email: "learner3@example.com", name: "Lê Minh C", level: "B2", lastPractice: "2026-01-09", avgScore: 85, weakSkill: "Grammar", status: "active" },
+    { id: 4, email: "learner4@example.com", name: "Phạm Thị D", level: "B1", lastPractice: "2025-12-20", avgScore: 55, weakSkill: "Fluency", status: "inactive" },
+  ];
+}
+
+const RESOURCES = [
+  { skill: "Pronunciation", title: "/θ/ vs /t/", desc_vi: "Luyện phân biệt âm /θ/ (think) và /t/ (tin).", desc_en: "Practice distinguishing /θ/ (think) vs /t/ (tin).", url: "https://www.youtube.com/results?search_query=theta+sound+practice" },
+  { skill: "Pronunciation", title: "Shadowing technique", desc_vi: "Luyện bắt chước ngữ điệu theo video/audio.", desc_en: "Mimic intonation using video/audio.", url: "https://www.youtube.com/results?search_query=english+shadowing+technique" },
+  { skill: "Vocabulary", title: "Basic collocations", desc_vi: "Học cụm từ đi kèm tự nhiên: make a decision, take a break...", desc_en: "Learn natural collocations: make a decision, take a break...", url: "https://www.oxfordlearnersdictionaries.com/" },
+  { skill: "Grammar", title: "Quick tenses review", desc_vi: "Tóm tắt các thì thường dùng khi nói.", desc_en: "Quick review of common tenses for speaking.", url: "https://www.perfect-english-grammar.com/" },
+  { skill: "Fluency", title: "Speaking frameworks", desc_vi: "Mẫu trả lời 2–3 ý: opinion → reason → example.", desc_en: "A 2–3 point template: opinion → reason → example.", url: "https://www.youtube.com/results?search_query=speaking+framework+opinion+reason+example" },
+];
+
+const TOPICS = [
+  { key: "airport", vi: "Sân bay (Airport)", en: "Airport" },
+  { key: "interview", vi: "Phỏng vấn xin việc (Job interview)", en: "Job interview" },
+  { key: "restaurant", vi: "Nhà hàng (Restaurant)", en: "Restaurant" },
+  { key: "hotel", vi: "Khách sạn (Hotel check-in)", en: "Hotel check-in" },
+  { key: "smalltalk", vi: "Giao tiếp xã giao (Small talk)", en: "Small talk" },
+];
+
+function initDemoSubmissions(){
+  submissionsState = [
+    { learnerId: 2, topicKey: "restaurant", submittedAt: "2026-01-12 20:10" },
+    { learnerId: 4, topicKey: "interview", submittedAt: "2026-01-12 19:30" },
+  ];
+}
+
+async function loadLearners(){
+  if (!canUseApi()){
+    renderLearners(getMockLearners());
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/internal/learners`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok){
+      renderLearners(getMockLearners());
+      return;
     }
+    const learners = await res.json();
+    renderLearners(Array.isArray(learners) ? learners : []);
+  } catch (e){
+    console.error("loadLearners error:", e);
+    renderLearners(getMockLearners());
+  }
+}
 
-    function renderAIFeedback(learner){
-      const t = translations[currentLang];
+function renderLearners(learners){
+  learnersCache = learners || [];
 
-      $("feedbackHint").style.display = "none";
-      $("aiFeedbackBody").style.display = "block";
+  const tbody = document.querySelector("#learnersTable tbody");
+  tbody.innerHTML = "";
 
-      const name = learner ? `${learner.name} (${learner.email})` : "N/A";
-      $("fbFor").textContent = t.fbFor(name);
+  const select = $("learnerSelect");
+  select.innerHTML = `<option value="">${escapeHtml(t("selectLearner"))}</option>`;
 
-      const errs = [
-        `/s/ sound mispronounced in "speech"`,
-        `/θ/ sound in "think" needs improvement`
-      ];
-      $("fbErrList").innerHTML = errs.map(e => `<li>${escapeHtml(e)}</li>`).join("");
+  const topicLearnerSelect = $("topicLearnerSelect");
+  topicLearnerSelect.innerHTML = `<option value="">${escapeHtml(t("topicSelectLearner"))}</option>`;
 
-      $("fbSug").textContent = `Practice tongue placement for /s/. Try slow → normal speed.`;
-      $("fbVocab").textContent = `Use "believe" instead of "think" for better formality.`;
-      $("fbPractice").textContent = `"I believe in practicing regularly."`;
+  if (!learnersCache.length){
+    $("noData").style.display = "block";
+    renderRanking();
+    return;
+  }
+  $("noData").style.display = "none";
+
+  learnersCache.forEach(learner => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(learner.id)}</td>
+      <td>
+        <div style="font-weight:900;">${escapeHtml(learner.name || "N/A")}</div>
+        <div style="color:var(--muted); font-size:12px;">${escapeHtml(learner.email || "")}</div>
+      </td>
+      <td>${escapeHtml(learner.level || "N/A")}</td>
+      <td>${escapeHtml(learner.lastPractice || "N/A")}</td>
+      <td>${escapeHtml(learner.avgScore ?? "N/A")}</td>
+      <td>${escapeHtml(learner.weakSkill || "N/A")}</td>
+      <td><span class="pill">${escapeHtml(learner.status || "N/A")}</span></td>
+      <td>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="viewDetails(${learner.id})">${escapeHtml(t("btnView"))}</button>
+          <button class="btn btn-outline btn-sm" onclick="sendFeedback(${learner.id})">${escapeHtml(t("btnSendFeedback"))}</button>
+          <button class="btn btn-outline btn-sm" onclick="assignTask(${learner.id})">${escapeHtml(t("btnAssignTask"))}</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
+
+    const opt = document.createElement("option");
+    opt.value = learner.id;
+    opt.textContent = `${learner.name || learner.email}`;
+    select.appendChild(opt);
+
+    const opt2 = document.createElement("option");
+    opt2.value = learner.id;
+    opt2.textContent = `${learner.name || learner.email}`;
+    topicLearnerSelect.appendChild(opt2);
+  });
+
+  renderRanking();
+}
+
+function filterLearners(){
+  const q = $("search").value.trim().toLowerCase();
+  const st = $("filterStatus").value.trim().toLowerCase();
+
+  const rows = document.querySelectorAll("#learnersTable tbody tr");
+  rows.forEach(row => {
+    const nameEmail = row.cells[1].innerText.toLowerCase();
+    const rowStatus = row.cells[6].innerText.toLowerCase();
+    const okQ = !q || nameEmail.includes(q);
+    const okS = !st || rowStatus.includes(st);
+    row.style.display = (okQ && okS) ? "" : "none";
+  });
+}
+
+/* =========================================================
+   PROGRESS + CHART
+========================================================= */
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function mockProgress(){
+  const history = [
+    { date: "2025-12-28", score: 60 },
+    { date: "2026-01-04", score: 68 },
+    { date: "2026-01-07", score: 72 },
+    { date: "2026-01-09", score: 78 },
+    { date: "2026-01-11", score: 81 }
+  ];
+  return {
+    pronunciation: rand(55, 95),
+    fluency: rand(50, 92),
+    vocabulary: rand(52, 94),
+    grammar: rand(48, 90),
+    history
+  };
+}
+
+function viewProgress(learnerId){
+  const learner = learnersCache.find(x => String(x.id) === String(learnerId));
+  const p = mockProgress();
+
+  const html = `
+    <div style="display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:12px;">
+      <div class="mini-card" style="background:#fff;">
+        <div style="font-weight:900;">${escapeHtml(t("skillPron"))}</div>
+        <div style="color:var(--muted); margin-top:6px; font-weight:800;">${p.pronunciation}%</div>
+      </div>
+      <div class="mini-card" style="background:#fff;">
+        <div style="font-weight:900;">${escapeHtml(t("skillFlu"))}</div>
+        <div style="color:var(--muted); margin-top:6px; font-weight:800;">${p.fluency}%</div>
+      </div>
+      <div class="mini-card" style="background:#fff;">
+        <div style="font-weight:900;">${escapeHtml(t("skillVocab"))}</div>
+        <div style="color:var(--muted); margin-top:6px; font-weight:800;">${p.vocabulary}%</div>
+      </div>
+      <div class="mini-card" style="background:#fff;">
+        <div style="font-weight:900;">${escapeHtml(t("skillGram"))}</div>
+        <div style="color:var(--muted); margin-top:6px; font-weight:800;">${p.grammar}%</div>
+      </div>
+    </div>
+
+    <div style="padding:12px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; background:#fff;">
+      <canvas id="progressChart" height="120"></canvas>
+    </div>
+
+    <h3 style="margin: 0 0 8px; font-weight:900;">${escapeHtml(t("recentPractice"))}</h3>
+    <div class="table-container">
+      <table class="data-table">
+        <thead><tr><th>${escapeHtml(t("colDate"))}</th><th>${escapeHtml(t("colScore"))}</th></tr></thead>
+        <tbody>
+          ${p.history.map(h => `<tr><td>${h.date}</td><td>${h.score}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+  $("progressDetails").innerHTML = html;
+
+  if (progressChart) progressChart.destroy();
+  const ctx = document.getElementById("progressChart").getContext("2d");
+  progressChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: p.history.map(h => h.date),
+      datasets: [{
+        label: t("colScore"),
+        data: p.history.map(h => h.score),
+        borderWidth: 2,
+        tension: 0.25
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, max: 100 } }
     }
+  });
 
-    /* =========================================================
-       ACTIONS
-    ========================================================= */
-    function viewDetails(learnerId){
-      showSection("progress");
-      $("learnerSelect").value = String(learnerId);
-      viewProgress(learnerId);
-    }
+  renderAIFeedback(learner);
+}
 
-    function sendFeedback(learnerId){
-      showSection("feedback");
-      alert(currentLang === "vi"
-        ? `Đang gửi phản hồi cho học viên ${learnerId}`
-        : `Sending feedback for learner ${learnerId}`);
-    }
+function renderAIFeedback(learner){
+  $("feedbackHint").style.display = "none";
+  $("aiFeedbackBody").style.display = "block";
 
-    function assignTask(learnerId){
-      showSection("tasks");
-      alert(currentLang === "vi"
-        ? (learnerId ? `Đang giao bài cho học viên ${learnerId}` : "Đang giao bài mới")
-        : (learnerId ? `Assigning task for learner ${learnerId}` : "Assigning new task"));
-    }
+  const name = learner ? `${learner.name} (${learner.email})` : "N/A";
+  $("fbFor").textContent = `${t("fbForPrefix")} ${name}`;
 
-    /* =========================================================
-       INIT
-    ========================================================= */
-    window.onload = function(){
-      updateLanguage();
-      showSection("learners");
-      loadLearners();
+  const errs = [
+    `/s/ sound mispronounced in "speech"`,
+    `/θ/ sound in "think" needs improvement`
+  ];
+  $("fbErrList").innerHTML = errs.map(e => `<li>${escapeHtml(e)}</li>`).join("");
 
-      $("learnerSelect").addEventListener("change", function(){
-        const id = this.value;
-        if (id){
-          showSection("progress");
-          viewProgress(id);
-        } else {
-          $("progressDetails").innerHTML = `<p style="color:#64748b;" id="progressHint">${translations[currentLang].progressHint}</p>`;
-        }
-      });
+  // Nội dung demo: để đúng ngôn ngữ
+  $("fbSug").textContent = (currentLang === "vi")
+    ? `Luyện đặt lưỡi đúng với /s/. Tập từ chậm → tốc độ bình thường.`
+    : `Practice correct tongue placement for /s/. Start slow → normal speed.`;
+
+  $("fbVocab").textContent = (currentLang === "vi")
+    ? `Dùng "believe" thay vì "think" để câu trang trọng hơn.`
+    : `Use "believe" instead of "think" to sound more formal.`;
+
+  $("fbPractice").textContent = `"I believe in practicing regularly."`;
+
+  $("fbClarity").textContent = (currentLang === "vi")
+    ? `Nói theo cấu trúc 3 bước (Ý kiến → Lý do → Ví dụ). Giữ tốc độ vừa phải và ngắt nghỉ sau mỗi ý.`
+    : `Use a 3-step structure (Opinion → Reason → Example). Keep a steady pace and pause between points.`;
+
+  $("fbVocabTips").textContent = (currentLang === "vi")
+    ? `Học theo cụm: "take a break", "make a decision". Mỗi ngày 3 cụm + đặt 2 câu ví dụ.`
+    : `Learn chunks: "take a break", "make a decision". Daily: 3 chunks + write 2 example sentences.`;
+
+  $("fbNativeTips").textContent = (currentLang === "vi")
+    ? `Ưu tiên rõ ràng hơn hoàn hảo. Nếu không nghe kịp: "Could you repeat that more slowly?"`
+    : `Prioritize clarity over perfection. If you can’t catch it: "Could you repeat that more slowly?"`;
+}
+
+/* =========================================================
+   RANKING
+========================================================= */
+function renderRanking(){
+  const sorted = [...learnersCache].sort((a,b) => (b.avgScore||0) - (a.avgScore||0));
+  const top = sorted.slice(0, 3);
+  const bottom = sorted.slice(-3).reverse();
+
+  function item(l, rank){
+    const name = escapeHtml(l.name || "N/A");
+    const score = escapeHtml(l.avgScore ?? "N/A");
+    const status = escapeHtml(l.status || "N/A");
+    const weak = escapeHtml(l.weakSkill || "");
+    return `
+      <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:900;">#${rank} ${name}</div>
+          <div style="color:var(--muted); font-size:12px;">${escapeHtml(l.email||"")}</div>
+          <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="pill">${escapeHtml(t("statusLabel"))}: ${status}</span>
+            <span class="pill">${escapeHtml(t("weakLabel"))}: ${weak}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:900; font-size:18px;">${score}</div>
+          <div style="color:var(--muted); font-size:12px;">${escapeHtml(t("avgScoreLabel"))}</div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-outline btn-sm" onclick="viewDetails(${l.id})">${escapeHtml(t("btnView"))}</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  $("topRankingList").innerHTML = top.length
+    ? top.map((l,i)=>item(l, i+1)).join("")
+    : `<p class="muted" style="margin:0;">—</p>`;
+
+  $("bottomRankingList").innerHTML = bottom.length
+    ? bottom.map((l,i)=>item(l, sorted.length - (bottom.length - 1 - i))).join("")
+    : `<p class="muted" style="margin:0;">—</p>`;
+}
+
+/* =========================================================
+   RESOURCES
+========================================================= */
+function renderResources(){
+  const filter = $("resourceFilter").value || "all";
+  const tbody = document.querySelector("#resourcesTable tbody");
+  tbody.innerHTML = "";
+
+  const list = (filter === "all") ? RESOURCES : RESOURCES.filter(r => r.skill === filter);
+
+  list.forEach(r => {
+    const desc = (currentLang === "vi") ? r.desc_vi : r.desc_en;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(r.skill)}</td>
+      <td style="font-weight:900;">${escapeHtml(r.title)}</td>
+      <td>${escapeHtml(desc)}</td>
+      <td>
+        <a class="btn btn-outline btn-sm" href="${r.url}" target="_blank" rel="noopener">${escapeHtml(t("btnOpen"))}</a>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!list.length){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="4" style="color:var(--muted);">${escapeHtml(t("noResource"))}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+/* =========================================================
+   TOPICS
+========================================================= */
+function renderTopics(){
+  const topicSelect = $("topicSelect");
+  topicSelect.innerHTML = `<option value="">${escapeHtml(t("topicSelectTopic"))}</option>`;
+  TOPICS.forEach(tp => {
+    const opt = document.createElement("option");
+    opt.value = tp.key;
+    opt.textContent = (currentLang === "vi") ? tp.en : tp.en; // dropdown trong ảnh EN: dùng EN luôn
+    // Nếu bạn muốn dropdown VI khi lang=vi thì đổi dòng trên thành: (currentLang==="vi"?tp.vi:tp.en)
+    topicSelect.appendChild(opt);
+  });
+
+  const lib = $("topicsLibrary");
+  lib.innerHTML = "";
+  TOPICS.forEach(tp => {
+    const span = document.createElement("span");
+    span.className = "pill";
+    span.textContent = (currentLang === "vi") ? tp.en : tp.en; // library trong ảnh EN
+    lib.appendChild(span);
+  });
+
+  const ul = $("assignedTopics");
+  ul.innerHTML = assignedTopicsState.length
+    ? assignedTopicsState.map(x => `<li>${escapeHtml(x.text)} — <span style="color:var(--muted);">${escapeHtml(x.learnerName)}</span></li>`).join("")
+    : `<li style="color:var(--muted);">${escapeHtml(t("noAssignedTopics"))}</li>`;
+}
+
+function assignTopic(){
+  const learnerId = $("topicLearnerSelect").value;
+  const topicKey = $("topicSelect").value;
+
+  if (!learnerId || !topicKey){
+    alert(t("msgPickBoth"));
+    return;
+  }
+
+  const learner = learnersCache.find(x => String(x.id) === String(learnerId));
+  const tp = TOPICS.find(x => x.key === topicKey);
+
+  const topicText = tp ? ((currentLang === "vi") ? tp.en : tp.en) : "N/A";
+  const learnerName = learner?.name || "N/A";
+
+  assignedTopicsState.unshift({ learnerId, topicKey, text: topicText, learnerName });
+  alert(`${t("msgAssignedPrefix")} "${topicText}" → ${learnerName}.`);
+  renderTopics();
+}
+
+/* =========================================================
+   SUBMISSIONS
+========================================================= */
+function renderSubmissions(){
+  const tbody = document.querySelector("#submissionsTable tbody");
+  tbody.innerHTML = "";
+
+  if (!submissionsState.length){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="4" style="color:var(--muted);">${escapeHtml(t("noSubmissions"))}</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  submissionsState.forEach(s => {
+    const learner = learnersCache.find(x => String(x.id) === String(s.learnerId));
+    const tp = TOPICS.find(x => x.key === s.topicKey);
+
+    const learnerName = learner ? `${learner.name} (${learner.email})` : "N/A";
+    const topicText = tp ? ((currentLang==="vi") ? tp.en : tp.en) : "N/A";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:900;">${escapeHtml(learnerName)}</td>
+      <td>${escapeHtml(topicText)}</td>
+      <td>${escapeHtml(s.submittedAt)}</td>
+      <td style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="listenAndFeedback(${s.learnerId}, '${s.topicKey}')">${escapeHtml(t("btnListen"))}</button>
+        <button class="btn btn-outline btn-sm" onclick="markReviewed(${s.learnerId}, '${s.topicKey}')">${escapeHtml(t("btnReviewed"))}</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function listenAndFeedback(learnerId, topicKey){
+  const learner = learnersCache.find(x => String(x.id) === String(learnerId));
+  showSection("feedback");
+  if (learner) renderAIFeedback(learner);
+  alert(t("msgListenDemo"));
+}
+function markReviewed(learnerId, topicKey){
+  submissionsState = submissionsState.filter(s => !(String(s.learnerId)===String(learnerId) && s.topicKey===topicKey));
+  renderSubmissions();
+  alert(t("msgReviewed"));
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+function viewDetails(learnerId){
+  showSection("progress");
+  $("learnerSelect").value = String(learnerId);
+  viewProgress(learnerId);
+}
+function sendFeedback(learnerId){
+  showSection("feedback");
+  alert(`${t("btnSendFeedback")}: #${learnerId}`);
+}
+function assignTask(learnerId){
+  showSection("tasks");
+  alert(learnerId ? `${t("btnAssignTask")}: #${learnerId}` : t("assignNewTask"));
+}
+
+/* =========================================================
+   Mentor Profile Modal
+========================================================= */
+const MENTOR_KEY = "mentor_profile";
+function getMentorProfile(){ return JSON.parse(localStorage.getItem(MENTOR_KEY) || "{}"); }
+function setMentorProfile(data){ localStorage.setItem(MENTOR_KEY, JSON.stringify(data)); }
+
+function openMentorModal(mode){
+  const modal = $("mentorModal");
+  const title = $("mentorModalTitle");
+  const body  = $("mentorModalBody");
+  const ft    = $("mentorModalFooter");
+  const data  = getMentorProfile();
+
+  function close(){ modal.classList.remove("show"); }
+  $("closeMentorModal").onclick = close;
+  ft.innerHTML = "";
+
+  if (mode === "info"){
+    title.textContent = t("modalInfoTitle");
+    body.innerHTML = `
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Họ tên" : "Full name"}</label>
+        <input id="m_name" value="${escapeHtml(data.name || "Mentor Tran")}" />
+      </div>
+      <div class="form-row">
+        <label>Email</label>
+        <input id="m_email" value="${escapeHtml(data.email || "mentor@example.com")}" />
+      </div>
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "SĐT" : "Phone"}</label>
+        <input id="m_phone" value="${escapeHtml(data.phone || "")}" placeholder="09xxxxxxxx" />
+      </div>
+      <div class="form-row">
+        <label>Bio</label>
+        <textarea id="m_bio" rows="3" placeholder="${currentLang==="vi" ? "Giới thiệu ngắn..." : "Short introduction..."}">${escapeHtml(data.bio || "")}</textarea>
+      </div>
+      <p class="muted">* Demo: saved to localStorage.</p>
+    `;
+    ft.innerHTML = `
+      <button class="btn btn-outline btn-sm" type="button" id="m_cancel">${escapeHtml(t("btnCancel"))}</button>
+      <button class="btn btn-primary btn-sm" type="button" id="m_save">${escapeHtml(t("btnSave"))}</button>
+    `;
+    $("m_cancel").onclick = close;
+    $("m_save").onclick = () => {
+      const newData = {
+        ...data,
+        name: $("m_name").value.trim(),
+        email: $("m_email").value.trim(),
+        phone: $("m_phone").value.trim(),
+        bio: $("m_bio").value.trim()
+      };
+      setMentorProfile(newData);
+      alert(t("msgSavedProfile"));
+      close();
     };
-  </script>
+  }
+
+  if (mode === "availability"){
+    title.textContent = t("modalAvailabilityTitle");
+    body.innerHTML = `
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Múi giờ" : "Time zone"}</label>
+        <select id="m_tz">
+          <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh</option>
+          <option value="UTC">UTC</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Khung giờ rảnh" : "Available time"}</label>
+        <input id="m_time" value="${escapeHtml(data.time || "Mon–Fri: 19:00 - 21:00")}" />
+      </div>
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Ghi chú" : "Notes"}</label>
+        <textarea id="m_note" rows="3" placeholder="${currentLang==="vi" ? "VD: Thứ 4 nghỉ..." : "E.g. Not available on Wed..."}">${escapeHtml(data.note || "")}</textarea>
+      </div>
+      <p class="muted">* Demo: saved to localStorage.</p>
+    `;
+    ft.innerHTML = `
+      <button class="btn btn-outline btn-sm" type="button" id="m_cancel">${escapeHtml(t("btnCancel"))}</button>
+      <button class="btn btn-primary btn-sm" type="button" id="m_save">${escapeHtml(t("btnSave"))}</button>
+    `;
+    $("m_cancel").onclick = close;
+    $("m_save").onclick = () => {
+      const newData = { ...data, tz: $("m_tz").value, time: $("m_time").value.trim(), note: $("m_note").value.trim() };
+      setMentorProfile(newData);
+      alert(t("msgSavedAvail"));
+      close();
+    };
+    if (data.tz) $("m_tz").value = data.tz;
+  }
+
+  if (mode === "notifications"){
+    title.textContent = t("modalNotificationsTitle");
+    const n = !!data.notify;
+    body.innerHTML = `
+      <div class="mini-card">
+        <h4>${currentLang==="vi" ? "Bật nhắc nhở" : "Enable reminders"}</h4>
+        <p class="muted" style="margin-top:6px;">${currentLang==="vi"
+          ? "Nhắc khi học viên 7 ngày chưa luyện / có bài nộp mới (demo)."
+          : "Remind when a learner is inactive for 7 days / new submission (demo)."
+        }</p>
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+          <input type="checkbox" id="m_notify" ${n ? "checked" : ""}/>
+          <label for="m_notify" style="font-weight:900;">${currentLang==="vi" ? "Bật thông báo" : "Enable notifications"}</label>
+        </div>
+      </div>
+    `;
+    ft.innerHTML = `
+      <button class="btn btn-outline btn-sm" type="button" id="m_cancel">${escapeHtml(t("btnClose"))}</button>
+      <button class="btn btn-primary btn-sm" type="button" id="m_save">${escapeHtml(t("btnSave"))}</button>
+    `;
+    $("m_cancel").onclick = close;
+    $("m_save").onclick = () => {
+      setMentorProfile({ ...data, notify: $("m_notify").checked });
+      alert(t("msgSavedNoti"));
+      close();
+    };
+  }
+
+  if (mode === "security"){
+    title.textContent = t("modalSecurityTitle");
+    body.innerHTML = `
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Mật khẩu cũ" : "Old password"}</label>
+        <input id="m_old" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Mật khẩu mới" : "New password"}</label>
+        <input id="m_new" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-row">
+        <label>${currentLang==="vi" ? "Xác nhận" : "Confirm"}</label>
+        <input id="m_new2" type="password" placeholder="••••••••" />
+      </div>
+      <p class="muted">* Demo only.</p>
+    `;
+    ft.innerHTML = `
+      <button class="btn btn-outline btn-sm" type="button" id="m_cancel">${escapeHtml(t("btnCancel"))}</button>
+      <button class="btn btn-primary btn-sm" type="button" id="m_save">${escapeHtml(t("btnChangePass"))}</button>
+    `;
+    $("m_cancel").onclick = close;
+    $("m_save").onclick = () => {
+      if ($("m_new").value !== $("m_new2").value){
+        alert(t("msgPassMismatch"));
+        return;
+      }
+      alert(t("msgPassOk"));
+      close();
+    };
+  }
+
+  if (mode === "lang"){
+    title.textContent = t("modalLangTitle");
+    body.innerHTML = `
+      <div class="mini-card">
+        <h4>${currentLang==="vi" ? "Ngôn ngữ" : "Language"}</h4>
+        <p class="muted" style="margin-top:6px;">${currentLang==="vi" ? "Lưu vào localStorage." : "Saved to localStorage."}</p>
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" type="button" id="lang_vi">VI</button>
+          <button class="btn btn-outline btn-sm" type="button" id="lang_en">EN</button>
+        </div>
+      </div>
+    `;
+    ft.innerHTML = `<button class="btn btn-outline btn-sm" type="button" id="m_cancel">${escapeHtml(t("btnClose"))}</button>`;
+    $("m_cancel").onclick = close;
+
+    $("lang_vi").onclick = ()=>{
+      currentLang = "vi";
+      localStorage.setItem("lang","vi");
+      applyLanguage();
+      alert(t("msgLangVI"));
+      close();
+    };
+    $("lang_en").onclick = ()=>{
+      currentLang = "en";
+      localStorage.setItem("lang","en");
+      applyLanguage();
+      alert(t("msgLangEN"));
+      close();
+    };
+  }
+
+  if (mode === "logout"){
+    localStorage.removeItem(TOKEN_KEY);
+    alert(t("msgLoggedOut"));
+    close();
+    return;
+  }
+
+  modal.classList.add("show");
+}
+
+/* Dropdown logic */
+function toggleDropdown(){
+  const dd = $("dropdown");
+  dd.style.display = (dd.style.display === "block") ? "none" : "block";
+}
+$("profileBtn").addEventListener("click", (e)=>{
+  e.stopPropagation();
+  toggleDropdown();
+});
+window.addEventListener("click", ()=>{
+  const dd = $("dropdown");
+  if (dd) dd.style.display = "none";
+});
+$("dropdown").addEventListener("click", (e)=>{
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  const mode = a.dataset.profile;
+  $("dropdown").style.display = "none";
+  openMentorModal(mode);
+});
+$("mentorModal").addEventListener("click", (e)=>{
+  if (e.target.id === "mentorModal") $("mentorModal").classList.remove("show");
+});
+
+/* =========================================================
+   INIT
+========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // init
+  initDemoSubmissions();
+  loadLearners();
+
+  $("learnerSelect").addEventListener("change", function(){
+    const id = this.value;
+    if (id){
+      showSection("progress");
+      viewProgress(id);
+    } else {
+      $("progressDetails").innerHTML = `<p style="color:var(--muted);" id="progressHint">${escapeHtml(t("progressHint"))}</p>`;
+    }
+  });
+
+  $("resourceFilter").addEventListener("change", renderResources);
+
+  // Apply language AFTER DOM ready (fix “EN vẫn VI”)
+  applyLanguage();
+
+  // Always open learners
+  showSection("learners");
+
+  // initial renders
+  renderResources();
+  renderTopics();
+  renderSubmissions();
+});
+</script>
 </body>
 </html>
