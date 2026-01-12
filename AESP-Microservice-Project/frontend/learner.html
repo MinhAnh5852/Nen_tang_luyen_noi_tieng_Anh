@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học viên - AI English Speaking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="learner.html" class="logo">
+                <i class="fas fa-robot logo-icon"></i>
+                <span class="logo-text">AI English Speaking</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="learner.html" class="active">Bảng điều khiển</a>
+                <a href="#practice">Luyện tập với AI</a>
+                <a href="#progress">Tiến độ học tập</a>
+                <a href="#lessons">Bài học</a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-avatar">NV</div>
+                    <span class="user-name">Nguyễn Văn A</span>
+                </div>
+                <a href="index.html" class="btn btn-outline">Đăng xuất</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Chào mừng trở lại, Nguyễn Văn A!</h1>
+            <div>
+                <a href="#practice" class="btn btn-primary">
+                    <i class="fas fa-microphone"></i> Bắt đầu luyện tập ngay
+                </a>
+            </div>
+        </div>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>12h 30m</h3>
+                    <p>Tổng thời gian luyện tập</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>78%</h3>
+                    <p>Độ chính xác phát âm</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>24</h3>
+                    <p>Bài học đã hoàn thành</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon accent">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>15</h3>
+                    <p>Ngày liên tiếp luyện tập</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="content-card">
+                <h2>Bài học gần đây</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bài học</th>
+                                <th>Chủ đề</th>
+                                <th>Điểm số</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bài 15: Giao tiếp tại sân bay</td>
+                                <td>Du lịch</td>
+                                <td>92/100</td>
+                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bài 14: Phỏng vấn xin việc</td>
+                                <td>Công việc</td>
+                                <td>85/100</td>
+                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bài 13: Đặt món tại nhà hàng</td>
+                                <td>Ẩm thực</td>
+                                <td>88/100</td>
+                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bài 16: Thuyết trình công việc</td>
+                                <td>Công việc</td>
+                                <td>-</td>
+                                <td><span class="status-badge status-pending">Đang thực hành</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Luyện tập với AI</h2>
+                <div id="practice">
+                    <p style="margin-bottom: 20px; color: var(--gray-color);">Chọn chủ đề bạn muốn luyện tập hôm nay:</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
+                            <i class="fas fa-briefcase" style="margin-right: 10px;"></i> Công việc
+                        </button>
+                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
+                            <i class="fas fa-plane" style="margin-right: 10px;"></i> Du lịch
+                        </button>
+                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
+                            <i class="fas fa-utensils" style="margin-right: 10px;"></i> Ẩm thực
+                        </button>
+                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
+                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i> Mua sắm
+                        </button>
+                    </div>
+                    
+                    <div style="background-color: #f0f4ff; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 10px;">Chủ đề đề xuất: Giao tiếp tại khách sạn</h3>
+                        <p style="color: var(--gray-color); margin-bottom: 15px;">Thực hành các tình huống check-in, yêu cầu dịch vụ và giải quyết vấn đề tại khách sạn.</p>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-play"></i> Bắt đầu bài học
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="#" class="btn btn-accent">
+                            <i class="fas fa-microphone-alt"></i> Bắt đầu hội thoại với AI ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI English Speaking</h3>
+                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Hỗ trợ học viên</h3>
+                    <a href="#">Hướng dẫn sử dụng</a>
+                    <a href="#">Câu hỏi thường gặp</a>
+                    <a href="#">Liên hệ mentor</a>
+                    <a href="#">Góp ý cải thiện</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

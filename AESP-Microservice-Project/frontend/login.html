@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - AI English Speaking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-robot logo-icon"></i>
+                <span class="logo-text">AI English Speaking</span>
+            </a>
+            
+            <div class="auth-buttons">
+                <a href="index.html" class="btn btn-outline">Trở về trang chủ</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Đăng nhập</h2>
+                    <p>Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục</p>
+                </div>
+                
+                <form class="auth-form" id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" name="email" placeholder="Nhập địa chỉ email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Mật khẩu</label>
+                        <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu" required>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <input type="checkbox" id="remember-me" name="remember">
+                            <label for="remember-me" style="display: inline;">Ghi nhớ đăng nhập</label>
+                        </div>
+                        
+                        <a href="#" style="color: var(--primary-color); text-decoration: none;">Quên mật khẩu?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Đăng nhập</button>
+                    
+                    <div class="divider">
+                        <span>Hoặc đăng nhập với</span>
+                    </div>
+                    
+                    <div class="social-login">
+                        <button type="button" class="social-btn">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        
+                        <button type="button" class="social-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </button>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <p>Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI English Speaking</h3>
+                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Liên hệ</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Đường ABC, Quận 1, TP.HCM</p>
+                    <p><i class="fas fa-phone"></i> (028) 1234 5678</p>
+                    <p><i class="fas fa-envelope"></i> support@aienglish.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Xử lý đăng nhập
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const remember = document.getElementById('remember-me').checked;
+            
+            // Trong thực tế, đây là nơi bạn sẽ gửi dữ liệu đến API
+            console.log('Đăng nhập với:', { email, password, remember });
+            
+            // Hiển thị thông báo thành công
+            alert('Đăng nhập thành công! Đang chuyển hướng...');
+            
+            // Giả lập xác định vai trò để chuyển hướng
+            // Trong thực tế, API sẽ trả về role của người dùng
+            const role = email.includes('admin') ? 'admin' : 
+                        email.includes('mentor') ? 'mentor' : 'learner';
+            
+            // Chuyển hướng đến trang tương ứng
+            if (role === 'admin') {
+                window.location.href = 'admin.html';
+            } else if (role === 'mentor') {
+                window.location.href = 'mentor.html';
+            } else {
+                window.location.href = 'learner.html';
+            }
+        });
+    </script>
+</body>
+</html>

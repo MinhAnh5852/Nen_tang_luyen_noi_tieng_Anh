@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor - AI English Speaking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="mentor.html" class="logo">
+                <i class="fas fa-robot logo-icon"></i>
+                <span class="logo-text">AI English Speaking</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="mentor.html" class="active">Bảng điều khiển</a>
+                <a href="#students">Học viên</a>
+                <a href="#sessions">Buổi học</a>
+                <a href="#reports">Báo cáo</a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-avatar">MT</div>
+                    <span class="user-name">Mentor Trần</span>
+                </div>
+                <a href="index.html" class="btn btn-outline">Đăng xuất</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Xin chào Mentor Trần!</h1>
+            <div>
+                <a href="#schedule" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus"></i> Lên lịch buổi học
+                </a>
+            </div>
+        </div>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>24</h3>
+                    <p>Học viên đang hướng dẫn</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>156</h3>
+                    <p>Buổi học đã thực hiện</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>4.8/5</h3>
+                    <p>Đánh giá từ học viên</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon accent">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>8</h3>
+                    <p>Buổi học sắp tới</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="content-card">
+                <h2>Học viên cần chú ý</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Học viên</th>
+                                <th>Trình độ</th>
+                                <th>Vấn đề</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Nguyễn Văn A</td>
+                                <td>Trung cấp</td>
+                                <td>Phát âm cần cải thiện</td>
+                                <td><button class="btn btn-outline btn-sm">Xem chi tiết</button></td>
+                            </tr>
+                            <tr>
+                                <td>Trần Thị B</td>
+                                <td>Sơ cấp</td>
+                                <td>Thiếu tự tin giao tiếp</td>
+                                <td><button class="btn btn-outline btn-sm">Xem chi tiết</button></td>
+                            </tr>
+                            <tr>
+                                <td>Lê Văn C</td>
+                                <td>Trung cấp</td>
+                                <td>Ngữ pháp cần củng cố</td>
+                                <td><button class="btn btn-outline btn-sm">Xem chi tiết</button></td>
+                            </tr>
+                            <tr>
+                                <td>Phạm Thị D</td>
+                                <td>Nâng cao</td>
+                                <td>Cần luyện ngữ điệu</td>
+                                <td><button class="btn btn-outline btn-sm">Xem chi tiết</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Buổi học sắp tới</h2>
+                <div id="sessions">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #f0f4ff; border-radius: var(--radius); margin-bottom: 10px;">
+                            <div>
+                                <h3 style="margin-bottom: 5px;">Nguyễn Văn A</h3>
+                                <p style="color: var(--gray-color);"><i class="far fa-clock"></i> 10:00 - 11:00, Hôm nay</p>
+                            </div>
+                            <button class="btn btn-primary">Tham gia</button>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #f0f4ff; border-radius: var(--radius); margin-bottom: 10px;">
+                            <div>
+                                <h3 style="margin-bottom: 5px;">Trần Thị B</h3>
+                                <p style="color: var(--gray-color);"><i class="far fa-clock"></i> 14:00 - 15:00, Hôm nay</p>
+                            </div>
+                            <button class="btn btn-primary">Tham gia</button>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #f0f4ff; border-radius: var(--radius); margin-bottom: 10px;">
+                            <div>
+                                <h3 style="margin-bottom: 5px;">Lê Văn C</h3>
+                                <p style="color: var(--gray-color);"><i class="far fa-clock"></i> 09:00 - 10:00, Ngày mai</p>
+                            </div>
+                            <button class="btn btn-outline">Chi tiết</button>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="#schedule" class="btn btn-accent">
+                            <i class="fas fa-calendar-alt"></i> Xem lịch học đầy đủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-card" style="margin-top: 30px;">
+            <h2>Đánh giá học viên gần đây</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Học viên</th>
+                            <th>Bài học</th>
+                            <th>Điểm AI</th>
+                            <th>Điểm Mentor</th>
+                            <th>Nhận xét</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nguyễn Văn A</td>
+                            <td>Bài 15: Giao tiếp tại sân bay</td>
+                            <td>85/100</td>
+                            <td>88/100</td>
+                            <td>Phát âm tiến bộ rõ rệt</td>
+                        </tr>
+                        <tr>
+                            <td>Trần Thị B</td>
+                            <td>Bài 10: Giới thiệu bản thân</td>
+                            <td>78/100</td>
+                            <td>80/100</td>
+                            <td>Cần tự tin hơn khi nói</td>
+                        </tr>
+                        <tr>
+                            <td>Lê Văn C</td>
+                            <td>Bài 18: Thảo luận công việc</td>
+                            <td>92/100</td>
+                            <td>90/100</td>
+                            <td>Ngữ pháp rất tốt</td>
+                        </tr>
+                        <tr>
+                            <td>Phạm Thị D</td>
+                            <td>Bài 22: Thuyết trình dự án</td>
+                            <td>88/100</td>
+                            <td>85/100</td>
+                            <td>Cần cải thiện ngữ điệu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI English Speaking</h3>
+                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp học viên cải thiện kỹ năng giao tiếp một cách hiệu quả.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Hỗ trợ Mentor</h3>
+                    <a href="#">Hướng dẫn giảng dạy</a>
+                    <a href="#">Tài liệu Mentor</a>
+                    <a href="#">Chính sách thanh toán</a>
+                    <a href="#">Liên hệ hỗ trợ</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
