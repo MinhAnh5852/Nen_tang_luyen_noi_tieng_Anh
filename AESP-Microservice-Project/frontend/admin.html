@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị - AI English Speaking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="admin.html" class="logo">
+                <i class="fas fa-robot logo-icon"></i>
+                <span class="logo-text">AI English Speaking</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="admin.html" class="active">Tổng quan</a>
+                <a href="#users">Người dùng</a>
+                <a href="#content">Nội dung</a>
+                <a href="#analytics">Phân tích</a>
+                <a href="#system">Hệ thống</a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-info">
+                    <div class="user-avatar">AD</div>
+                    <span class="user-name">Quản trị viên</span>
+                </div>
+                <a href="index.html" class="btn btn-outline">Đăng xuất</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="dashboard-header">
+            <h1>Bảng điều khiển quản trị</h1>
+            <div>
+                <span style="margin-right: 15px; color: var(--gray-color);"><i class="fas fa-server"></i> Hệ thống đang hoạt động ổn định</span>
+                <a href="#system" class="btn btn-primary">
+                    <i class="fas fa-cog"></i> Cài đặt hệ thống
+                </a>
+            </div>
+        </div>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>1,245</h3>
+                    <p>Tổng số người dùng</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>1,180</h3>
+                    <p>Học viên</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>65</h3>
+                    <p>Mentor</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon accent">
+                    <i class="fas fa-microphone-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>45,230</h3>
+                    <p>Phiên luyện tập hôm nay</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="content-card">
+                <h2>Người dùng mới đăng ký</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tên người dùng</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Nguyễn Văn A</td>
+                                <td>nguyenvana@email.com</td>
+                                <td>Học viên</td>
+                                <td>12/10/2023</td>
+                                <td><span class="status-badge status-active">Đang hoạt động</span></td>
+                            </tr>
+                            <tr>
+                                <td>Trần Thị B</td>
+                                <td>tranthib@email.com</td>
+                                <td>Học viên</td>
+                                <td>11/10/2023</td>
+                                <td><span class="status-badge status-active">Đang hoạt động</span></td>
+                            </tr>
+                            <tr>
+                                <td>Lê Văn C</td>
+                                <td>levanc@email.com</td>
+                                <td>Mentor</td>
+                                <td>10/10/2023</td>
+                                <td><span class="status-badge status-pending">Chờ xác nhận</span></td>
+                            </tr>
+                            <tr>
+                                <td>Phạm Thị D</td>
+                                <td>phamthid@email.com</td>
+                                <td>Học viên</td>
+                                <td>09/10/2023</td>
+                                <td><span class="status-badge status-active">Đang hoạt động</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#users" class="btn btn-outline">Xem tất cả người dùng</a>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Thống kê hệ thống</h2>
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Tổng số bài học</span>
+                        <span style="font-weight: 600;">156</span>
+                    </div>
+                    <div style="height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden;">
+                        <div style="width: 100%; height: 100%; background-color: var(--primary-color);"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Tổng số bài tập AI</span>
+                        <span style="font-weight: 600;">89</span>
+                    </div>
+                    <div style="height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden;">
+                        <div style="width: 89%; height: 100%; background-color: var(--success-color);"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Lượt tương tác AI hôm nay</span>
+                        <span style="font-weight: 600;">45,230</span>
+                    </div>
+                    <div style="height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden;">
+                        <div style="width: 75%; height: 100%; background-color: var(--accent-color);"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Thời gian hoạt động hệ thống</span>
+                        <span style="font-weight: 600;">99.8%</span>
+                    </div>
+                    <div style="height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden;">
+                        <div style="width: 99.8%; height: 100%; background-color: var(--warning-color);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-card" style="margin-top: 30px;">
+            <h2>Quản lý nhanh</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                <a href="#add-user" class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+                    <i class="fas fa-user-plus" style="font-size: 30px; margin-bottom: 10px; color: var(--primary-color);"></i>
+                    <span>Thêm người dùng</span>
+                </a>
+                
+                <a href="#add-content" class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+                    <i class="fas fa-book" style="font-size: 30px; margin-bottom: 10px; color: var(--success-color);"></i>
+                    <span>Thêm bài học</span>
+                </a>
+                
+                <a href="#ai-training" class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+                    <i class="fas fa-robot" style="font-size: 30px; margin-bottom: 10px; color: var(--accent-color);"></i>
+                    <span>Huấn luyện AI</span>
+                </a>
+                
+                <a href="#reports" class="btn btn-outline" style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+                    <i class="fas fa-chart-bar" style="font-size: 30px; margin-bottom: 10px; color: var(--warning-color);"></i>
+                    <span>Báo cáo hệ thống</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI English Speaking</h3>
+                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến - Hệ thống quản trị</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Hệ thống</h3>
+                    <p><i class="fas fa-server"></i> Phiên bản: 2.1.3</p>
+                    <p><i class="fas fa-database"></i> Cơ sở dữ liệu: Đang hoạt động</p>
+                    <p><i class="fas fa-shield-alt"></i> Bảo mật: Mức cao</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu. <span style="color: var(--success-color);"><i class="fas fa-circle"></i> Hệ thống đang hoạt động ổn định</span></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
