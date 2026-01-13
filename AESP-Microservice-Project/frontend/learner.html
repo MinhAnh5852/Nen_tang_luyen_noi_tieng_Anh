@@ -3,10 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học viên - AI English Speaking Platform</title>
+    <title>Học viên - AESP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for learner page */
+        .progress-chart {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            height: 100%;
+        }
+        
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .heatmap-day {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .heatmap-0 { background-color: #ebedf0; }
+        .heatmap-1 { background-color: #9be9a8; }
+        .heatmap-2 { background-color: #40c463; }
+        .heatmap-3 { background-color: #30a14e; }
+        .heatmap-4 { background-color: #216e39; }
+        
+        .subscription-plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 2px solid #e5e7eb;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .plan-card.recommended {
+            border-color: var(--primary-color);
+            transform: scale(1.02);
+        }
+        
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 15px 0;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+        
+        .plan-features li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .plan-features i {
+            color: var(--success-color);
+            margin-right: 10px;
+        }
+        
+        .profile-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .profile-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .goal-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .goal-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: var(--radius);
+        }
+        
+        .specialization-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .specialization-tag {
+            padding: 8px 15px;
+            background: #f3f4f6;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .specialization-tag.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .performance-report {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+        }
+        
+        .report-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .challenge-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .challenge-badge {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .leaderboard {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: 700;
+            width: 40px;
+            color: var(--primary-color);
+        }
+        
+        .assessment-container {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+        }
+        
+        .assessment-question {
+            margin-bottom: 25px;
+        }
+        
+        .assessment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .assessment-option {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .assessment-option:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .assessment-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .topic-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .topic-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .ai-feedback {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+        }
+        
+        .feedback-category {
+            margin-bottom: 20px;
+        }
+        
+        .feedback-meter {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .feedback-fill {
+            height: 100%;
+            border-radius: 5px;
+        }
+        
+        .feedback-good { background: var(--success-color); width: 85%; }
+        .feedback-average { background: var(--warning-color); width: 65%; }
+        .feedback-poor { background: var(--danger-color); width: 40%; }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .speech-recording {
+            text-align: center;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            margin: 20px 0;
+        }
+        
+        .recording-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+        
+        .recording-button.recording {
+            background: var(--danger-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .conversation-partner {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: var(--radius);
+        }
+        
+        .partner-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -14,14 +383,15 @@
         <div class="container header-container">
             <a href="learner.html" class="logo">
                 <i class="fas fa-robot logo-icon"></i>
-                <span class="logo-text">AI English Speaking</span>
+                <span class="logo-text">AESP</span>
             </a>
             
             <nav class="nav-links">
                 <a href="learner.html" class="active">Bảng điều khiển</a>
                 <a href="#practice">Luyện tập với AI</a>
                 <a href="#progress">Tiến độ học tập</a>
-                <a href="#lessons">Bài học</a>
+                <a href="#subscription">Gói dịch vụ</a>
+                <a href="#profile">Hồ sơ</a>
             </nav>
             
             <div class="user-menu">
@@ -36,133 +406,531 @@
 
     <!-- Main Content -->
     <main class="container">
-        <div class="dashboard-header">
-            <h1>Chào mừng trở lại, Nguyễn Văn A!</h1>
-            <div>
-                <a href="#practice" class="btn btn-primary">
-                    <i class="fas fa-microphone"></i> Bắt đầu luyện tập ngay
-                </a>
+        <!-- Assessment Section (First time user) -->
+        <div id="assessment-section" class="assessment-container">
+            <h2>Đánh giá năng lực ban đầu</h2>
+            <p>Hoàn thành bài đánh giá để chúng tôi có thể cá nhân hóa lộ trình học tập cho bạn.</p>
+            
+            <div class="assessment-question">
+                <h3>Câu 1: Mục tiêu học tiếng Anh của bạn là gì?</h3>
+                <div class="assessment-options">
+                    <div class="assessment-option" onclick="selectOption(this)">Giao tiếp trong công việc</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Du lịch nước ngoài</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Học tập tại nước ngoài</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Cải thiện kỹ năng tổng quát</div>
+                </div>
+            </div>
+            
+            <div class="assessment-question">
+                <h3>Câu 2: Trình độ hiện tại của bạn?</h3>
+                <div class="assessment-options">
+                    <div class="assessment-option" onclick="selectOption(this)">Mới bắt đầu</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Sơ cấp</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Trung cấp</div>
+                    <div class="assessment-option" onclick="selectOption(this)">Nâng cao</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="completeAssessment()">
+                    <i class="fas fa-check-circle"></i> Hoàn thành đánh giá
+                </button>
             </div>
         </div>
         
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <div class="stat-icon primary">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>12h 30m</h3>
-                    <p>Tổng thời gian luyện tập</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon success">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>78%</h3>
-                    <p>Độ chính xác phát âm</p>
+        <!-- Main Dashboard (After assessment) -->
+        <div id="main-dashboard" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Chào mừng trở lại, Nguyễn Văn A!</h1>
+                <div>
+                    <a href="#practice" class="btn btn-primary">
+                        <i class="fas fa-microphone"></i> Bắt đầu luyện tập ngay
+                    </a>
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-icon warning">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>24</h3>
-                    <p>Bài học đã hoàn thành</p>
+            <!-- Subscription Status -->
+            <div class="content-card" id="subscription">
+                <h2>Gói dịch vụ của bạn</h2>
+                <div class="subscription-status" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: #f0f4ff; border-radius: var(--radius);">
+                    <div>
+                        <h3 style="margin-bottom: 5px;">Gói Premium với Mentor</h3>
+                        <p style="color: var(--gray-color);">Còn 25 ngày sử dụng - Hết hạn: 15/11/2026</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" onclick="showSubscriptionPlans()">Nâng cấp gói</button>
+                        <button class="btn btn-outline" style="margin-left: 10px;">Quản lý gói</button>
+                    </div>
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-icon accent">
-                    <i class="fas fa-fire"></i>
+            <!-- Quick Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>12h 30m</h3>
+                        <p>Tổng thời gian luyện tập</p>
+                    </div>
                 </div>
-                <div class="stat-info">
-                    <h3>15</h3>
-                    <p>Ngày liên tiếp luyện tập</p>
+                
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>78%</h3>
+                        <p>Độ chính xác phát âm</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>24</h3>
+                        <p>Bài học đã hoàn thành</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon accent">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>15</h3>
+                        <p>Ngày liên tiếp luyện tập</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="dashboard-content">
+                <!-- Learning Progress -->
+                <div class="content-card" id="progress">
+                    <h2>Tiến độ học tập</h2>
+                    <div class="tab-container">
+                        <div class="tab active" onclick="showTab('heatmap')">Bản đồ nhiệt</div>
+                        <div class="tab" onclick="showTab('trends')">Xu hướng</div>
+                        <div class="tab" onclick="showTab('analytics')">Phân tích chi tiết</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="heatmap-tab">
+                        <div class="heatmap">
+                            <!-- Heatmap days will be generated by JavaScript -->
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; color: var(--gray-color);">Hoạt động luyện tập trong 3 tháng gần nhất</p>
+                    </div>
+                    
+                    <div class="tab-content" id="trends-tab">
+                        <div class="progress-chart">
+                            <canvas id="progressChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="analytics-tab">
+                        <div class="performance-report">
+                            <h3>Báo cáo hiệu suất tuần này</h3>
+                            <div class="report-filters">
+                                <button class="btn btn-outline active">Tuần</button>
+                                <button class="btn btn-outline">Tháng</button>
+                                <button class="btn btn-outline">Quý</button>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Chỉ số</th>
+                                            <th>Giá trị</th>
+                                            <th>Thay đổi</th>
+                                            <th>Xu hướng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Độ chính xác phát âm</td>
+                                            <td>78%</td>
+                                            <td>+5%</td>
+                                            <td><i class="fas fa-arrow-up" style="color: var(--success-color);"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Từ vựng mới</td>
+                                            <td>45 từ</td>
+                                            <td>+12 từ</td>
+                                            <td><i class="fas fa-arrow-up" style="color: var(--success-color);"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Thời gian luyện tập</td>
+                                            <td>4h 30m</td>
+                                            <td>+30m</td>
+                                            <td><i class="fas fa-arrow-up" style="color: var(--success-color);"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tốc độ nói</td>
+                                            <td>120 wpm</td>
+                                            <td>-5 wpm</td>
+                                            <td><i class="fas fa-arrow-down" style="color: var(--danger-color);"></i></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Practice with AI -->
+                <div class="content-card" id="practice">
+                    <h2>Luyện tập với AI</h2>
+                    
+                    <!-- Practice Mode Selection -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button class="btn btn-outline active" onclick="selectPracticeMode('ai')">
+                            <i class="fas fa-robot"></i> Luyện với AI
+                        </button>
+                        <button class="btn btn-outline" onclick="selectPracticeMode('partner')">
+                            <i class="fas fa-users"></i> Luyện với người học
+                        </button>
+                        <button class="btn btn-outline" onclick="selectPracticeMode('mentor')">
+                            <i class="fas fa-chalkboard-teacher"></i> Luyện với Mentor
+                        </button>
+                    </div>
+                    
+                    <!-- Topic Selection -->
+                    <p style="margin-bottom: 20px; color: var(--gray-color);">Chọn chủ đề bạn muốn luyện tập:</p>
+                    <div class="topic-grid">
+                        <div class="topic-card" onclick="selectTopic('work')">
+                            <i class="fas fa-briefcase topic-icon"></i>
+                            <h4>Công việc</h4>
+                        </div>
+                        <div class="topic-card" onclick="selectTopic('travel')">
+                            <i class="fas fa-plane topic-icon"></i>
+                            <h4>Du lịch</h4>
+                        </div>
+                        <div class="topic-card" onclick="selectTopic('daily')">
+                            <i class="fas fa-home topic-icon"></i>
+                            <h4>Cuộc sống hàng ngày</h4>
+                        </div>
+                        <div class="topic-card" onclick="selectTopic('healthcare')">
+                            <i class="fas fa-heartbeat topic-icon"></i>
+                            <h4>Chăm sóc sức khỏe</h4>
+                        </div>
+                        <div class="topic-card" onclick="selectTopic('business')">
+                            <i class="fas fa-chart-line topic-icon"></i>
+                            <h4>Kinh doanh</h4>
+                        </div>
+                        <div class="topic-card" onclick="selectTopic('custom')">
+                            <i class="fas fa-plus topic-icon"></i>
+                            <h4>Tùy chỉnh</h4>
+                        </div>
+                    </div>
+                    
+                    <!-- Specialization Selection -->
+                    <div style="margin-top: 25px;">
+                        <h4>Chọn chuyên ngành (tùy chọn):</h4>
+                        <div class="specialization-tags">
+                            <div class="specialization-tag" onclick="toggleSpecialization(this)">Kinh doanh</div>
+                            <div class="specialization-tag" onclick="toggleSpecialization(this)">Du lịch</div>
+                            <div class="specialization-tag" onclick="toggleSpecialization(this)">Chăm sóc sức khỏe</div>
+                            <div class="specialization-tag" onclick="toggleSpecialization(this)">Công nghệ</div>
+                            <div class="specialization-tag" onclick="toggleSpecialization(this)">Giáo dục</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Start Practice Section -->
+                    <div class="speech-recording" style="margin-top: 30px;">
+                        <h3>Bắt đầu luyện tập</h3>
+                        <button class="recording-button" onclick="toggleRecording(this)">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <p id="recording-status">Nhấn nút để bắt đầu ghi âm</p>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="startConversation()">
+                                <i class="fas fa-play"></i> Bắt đầu hội thoại với AI
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversation with Partner (hidden by default) -->
+                    <div id="partner-practice" style="display: none; margin-top: 30px;">
+                        <h3>Luyện tập với người học</h3>
+                        <div class="conversation-partner">
+                            <div class="partner-avatar">TL</div>
+                            <div>
+                                <h4>Trần Lê B</h4>
+                                <p style="color: var(--gray-color);">Trình độ: Trung cấp • Chủ đề: Công việc</p>
+                            </div>
+                            <button class="btn btn-primary" style="margin-left: auto;">Kết nối</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Feedback Section -->
+            <div class="ai-feedback">
+                <h2>Phản hồi từ AI</h2>
+                <div class="feedback-category">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h4>Phát âm</h4>
+                        <span>85/100</span>
+                    </div>
+                    <div class="feedback-meter">
+                        <div class="feedback-fill feedback-good"></div>
+                    </div>
+                    <p style="color: var(--gray-color); margin-top: 5px;">Phát âm khá tốt, cần chú ý âm cuối</p>
+                </div>
+                
+                <div class="feedback-category">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h4>Ngữ pháp</h4>
+                        <span>65/100</span>
+                    </div>
+                    <div class="feedback-meter">
+                        <div class="feedback-fill feedback-average"></div>
+                    </div>
+                    <p style="color: var(--gray-color); margin-top: 5px;">Cần cải thiện thì của động từ</p>
+                </div>
+                
+                <div class="feedback-category">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h4>Từ vựng</h4>
+                        <span>90/100</span>
+                    </div>
+                    <div class="feedback-meter">
+                        <div class="feedback-fill feedback-good"></div>
+                    </div>
+                    <p style="color: var(--gray-color); margin-top: 5px;">Sử dụng từ vựng phong phú</p>
+                </div>
+                
+                <div class="feedback-category">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h4>Ngữ điệu</h4>
+                        <span>40/100</span>
+                    </div>
+                    <div class="feedback-meter">
+                        <div class="feedback-fill feedback-poor"></div>
+                    </div>
+                    <p style="color: var(--gray-color); margin-top: 5px;">Cần luyện tập ngữ điệu nhiều hơn</p>
+                </div>
+            </div>
+            
+            <!-- Challenges and Leaderboard -->
+            <div class="dashboard-content" style="margin-top: 30px;">
+                <div class="content-card">
+                    <h2>Thử thách nói</h2>
+                    <div class="challenge-grid">
+                        <div class="challenge-card">
+                            <div class="challenge-badge">
+                                <i class="fas fa-trophy" style="color: var(--warning-color);"></i>
+                            </div>
+                            <h4>Thử thách 7 ngày</h4>
+                            <p>Luyện tập liên tiếp 7 ngày</p>
+                            <div style="margin-top: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px;">
+                                        <div style="width: 85%; height: 100%; background: var(--success-color); border-radius: 4px;"></div>
+                                    </div>
+                                    <span>85%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <div class="challenge-badge">
+                                <i class="fas fa-star" style="color: var(--accent-color);"></i>
+                            </div>
+                            <h4>Chinh phục 50 chủ đề</h4>
+                            <p>Hoàn thành 50 chủ đề khác nhau</p>
+                            <div style="margin-top: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px;">
+                                        <div style="width: 60%; height: 100%; background: var(--primary-color); border-radius: 4px;"></div>
+                                    </div>
+                                    <span>60%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <div class="challenge-badge">
+                                <i class="fas fa-crown" style="color: var(--primary-color);"></i>
+                            </div>
+                            <h4>Master Pronunciation</h4>
+                            <p>Đạt 90% độ chính xác phát âm</p>
+                            <div style="margin-top: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px;">
+                                        <div style="width: 78%; height: 100%; background: var(--success-color); border-radius: 4px;"></div>
+                                    </div>
+                                    <span>78%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-card">
+                    <h2>Bảng xếp hạng</h2>
+                    <div class="leaderboard">
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank">1</div>
+                            <div class="partner-avatar" style="width: 40px; height: 40px;">TL</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 5px;">Trần Lê B</h4>
+                                <p style="color: var(--gray-color); font-size: 0.9rem;">Điểm: 2450</p>
+                            </div>
+                            <i class="fas fa-trophy" style="color: var(--warning-color);"></i>
+                        </div>
+                        
+                        <div class="leaderboard-item" style="background: #f0f4ff;">
+                            <div class="leaderboard-rank">2</div>
+                            <div class="partner-avatar" style="width: 40px; height: 40px;">NV</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 5px;">Nguyễn Văn A</h4>
+                                <p style="color: var(--gray-color); font-size: 0.9rem;">Điểm: 1980</p>
+                            </div>
+                            <i class="fas fa-medal" style="color: var(--gray-color);"></i>
+                        </div>
+                        
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank">3</div>
+                            <div class="partner-avatar" style="width: 40px; height: 40px;">PT</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 5px;">Phạm Thị C</h4>
+                                <p style="color: var(--gray-color); font-size: 0.9rem;">Điểm: 1850</p>
+                            </div>
+                            <i class="fas fa-medal" style="color: #cd7f32;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Section -->
+            <div class="profile-section" id="profile">
+                <div class="profile-card">
+                    <h3>Hồ sơ học tập</h3>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div class="user-avatar" style="width: 80px; height: 80px; margin: 0 auto 15px;">NV</div>
+                        <h3>Nguyễn Văn A</h3>
+                        <p style="color: var(--gray-color);">Học viên Premium</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>Thông tin cơ bản</h4>
+                        <p><strong>Trình độ:</strong> Trung cấp</p>
+                        <p><strong>Mục tiêu:</strong> Giao tiếp công việc</p>
+                        <p><strong>Ngày tham gia:</strong> 06/01/2026</P>
+                    </div>
+                </div>
+                
+                <div class="profile-card">
+                    <h3>Thiết lập học tập</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4>Mục tiêu hàng ngày</h4>
+                        <div class="goal-input">
+                            <input type="number" id="daily-goal" value="30" min="10" max="120">
+                            <span>phút/ngày</span>
+                            <button class="btn btn-primary" onclick="updateGoal()">Cập nhật</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4>Tùy chọn thông báo</h4>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" checked>
+                                <span>Nhắc nhở luyện tập hàng ngày</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" checked>
+                                <span>Báo cáo tiến độ hàng tuần</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox">
+                                <span>Thông báo thử thách mới</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4>Lộ trình học tập</h4>
+                        <div style="margin-top: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--success-color);"></div>
+                                <span>Phát âm cơ bản (Đã hoàn thành)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--primary-color);"></div>
+                                <span>Giao tiếp công việc (Đang học)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; border-radius: 50%; background: #e5e7eb;"></div>
+                                <span>Thuyết trình nâng cao (Sắp tới)</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="dashboard-content">
-            <div class="content-card">
-                <h2>Bài học gần đây</h2>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Bài học</th>
-                                <th>Chủ đề</th>
-                                <th>Điểm số</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Bài 15: Giao tiếp tại sân bay</td>
-                                <td>Du lịch</td>
-                                <td>92/100</td>
-                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
-                            </tr>
-                            <tr>
-                                <td>Bài 14: Phỏng vấn xin việc</td>
-                                <td>Công việc</td>
-                                <td>85/100</td>
-                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
-                            </tr>
-                            <tr>
-                                <td>Bài 13: Đặt món tại nhà hàng</td>
-                                <td>Ẩm thực</td>
-                                <td>88/100</td>
-                                <td><span class="status-badge status-active">Đã hoàn thành</span></td>
-                            </tr>
-                            <tr>
-                                <td>Bài 16: Thuyết trình công việc</td>
-                                <td>Công việc</td>
-                                <td>-</td>
-                                <td><span class="status-badge status-pending">Đang thực hành</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Subscription Plans Modal (Hidden by default) -->
+        <div id="subscription-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 40px; border-radius: var(--radius); max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2>Chọn gói dịch vụ</h2>
+                    <button onclick="closeSubscriptionModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
                 </div>
-            </div>
-            
-            <div class="content-card">
-                <h2>Luyện tập với AI</h2>
-                <div id="practice">
-                    <p style="margin-bottom: 20px; color: var(--gray-color);">Chọn chủ đề bạn muốn luyện tập hôm nay:</p>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
-                            <i class="fas fa-briefcase" style="margin-right: 10px;"></i> Công việc
-                        </button>
-                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
-                            <i class="fas fa-plane" style="margin-right: 10px;"></i> Du lịch
-                        </button>
-                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
-                            <i class="fas fa-utensils" style="margin-right: 10px;"></i> Ẩm thực
-                        </button>
-                        <button class="btn btn-outline" style="text-align: left; justify-content: flex-start;">
-                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i> Mua sắm
-                        </button>
+                
+                <div class="subscription-plans">
+                    <div class="plan-card">
+                        <h3>Gói Cơ bản</h3>
+                        <p>Luyện tập với AI</p>
+                        <div class="plan-price">149.000đ<span style="font-size: 1rem; color: var(--gray-color);">/tháng</span></div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Luyện tập với AI không giới hạn</li>
+                            <li><i class="fas fa-check"></i> 20 chủ đề cơ bản</li>
+                            <li><i class="fas fa-check"></i> Phản hồi phát âm cơ bản</li>
+                            <li><i class="fas fa-times" style="color: var(--gray-color);"></i> <span style="color: var(--gray-color);">Không có Mentor</span></li>
+                            <li><i class="fas fa-times" style="color: var(--gray-color);"></i> <span style="color: var(--gray-color);">Không luyện với người học</span></li>
+                        </ul>
+                        <button class="btn btn-outline" style="width: 100%;" onclick="selectPlan('basic')">Chọn gói</button>
                     </div>
                     
-                    <div style="background-color: #f0f4ff; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
-                        <h3 style="margin-bottom: 10px;">Chủ đề đề xuất: Giao tiếp tại khách sạn</h3>
-                        <p style="color: var(--gray-color); margin-bottom: 15px;">Thực hành các tình huống check-in, yêu cầu dịch vụ và giải quyết vấn đề tại khách sạn.</p>
-                        <button class="btn btn-primary">
-                            <i class="fas fa-play"></i> Bắt đầu bài học
-                        </button>
+                    <div class="plan-card recommended">
+                        <div class="plan-badge">Đề xuất</div>
+                        <h3>Gói Premium</h3>
+                        <p>Luyện tập với AI + Mentor</p>
+                        <div class="plan-price">399.000đ<span style="font-size: 1rem; color: var(--gray-color);">/tháng</span></div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Mọi tính năng gói Cơ bản</li>
+                            <li><i class="fas fa-check"></i> 4 buổi với Mentor/tháng</li>
+                            <li><i class="fas fa-check"></i> 50+ chủ đề chuyên sâu</li>
+                            <li><i class="fas fa-check"></i> Luyện tập với người học</li>
+                            <li><i class="fas fa-check"></i> Báo cáo chi tiết hàng tuần</li>
+                        </ul>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="selectPlan('premium')">Chọn gói</button>
                     </div>
                     
-                    <div style="text-align: center;">
-                        <a href="#" class="btn btn-accent">
-                            <i class="fas fa-microphone-alt"></i> Bắt đầu hội thoại với AI ngay
-                        </a>
+                    <div class="plan-card">
+                        <h3>Gói Pro</h3>
+                        <p>Toàn quyền truy cập</p>
+                        <div class="plan-price">699.000đ<span style="font-size: 1rem; color: var(--gray-color);">/tháng</span></div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Mọi tính năng gói Premium</li>
+                            <li><i class="fas fa-check"></i> 8 buổi với Mentor/tháng</li>
+                            <li><i class="fas fa-check"></i> 100+ chủ đề chuyên ngành</li>
+                            <li><i class="fas fa-check"></i> Lộ trình học cá nhân hóa</li>
+                            <li><i class="fas fa-check"></i> Hỗ trợ ưu tiên 24/7</li>
+                        </ul>
+                        <button class="btn btn-outline" style="width: 100%;" onclick="selectPlan('pro')">Chọn gói</button>
                     </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="color: var(--gray-color);">Có thể nâng cấp hoặc hạ cấp gói bất kỳ lúc nào</p>
                 </div>
             </div>
         </div>
@@ -173,7 +941,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>AI English Speaking</h3>
+                    <h3>AESP</h3>
                     <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
                 </div>
                 
@@ -187,9 +955,196 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
+                <p>&copy; 2026 AESP. Tất cả các quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
+
+    <script>
+        // Check if user has completed assessment
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasCompletedAssessment = localStorage.getItem('assessment_completed');
+            
+            if (hasCompletedAssessment === 'true') {
+                document.getElementById('assessment-section').style.display = 'none';
+                document.getElementById('main-dashboard').style.display = 'block';
+                generateHeatmap();
+                initializeProgressChart();
+            } else {
+                document.getElementById('assessment-section').style.display = 'block';
+                document.getElementById('main-dashboard').style.display = 'none';
+            }
+        });
+        
+        function selectOption(element) {
+            // Remove selected class from all options in the same question
+            const parent = element.parentElement;
+            const options = parent.querySelectorAll('.assessment-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+        }
+        
+        function completeAssessment() {
+            // Save assessment completion status
+            localStorage.setItem('assessment_completed', 'true');
+            
+            // Hide assessment section, show main dashboard
+            document.getElementById('assessment-section').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'block';
+            
+            // Initialize components
+            generateHeatmap();
+            initializeProgressChart();
+            
+            alert('Đánh giá đã hoàn thành! Lộ trình học tập đã được cá nhân hóa cho bạn.');
+        }
+        
+        function generateHeatmap() {
+            const heatmap = document.querySelector('.heatmap');
+            heatmap.innerHTML = '';
+            
+            // Generate 90 days of heatmap (approx 3 months)
+            for (let i = 0; i < 90; i++) {
+                const day = document.createElement('div');
+                day.className = 'heatmap-day';
+                
+                // Random activity level for demo
+                const activityLevel = Math.floor(Math.random() * 5);
+                day.classList.add(`heatmap-${activityLevel}`);
+                
+                // Add tooltip with date
+                const date = new Date();
+                date.setDate(date.getDate() - (89 - i));
+                day.title = `${date.toLocaleDateString('vi-VN')}: ${activityLevel === 0 ? 'Không có hoạt động' : 'Có hoạt động'}`;
+                
+                heatmap.appendChild(day);
+            }
+        }
+        
+        function initializeProgressChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            // Mock data for progress chart
+            const data = {
+                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5', 'Tuần 6', 'Tuần 7'],
+                datasets: [{
+                    label: 'Độ chính xác phát âm',
+                    data: [65, 68, 72, 75, 78, 80, 78],
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Thời gian luyện tập (giờ)',
+                    data: [2.5, 3, 3.5, 4, 4.5, 5, 4.5],
+                    borderColor: '#4cc9f0',
+                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function selectPracticeMode(mode) {
+            // Update button states
+            document.querySelectorAll('#practice .btn-outline').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide relevant sections
+            if (mode === 'partner') {
+                document.getElementById('partner-practice').style.display = 'block';
+            } else {
+                document.getElementById('partner-practice').style.display = 'none';
+            }
+        }
+        
+        function selectTopic(topic) {
+            alert(`Đã chọn chủ đề: ${topic}`);
+            // In real implementation, this would load relevant content
+        }
+        
+        function toggleSpecialization(element) {
+            element.classList.toggle('selected');
+        }
+        
+        function toggleRecording(button) {
+            button.classList.toggle('recording');
+            const status = document.getElementById('recording-status');
+            
+            if (button.classList.contains('recording')) {
+                status.textContent = 'Đang ghi âm...';
+                // In real implementation, start recording here
+            } else {
+                status.textContent = 'Đã dừng ghi âm. Đang phân tích...';
+                // Simulate analysis
+                setTimeout(() => {
+                    status.textContent = 'Phân tích hoàn tất! Xem phản hồi bên dưới.';
+                }, 2000);
+            }
+        }
+        
+        function startConversation() {
+            alert('Bắt đầu hội thoại với AI! (Trong phiên bản thực tế, đây sẽ là giao diện trò chuyện thời gian thực)');
+        }
+        
+        function updateGoal() {
+            const goal = document.getElementById('daily-goal').value;
+            alert(`Đã cập nhật mục tiêu hàng ngày: ${goal} phút`);
+        }
+        
+        function showSubscriptionPlans() {
+            document.getElementById('subscription-modal').style.display = 'flex';
+        }
+        
+        function closeSubscriptionModal() {
+            document.getElementById('subscription-modal').style.display = 'none';
+        }
+        
+        function selectPlan(plan) {
+            alert(`Đã chọn gói ${plan.toUpperCase()}. Trong phiên bản thực tế, đây sẽ chuyển đến trang thanh toán.`);
+            closeSubscriptionModal();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
