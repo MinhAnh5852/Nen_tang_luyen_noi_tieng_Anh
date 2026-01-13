@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Học viên</title>
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/users.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <div class="page-header">
+            <h1 class="page-title">Quản lý Học viên (Learners)</h1>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Thêm mới
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Tìm theo tên hoặc email..." class="form-input input-search">
+            </div>
+            
+            <select class="form-select">
+                <option>Tất cả gói</option>
+                <option>Free</option>
+                <option>Premium AI</option>
+                <option>Mentor Support</option>
+            </select>
+            
+            <button class="btn btn-dark">
+                Áp dụng
+            </button>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-id">ID</th>
+                        <th>Thông tin học viên</th>
+                        <th>Level</th>
+                        <th>Gói dịch vụ</th>
+                        <th>Trạng thái</th>
+                        <th class="text-right">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-light"></td>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar-circle avatar-orange"></div>
+                                <div class="user-text">
+                                    <h4></h4>
+                                    <span></span> 
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-yellow-soft"></span></td>
+                        <td><span class="badge badge-gray-border"></span></td>
+                        <td>
+                            <span class="status-badge status-blocked">
+                                <span class="dot dot-red"></span> 
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <button class="action-btn btn-edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="action-btn btn-delete"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

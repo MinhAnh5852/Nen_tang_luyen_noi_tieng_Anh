@@ -1,0 +1,226 @@
+/* frontend/admin/css/users.css */
+
+/* =========================================
+   1. LAYOUT & HEADER (Giống Mentor)
+   ========================================= */
+
+/* Container đệm cho trang nội dung */
+.page-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* =========================================
+   2. COMPONENTS (Buttons & Filter - Giống Mentor)
+   ========================================= */
+
+/* General Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+}
+
+.btn-dark {
+    background-color: #1e293b;
+    color: white;
+}
+
+.btn-dark:hover {
+    background-color: #0f172a;
+}
+
+/* Filter Bar */
+.filter-bar {
+    background: var(--white);
+    padding: 16px;
+    border-radius: 12px; /* Đồng bộ radius 12px giống Mentor */
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px; /* Đồng bộ gap 12px */
+    margin-bottom: 24px;
+}
+
+.form-input, .form-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    color: var(--text-main);
+    min-width: 200px;
+    font-size: 13px;
+    background-color: white;
+}
+
+.form-input:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-wrapper { position: relative; }
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.input-search { padding-left: 32px; }
+
+/* =========================================
+   3. TABLE STYLES (Đặc thù trang Users)
+   ========================================= */
+
+.table-card {
+    background: var(--white);
+    border-radius: 12px; /* Bo góc 12px giống Card bên Mentor */
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    white-space: nowrap;
+}
+
+thead { background-color: #f8fafc; }
+
+th {
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-light);
+    border-bottom: 1px solid var(--border-color);
+}
+
+td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+tr:hover td { background-color: #f8fafc; }
+tr:last-child td { border-bottom: none; }
+
+/* Helper classes cho Table */
+.text-right { text-align: right; }
+.text-light { color: var(--text-light); }
+.col-id { width: 80px; }
+
+/* =========================================
+   4. USER SPECIFIC COMPONENTS (Avatars & Badges)
+   ========================================= */
+
+/* --- User Info & Avatar --- */
+.user-info { display: flex; align-items: center; gap: 12px; }
+
+.avatar-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.avatar-blue { background-color: #eff6ff; color: var(--primary); }
+.avatar-orange { background-color: #fff7ed; color: #ea580c; }
+
+.user-text h4 { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+.user-text span { font-size: 12px; color: var(--text-light); }
+
+/* --- Badges --- */
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-green-soft { background-color: #dcfce7; color: #15803d; }
+.badge-yellow-soft { background-color: #fef9c3; color: #a16207; }
+
+.badge-purple-border { 
+    background-color: #faf5ff; 
+    color: #7e22ce; 
+    border: 1px solid #f3e8ff; 
+}
+.badge-gray-border { 
+    background-color: #f9fafb; 
+    color: #374151; 
+    border: 1px solid #e5e7eb; 
+}
+
+/* --- Status Badge --- */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600;
+}
+
+.status-active { background-color: #f0fdf4; color: #16a34a; }
+.status-blocked { background-color: #fef2f2; color: #dc2626; }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-green { background-color: #16a34a; }
+.dot-red { background-color: #dc2626; }
+
+/* --- Action Buttons --- */
+.action-btn {
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
+    color: var(--text-light);
+    display: inline-flex; /* Canh giữa icon */
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-edit:hover { color: var(--primary); background-color: #eff6ff; }
+.btn-delete:hover { color: var(--danger); background-color: #fef2f2; }
