@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo hệ thống</title>
+    
+    <link rel="stylesheet" href="css/reports.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 style="font-size: 24px; font-weight: 700; color: var(--text-main);">Báo cáo Hệ thống</h1>
+        <button class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-download"></i> Xuất PDF
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        
+        <div class="card">
+            <div class="stat-flex">
+                <div style="width: 100%">
+                    <div class="stat-title" style="display: flex; justify-content: space-between;">
+                        RabbitMQ Queue
+                        <div class="pulse-dot"></div>
+                    </div>
+                    <!-- nhúng dữ liệu từ mqrabbit  -->
+                    <div class="stat-value"></div>
+                    <div class="stat-trend text-gray">Tin nhắn đang chờ</div>
+                    
+                    <div class="progress-track">
+                        <!-- lấy dữ liệu tin nhắn đang chờ  -->
+                        <div class="progress-fill fill-orange" style="width: 9%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-flex">
+                 <div style="width: 100%">
+                    <div class="stat-title" style="display: flex; justify-content: space-between;">
+                        API Gateway
+                        <span class="badge badge-gray">NGINX</span>
+                    </div>
+                    <div class="stat-value"></div>
+                    <div class="stat-trend text-gray">Requests / phút</div>
+
+                    <div class="progress-track">
+                        <!-- tương tự mq  -->
+                        <div class="progress-fill fill-blue" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-flex">
+                 <div style="width: 100%">
+                    <div class="stat-title" style="display: flex; justify-content: space-between;">
+                        Docker Memory
+                        <span style="text-transform: none;">Total: 4GB</span>
+                    </div>
+                    <!-- dữ liệu hệ thống  -->
+                    <div class="stat-value"></div>
+                    <div class="stat-trend text-gray">Đang sử dụng</div>
+
+                    <div class="progress-track">
+                        <div class="progress-fill fill-red" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Biểu đồ tăng trưởng (User Growth)</h3>
+            <select class="form-input">
+                <option></option>
+                <option>Năm nay</option>
+            </select>
+        </div>
+        <!-- nhúng biểu đồ -->
+        <div class="chart-area">
+            
+        </div>
+    </div>
+</body>
+</html>
