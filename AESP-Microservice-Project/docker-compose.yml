@@ -128,6 +128,10 @@ services:
     environment:
       - USER_SERVICE_URL=http://user-service:5000
       - PAYMENT_SERVICE_URL=http://payment-service:5002
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASS=admin123
     networks:
       - app-network
 
@@ -143,7 +147,26 @@ services:
       - subscription-service
     networks:
       - app-network
-
+  # 1. Frontend (Giao diện Admin)
+  frontend:
+    build: ./frontend
+    container_name: app-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+  # --- SERVICE RABBITMQ  ---
+  rabbitmq:
+    image: rabbitmq:3-management-alpine # Bản có sẵn giao diện quản lý web
+    container_name: app-rabbitmq
+    ports:
+      - "5672:5672"   
+      - "15672:15672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin123"
+    networks:
+      - app-network
 volumes:
   user_db_data:
   subscription_db_data:
