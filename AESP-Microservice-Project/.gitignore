@@ -1,3 +1,11 @@
+# secrets / env
 .env
-__pycache__/
-*.py[cod]
+**/.env
+
+# local runtime / db / cache
+instance/
+**/instance/
+
+# local tokens
+*_token.txt
+mentor_token.txt

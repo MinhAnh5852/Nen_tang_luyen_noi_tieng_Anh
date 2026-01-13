@@ -1,0 +1,139 @@
+/* frontend/admin/css/reports.css */
+
+/* =========================================
+   1. DASHBOARD CORE STYLES (COPY Y NGUYÊN)
+   ========================================= */
+
+/* --- VARIABLES --- */
+:root {
+    --primary: #2563eb;
+    --text-main: #334155;
+    --text-light: #94a3b8;
+    --border-color: #e2e8f0;
+    --white: #ffffff;
+    --bg-body: #f8fafc;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444; 
+}
+
+/* --- RESET --- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); font-size: 14px; padding: 32px; }
+
+/* --- LAYOUT & CARDS --- */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.card { background: var(--white); border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+
+.stat-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); line-height: 1; }
+.stat-trend { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+.text-gray { color: var(--text-light); }
+
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.card-header h3 { font-weight: 700; color: var(--text-main); font-size: 1.17em; }
+
+/* --- COMPONENTS --- */
+.badge { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.badge-gray { background: #f1f5f9; color: #475569; }
+
+.form-input { padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; }
+.form-input:focus { border-color: var(--primary); }
+.btn-primary { background: var(--primary); color: var(--white); border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+.btn-primary:hover { background: #1d4ed8; }
+
+
+/* =========================================
+   2. REPORT SPECIFIC STYLES (PHẦN THÊM MỚI)
+   ========================================= */
+
+/* --- Progress Bars (Thanh tiến trình trong Card) --- */
+.progress-track {
+    width: 100%;
+    height: 6px;
+    background-color: #f1f5f9;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 16px; /* Cách phần text một chút */
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+}
+
+.fill-orange { background-color: var(--warning); }
+.fill-blue { background-color: var(--primary); }
+.fill-red { background-color: var(--danger); }
+
+/* --- Pulse Animation (RabbitMQ) --- */
+.pulse-dot {
+    width: 10px; height: 10px;
+    background-color: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* --- Chart Styles (Biểu đồ cột) --- */
+.chart-area {
+    height: 250px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-top: 10px;
+}
+
+.chart-column {
+    width: 100%;
+    height: 100%;
+    background-color: #f8fafc; /* Màu nền cột nhạt */
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.chart-column:hover { background-color: #eff6ff; }
+
+.chart-bar-fill {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    transition: height 0.7s ease;
+    position: relative;
+}
+
+/* Màu gradient xanh dương */
+.fill-level-1 { background-color: #93c5fd; }
+.fill-level-2 { background-color: #60a5fa; }
+.fill-level-3 { background-color: #3b82f6; }
+.fill-level-4 { background-color: #2563eb; }
+
+/* Tooltip & Label */
+.chart-tooltip {
+    position: absolute;
+    top: -30px; left: 50%; transform: translateX(-50%);
+    background-color: #1e293b; color: white;
+    padding: 4px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+}
+.chart-column:hover .chart-tooltip { opacity: 1; top: -35px; }
+
+.chart-label {
+    position: absolute; bottom: -25px; width: 100%;
+    text-align: center; font-size: 11px; color: var(--text-light); font-weight: 500;
+}

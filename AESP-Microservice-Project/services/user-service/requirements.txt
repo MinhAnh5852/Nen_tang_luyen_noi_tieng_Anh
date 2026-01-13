@@ -2,3 +2,6 @@ flask
 flask_sqlalchemy
 psycopg2-binary
 PyJWT
+pytest
+flask-limiter
+python-dotenv
