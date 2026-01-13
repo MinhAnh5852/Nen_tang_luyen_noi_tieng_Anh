@@ -22,7 +22,7 @@ def verify():
         role = payload.get("role")
 
         # role có thể đang là enum hoặc string
-        role_str = getattr(role, "value", None) or (str(role) if role is not None else None)
+        role_str = user.role_str
 
         # Nếu trước đây role bị dạng "UserRole.LEARNER" thì normalize về "learner"
         if isinstance(role_str, str) and "." in role_str:
@@ -42,3 +42,24 @@ def verify():
         return jsonify({"valid": False, "error": "Invalid token"}), 401
     except Exception as e:
         return jsonify({"valid": False, "error": "Internal error", "detail": str(e)}), 500
+
+@internal_bp.route("/internal/learners", methods=["GET"])
+def get_learners():
+    # Only mentors can access
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return jsonify({"error": "Missing token"}), 401
+
+    token = auth.split(" ", 1)[1]
+    secret = current_app.config.get("JWT_SECRET_KEY")
+    try:
+        payload = jwt.decode(token, secret, algorithms=["HS256"])
+        if payload.get("role") != "mentor":
+            return jsonify({"error": "Unauthorized"}), 403
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
+    from models.user import User
+    learners = User.query.filter_by(role="LEARNER").all()
+    result = [{"id": u.id, "email": u.email, "status": u.status.value} for u in learners]
+    return jsonify(result)

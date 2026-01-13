@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="stats-grid">
+        <div class="card">
+            <div class="stat-flex">
+                <div>
+                    <p class="stat-title">Tổng Học viên</p>
+                    <!-- // tổng học viên -->
+                    <h3 class="stat-value"></h3>
+                    <!-- tỉ lệ tăng % -->
+                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i></p>
+                </div>
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-flex">
+                <div>
+                    <p class="stat-title">Doanh thu</p>
+                    <!-- doanh thu -->
+                    <h3 class="stat-value"> <span class="stat-unit">VND</span></h3>
+                    <!-- tỉ lệ tăng % -->
+                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i></p>
+                </div>
+                <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-flex">
+                <div>
+                    <p class="stat-title">AI Sessions</p>
+                    <!-- hoạt động AI -->
+                    <h3 class="stat-value"></h3>
+                    <p class="stat-trend text-gray">Luyện nói với AI</p>
+                </div>
+                <div class="stat-icon icon-purple"><i class="fa-solid fa-microchip"></i></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-flex">
+                <div>
+                    <p class="stat-title">Cố vấn hoạt động</p>
+                    <!-- số cố vấn hoạt động -->
+                    <h3 class="stat-value"></h3>
+                    <!-- số cố vấn đang onl -->
+                    <p class="stat-trend text-orange">Đang online: </p>
+                </div>
+                <div class="stat-icon icon-orange"><i class="fa-solid fa-chalkboard-user"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-section">
+        
+        <div class="card no-padding">
+            <div class="table-header">
+                <h3 class="table-title">Học viên mới đăng ký</h3>
+                <div class="filter-group">
+                    <input type="text" placeholder="Tìm kiếm..." class="form-input">
+                    <button class="btn-primary"><i class="fa-solid fa-filter"></i> Lọc</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Học viên</th>
+                            <th>Gói</th>
+                            <th>Level</th>
+                            <th>Trạng thái</th>
+                            <th class="text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-recent-transactions">
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <!-- hình ảnh tên học viên  -->
+                                    <div class="user-avatar-placeholder"></div>
+                                    <!-- học viên đăng kí bao gồm: tên gói, level, trạng thái, hành động -->
+                                    <div>
+                                        <div class="user-name"></div>
+                                        <div class="user-email"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- loại gói -->
+                            <td><span class="badge badge-purple"></span></td>
+                            <!-- level bậc học -->
+                            <td></td>
+                            <!-- trạng thái gói -->
+                            <td><span class="badge badge-green"></span></td>
+                            <td class="text-right">
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                                <button class="action-btn btn-delete"><i class="fa-solid fa-ban"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Cố vấn nổi bật</h3>
+                    <a href="#" class="link-sm">Xem tất cả</a>
+                </div>
+                <!-- các cố vấn nổi bật -->
+                <div class="mentor-item">
+                    <div class="mentor-info">
+                        <img src="https://ui-avatars.com/api/?name=David+S&background=random" class="mentor-avatar" alt="Avatar">
+                        <div>
+                            <div class="mentor-name"></div>
+                            <div class="mentor-subject"></div>
+                        </div>
+                    </div>
+                    <!-- số đánh giá -->
+                    <div class="mentor-rating"><i class="fa-solid fa-star"></i> </div>
+                </div>
+                
+                </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

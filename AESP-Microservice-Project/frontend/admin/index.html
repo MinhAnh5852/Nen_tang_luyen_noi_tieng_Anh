@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESP Admin System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-robot brand-icon"></i>
+                <span>AESP Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="dashboard.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-label">Quản lý User</li>
+                    <li>
+                        <a href="users.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-users"></i> Học viên (Learners)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="quanlimentor.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-chalkboard-user"></i> Cố vấn (Mentors)
+                        </a>
+                    </li>
+                    <li class="nav-label">Kinh doanh</li>
+                    <li>
+                        <a href="reports.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-box-open"></i> Gói dịch vụ
+                        </a>
+                    </li>
+                </ul> 
+            </nav>
+            <div class="sidebar-footer">
+                <div class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-wrapper">
+            
+            <header class="top-nav">
+                <div class="header-left">
+                    <i class="fa-solid fa-bars menu-toggle"></i>
+                    <span>English Speaking Practice Platform Supported by AI</span>
+                </div>
+                <!-- // để liên kết đến RabbitMQ -->
+                <div class="header-right">
+                    <div class="badge badge-green">
+                        <span class="status-dot blink"></span>
+                        RabbitMQ Connected
+                    </div>
+                    <!-- xem thông báo  -->
+                    <div class="notification-box">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="notification-count"></span>
+                    </div>
+                    <!-- tên tk đã đăng nhập và role-->
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <p class="user-name"></p>
+                            <p class="user-role"></p>
+                        </div>
+                        <div class="user-avatar"></div>
+                    </div>
+                </div>
+            </header>
+
+            <iframe 
+                name="content-frame" 
+                src="dashboard.html" 
+                class="full-iframe"
+                title="Main Content">
+            </iframe>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

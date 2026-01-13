@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Cố vấn</title>
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mentor.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <div class="page-header">
+            <h1 class="page-title">Đội ngũ Cố vấn (Mentors)</h1>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Thêm Cố vấn
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Tìm theo tên, kỹ năng..." class="form-input input-search">
+            </div>
+            
+            <select class="form-select">
+                <option>Tất cả chuyên môn</option>
+                <option>IELTS</option>
+                <option>TOEIC</option>
+                <option>Giao tiếp</option>
+            </select>
+
+            <select class="form-select">
+                <option>Tất cả trạng thái</option>
+                <option>Đang hoạt động</option>
+                <option>Chờ duyệt</option>
+            </select>
+        </div>
+
+        <div class="mentors-grid">
+            <!-- mentor  -->
+            <div class="mentor-card">
+                <div class="mentor-avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=David+Smith&background=random" class="mentor-avatar" alt="Avatar">
+                    <span class="status-dot status-online"></span>
+                </div>
+                <!-- tên mentor  -->
+                <h3 class="mentor-name"></h3>
+                <!-- skill  -->
+                <p class="mentor-skill"></p>
+                
+                <div class="mentor-rating">
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                    <!-- số sao đánh giá  -->
+                    <span class="rating-count"></span>
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn btn-soft-gray">Hồ sơ</button>
+                    <button class="btn btn-soft-blue">Lịch dạy</button>
+                </div>
+            </div>
+
+            <div class="mentor-card">
+                <div class="mentor-avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=Sarah+Lee&background=random" class="mentor-avatar" alt="Avatar">
+                    <span class="status-dot status-offline"></span>
+                </div>
+                
+                <h3 class="mentor-name"></h3>
+                <p class="mentor-skill"></p>
+                
+                <div class="mentor-rating">
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <span class="rating-count"></span>
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn btn-soft-gray">Hồ sơ</button>
+                    <button class="btn btn-soft-blue">Lịch dạy</button>
+                </div>
+            </div>
+            
+            <div class="mentor-card pending">
+                <div class="mentor-avatar-wrapper">
+                    <div class="mentor-avatar avatar-placeholder">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+                
+                <h3 class="mentor-name"></h3>
+                <p class="mentor-skill"></p>
+                
+                <div class="badge-pending">
+                    <i class="fa-regular fa-clock"></i> Chờ phê duyệt
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn btn-dark">
+                        <i class="fa-solid fa-check"></i> Duyệt hồ sơ
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

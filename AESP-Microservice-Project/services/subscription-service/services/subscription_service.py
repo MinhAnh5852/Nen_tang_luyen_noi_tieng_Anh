@@ -48,6 +48,8 @@ class SubscriptionService:
         subscription = Subscription.query.get(subscription_id)
         if not subscription:
             return None
+        if subscription.end_date < datetime.utcnow():
+            raise ValueError("Subscription expired")
         subscription.status = "ACTIVE"
         db.session.commit()
         return subscription

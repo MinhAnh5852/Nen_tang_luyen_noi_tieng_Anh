@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_limiter import Limiter
 
 from services.user_service import AuthService
 from models.user import User

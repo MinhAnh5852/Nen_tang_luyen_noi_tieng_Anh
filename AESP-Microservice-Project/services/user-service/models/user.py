@@ -9,3 +9,11 @@ class User(db.Model):
     password=db.Column(db.String,nullable=False)
     role=db.Column(db.Enum(UserRole))
     status=db.Column(db.Enum(AccountStatus),default=AccountStatus.ACTIVE)
+
+    @property
+    def role_str(self):
+        if self.role:
+            if hasattr(self.role, 'value'):
+                return self.role.value.lower()
+            return str(self.role).lower()
+        return None

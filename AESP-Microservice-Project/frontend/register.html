@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - AI English Speaking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-robot logo-icon"></i>
+                <span class="logo-text">AI English Speaking</span>
+            </a>
+            
+            <div class="auth-buttons">
+                <a href="index.html" class="btn btn-outline">Trở về trang chủ</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Đăng ký tài khoản</h2>
+                    <p>Tạo tài khoản để bắt đầu hành trình luyện nói tiếng Anh với AI</p>
+                </div>
+                
+                <form class="auth-form" id="register-form">
+                    <div class="role-selection">
+                        <div class="role-option" onclick="selectRole('learner')">
+                            <i class="fas fa-user-graduate"></i>
+                            <h4>Học viên</h4>
+                            <p>Luyện nói tiếng Anh với AI</p>
+                        </div>
+                        
+                        <div class="role-option" onclick="selectRole('mentor')">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <h4>Mentor</h4>
+                            <p>Hướng dẫn và đánh giá học viên</p>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="user-role" name="role" value="learner">
+                    
+                    <div class="form-group">
+                        <label for="register-name">Họ và tên</label>
+                        <input type="text" id="register-name" name="name" placeholder="Nhập họ và tên của bạn" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" placeholder="Nhập địa chỉ email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Mật khẩu</label>
+                        <input type="password" id="register-password" name="password" placeholder="Tạo mật khẩu (ít nhất 8 ký tự)" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">Xác nhận mật khẩu</label>
+                        <input type="password" id="register-confirm-password" name="confirm-password" placeholder="Nhập lại mật khẩu" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-level">Trình độ tiếng Anh</label>
+                        <select id="register-level" name="level">
+                            <option value="beginner">Mới bắt đầu</option>
+                            <option value="elementary">Sơ cấp</option>
+                            <option value="intermediate" selected>Trung cấp</option>
+                            <option value="upper-intermediate">Trung cấp nâng cao</option>
+                            <option value="advanced">Nâng cao</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Đăng ký tài khoản</button>
+                    
+                    <div class="divider">
+                        <span>Hoặc đăng ký với</span>
+                    </div>
+                    
+                    <div class="social-login">
+                        <button type="button" class="social-btn">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        
+                        <button type="button" class="social-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </button>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <p>Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI English Speaking</h3>
+                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Liên hệ</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Đường ABC, Quận 1, TP.HCM</p>
+                    <p><i class="fas fa-phone"></i> (028) 1234 5678</p>
+                    <p><i class="fas fa-envelope"></i> support@aienglish.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI English Speaking Platform. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Chọn vai trò người dùng trong đăng ký
+        function selectRole(role) {
+            // Xóa lớp selected khỏi tất cả các tùy chọn
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Thêm lớp selected vào tùy chọn được chọn
+            const selectedOption = document.querySelector(`.role-option:nth-child(${role === 'learner' ? 1 : 2})`);
+            selectedOption.classList.add('selected');
+            
+            // Cập nhật giá trị ẩn
+            document.getElementById('user-role').value = role;
+        }
+        
+        // Xử lý đăng ký
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const role = document.getElementById('user-role').value;
+            const level = document.getElementById('register-level').value;
+            
+            // Kiểm tra mật khẩu khớp
+            if (password !== confirmPassword) {
+                alert('Mật khẩu xác nhận không khớp!');
+                return;
+            }
+            
+            // Kiểm tra độ dài mật khẩu
+            if (password.length < 8) {
+                alert('Mật khẩu phải có ít nhất 8 ký tự!');
+                return;
+            }
+            
+            // Trong thực tế, đây là nơi bạn sẽ gửi dữ liệu đến API
+            console.log('Đăng ký với:', { name, email, password, role, level });
+            
+            // Hiển thị thông báo thành công
+            alert(`Đăng ký thành công! Chào mừng ${name} đến với AI English Speaking Platform.`);
+            
+            // Chuyển đến trang đăng nhập
+            window.location.href = 'login.html';
+        });
+        
+        // Khởi tạo: chọn vai trò mặc định là "learner"
+        document.addEventListener('DOMContentLoaded', function() {
+            selectRole('learner');
+        });
+    </script>
+</body>
+</html>

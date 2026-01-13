@@ -1,0 +1,261 @@
+/* =========================================
+   1. LAYOUT & HEADER
+   ========================================= */
+
+/* Container đệm cho trang nội dung */
+.page-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* =========================================
+   2. COMPONENTS (Buttons & Filter)
+   ========================================= */
+
+/* General Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* Center content icon+text */
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+}
+
+/* Filter Bar */
+.filter-bar {
+    background: var(--white);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.form-input, .form-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    color: var(--text-main);
+    min-width: 200px;
+    font-size: 13px;
+    background-color: white;
+}
+
+.form-input:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-wrapper { position: relative; }
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.input-search { padding-left: 32px; }
+
+/* =========================================
+   3. MENTOR CARD GRID
+   ========================================= */
+
+.mentors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.mentor-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.mentor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+/* --- Avatar Section --- */
+.mentor-avatar-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.mentor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #f0f9ff;
+}
+
+/* New: Avatar Placeholder for Pending Users (Replaces Inline Style) */
+.avatar-placeholder {
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 32px;
+}
+
+/* Status Dot */
+.status-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+}
+
+.status-online { background-color: var(--success); }
+.status-offline { background-color: #9ca3af; }
+
+/* --- Mentor Info --- */
+.mentor-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.mentor-skill {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 12px;
+}
+
+/* Rating */
+.mentor-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.mentor-rating .stars { color: var(--warning); }
+
+/* New: Rating Count Style (Replaces Inline Style) */
+.rating-count {
+    color: var(--text-light);
+    margin-left: 4px;
+}
+
+/* --- Action Buttons --- */
+.card-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: auto;
+}
+
+.card-actions .btn {
+    flex: 1;
+    padding: 10px;
+}
+
+.btn-soft-gray {
+    background-color: #f8fafc;
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+.btn-soft-gray:hover {
+    background-color: #f1f5f9;
+    color: var(--text-main);
+}
+
+.btn-soft-blue {
+    background-color: #eff6ff;
+    color: var(--primary);
+}
+
+.btn-soft-blue:hover { background-color: #dbeafe; }
+
+/* =========================================
+   4. PENDING CARD STYLE
+   ========================================= */
+
+.mentor-card.pending {
+    background-color: #fff7ed; /* Light orange background */
+    border: 2px dashed #fdba74;
+}
+
+.mentor-card.pending .mentor-avatar {
+    border-color: #ffedd5;
+    opacity: 0.8;
+}
+
+.badge-pending {
+    background-color: #ffedd5;
+    color: #c2410c;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-dark {
+    background-color: #1e293b;
+    color: white;
+    width: 100%;
+}
+
+.btn-dark:hover {
+    background-color: #0f172a;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
