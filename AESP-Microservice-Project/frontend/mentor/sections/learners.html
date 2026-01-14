@@ -1,0 +1,39 @@
+<!-- sections/learners.html -->
+<div class="content-card">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0; font-weight:900;" data-i18n="learnersTitle">Học Viên Của Tôi</h2>
+      <p class="muted" style="margin:6px 0 0;">Quản lý danh sách học viên và lọc theo trạng thái.</p>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" class="form-control w-260" data-i18n-placeholder="phSearch" placeholder="Tìm theo tên hoặc email">
+      <select id="statusFilter" class="form-control w-180">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container" style="margin-top:14px;">
+    <table class="data-table" id="learnersTable">
+      <thead>
+        <tr>
+          <th data-i18n="thId">ID</th>
+          <th data-i18n="thName">Tên</th>
+          <th data-i18n="thLevel">Cấp độ</th>
+          <th data-i18n="thLastPractice">Lần luyện gần nhất</th>
+          <th data-i18n="thAvg">Điểm TB</th>
+          <th data-i18n="thWeak">Kỹ năng yếu</th>
+          <th data-i18n="thStatus">Trạng thái</th>
+          <th data-i18n="thActions">Hành động</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="noData" class="muted" style="display:none; margin-top:10px;" data-i18n="noLearners">
+      Chưa có học viên nào được phân công.
+    </p>
+  </div>
+</div>

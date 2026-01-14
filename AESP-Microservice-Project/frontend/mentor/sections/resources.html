@@ -1,0 +1,32 @@
+<!-- sections/resources.html -->
+<div class="content-card">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <h2 style="margin:0; font-weight:900;" data-i18n="resourcesTitle">Tài Liệu Hỗ Trợ</h2>
+
+    <div style="width:260px; max-width:100%;">
+      <select id="resourceFilter" class="form-control">
+        <option id="resourceAll" value="all" data-i18n="resourceAll">Tất cả kỹ năng</option>
+        <option id="resPron" value="Pronunciation" data-i18n="resPron">Phát âm</option>
+        <option id="resVocab" value="Vocabulary" data-i18n="resVocab">Từ vựng</option>
+        <option id="resGram" value="Grammar" data-i18n="resGram">Ngữ pháp</option>
+        <option id="resFlu" value="Fluency" data-i18n="resFlu">Trôi chảy</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-top:10px;" data-i18n="resourceHint"></p>
+
+  <div class="table-container" style="margin-top:12px;">
+    <table class="data-table" id="resourcesTable">
+      <thead>
+        <tr>
+          <th data-i18n="resColType">Kỹ năng</th>
+          <th data-i18n="resColTitle">Tài liệu</th>
+          <th data-i18n="resColDesc">Mô tả</th>
+          <th data-i18n="resColAction">Hành động</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>

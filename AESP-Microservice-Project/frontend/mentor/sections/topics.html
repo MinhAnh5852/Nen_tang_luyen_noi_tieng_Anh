@@ -1,0 +1,30 @@
+<!-- sections/topics.html -->
+<div class="content-card">
+  <h2 style="margin:0; font-weight:900;" data-i18n="topicsTitle">Chủ Đề & Tình Huống Giao Tiếp</h2>
+
+  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; align-items:center;">
+    <div style="width:280px; max-width:100%;">
+      <select id="topicLearnerSelect" class="form-control">
+        <option value="" id="topicSelectLearner" data-i18n="topicSelectLearner">Chọn học viên</option>
+      </select>
+    </div>
+
+    <div style="width:280px; max-width:100%;">
+      <select id="topicSelect" class="form-control">
+        <option value="" id="topicSelectTopic" data-i18n="topicSelectTopic">Chọn chủ đề</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary btn-sm" type="button" id="topicAssignBtn" data-i18n="topicAssignBtn">Giao chủ đề</button>
+  </div>
+
+  <div class="mini-card" style="margin-top:12px;">
+    <h3 style="margin:0 0 10px;" data-i18n="topicLibraryTitle">Thư viện chủ đề</h3>
+    <div id="topicsLibrary" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="mini-card" style="margin-top:12px;">
+    <h3 style="margin:0 0 10px;" data-i18n="topicAssignedTitle">Chủ đề đã giao (demo)</h3>
+    <ul id="assignedTopics" style="margin:0 0 0 16px;"></ul>
+  </div>
+</div>

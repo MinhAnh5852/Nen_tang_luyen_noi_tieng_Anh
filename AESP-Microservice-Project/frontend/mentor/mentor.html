@@ -1,0 +1,116 @@
+<!-- mentor.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mentor • AESP</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Chart.js (CHỈ 1 LẦN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="./css/main.css">
+</head>
+
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo"><i class="fa-solid fa-robot"></i></div>
+      <div>
+        <h3>AESP</h3>
+        <p data-i18n="roleMentor">Mentor</p>
+      </div>
+    </div>
+
+    <div class="sb-group-title" data-i18n="groupDashboard">DASHBOARD</div>
+    <a class="sb-link active" href="#" data-section="learners">
+      <i class="fa-solid fa-user-group"></i> <span data-i18n="menuLearners">Học viên</span>
+    </a>
+
+    <div class="sb-group-title" data-i18n="groupManage">QUẢN LÝ</div>
+    <a class="sb-link" href="#" data-section="progress">
+      <i class="fa-solid fa-chart-line"></i> <span data-i18n="menuProgress">Tiến độ</span>
+    </a>
+    <a class="sb-link" href="#" data-section="feedback">
+      <i class="fa-regular fa-comment-dots"></i> <span data-i18n="menuFeedback">Phản hồi</span>
+    </a>
+    <a class="sb-link" href="#" data-section="tasks">
+      <i class="fa-solid fa-list-check"></i> <span data-i18n="menuTasks">Giao bài</span>
+    </a>
+    <a class="sb-link" href="#" data-section="ranking">
+      <i class="fa-solid fa-ranking-star"></i> <span data-i18n="menuRanking">Xếp hạng</span>
+    </a>
+    <a class="sb-link" href="#" data-section="resources">
+      <i class="fa-regular fa-folder-open"></i> <span data-i18n="menuResources">Tài liệu</span>
+    </a>
+    <a class="sb-link" href="#" data-section="topics">
+      <i class="fa-regular fa-comments"></i> <span data-i18n="menuTopics">Chủ đề</span>
+    </a>
+    <a class="sb-link" href="#" data-section="submissions">
+      <i class="fa-regular fa-file-lines"></i> <span data-i18n="menuSubmissions">Bài nộp</span>
+    </a>
+    <a class="sb-link" href="#" data-section="settings">
+      <i class="fa-solid fa-gear"></i> <span data-i18n="menuSettings">Cài đặt</span>
+    </a>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <h1 class="topbar-title" id="pageTitle" data-i18n="pageTitle">Mentor Dashboard</h1>
+
+        <div class="topbar-right">
+          <div class="dd">
+            <button class="btn btn-primary btn-sm" id="profileBtn" type="button">
+              <span data-i18n="mentorProfile">Hồ Sơ Mentor</span> ▼
+            </button>
+            <div class="dd-menu" id="dropdown">
+              <a href="#" data-profile="info" data-i18n="ddInfo">Thông tin cá nhân</a>
+              <a href="#" data-profile="availability" data-i18n="ddAvailability">Lịch & thời gian rảnh</a>
+              <a href="#" data-profile="security" data-i18n="ddSecurity">Đổi mật khẩu</a>
+              <a href="#" data-profile="logout" style="color:#dc2626;" data-i18n="ddLogout">Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <main class="container">
+      <div class="content-card alert-card">
+        <strong data-i18n="alertsLabel">Cảnh báo:</strong>
+        <span id="alertsText"></span>
+      </div>
+
+      <div id="sectionHost" style="margin-top: 16px;"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== Mentor Profile Modal ===== -->
+<div class="modal-backdrop" id="mentorModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hd">
+      <h3 id="mentorModalTitle">Mentor</h3>
+      <button class="btn btn-outline btn-sm" type="button" id="closeMentorModal">✕</button>
+    </div>
+    <div class="modal-bd" id="mentorModalBody"></div>
+    <div class="modal-ft" id="mentorModalFooter"></div>
+  </div>
+</div>
+
+<script src="./js/mentor.js"></script>
+</body>
+</html>
