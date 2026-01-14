@@ -259,3 +259,18 @@
     background-color: #0f172a;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
+
+.mentor-skills {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.skill-tag {
+    background: #f0f7ff;
+    color: #007bff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
