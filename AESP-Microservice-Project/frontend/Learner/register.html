@@ -48,17 +48,17 @@
         <h4>Học viên</h4>
         <p>Luyện nói tiếng Anh với AI</p>
     </div>
-
-    <div class="role-option" onclick="selectRole('admin')">
-        <i class="fas fa-user-shield"></i>
-        <h4>Admin</h4>
-        <p>Quản lý hệ thống và người dùng</p>
-    </div>
-
+    
     <div class="role-option" onclick="selectRole('mentor')">
         <i class="fas fa-chalkboard-teacher"></i>
         <h4>Mentor</h4>
         <p>Hướng dẫn và đánh giá học viên</p>
+    </div>
+
+    <div class="role-option" onclick="selectRole('admin')">
+        <i class="fas fa-user-shield"></i>
+        <h4>Admin</h4>
+        <p>Quản lý hệ thống</p>
     </div>
 </div>
 
@@ -166,6 +166,7 @@
             </div>
         </div>
     </footer>
+
     <script>
         // Chọn vai trò người dùng trong đăng ký
         function selectRole(role) {
