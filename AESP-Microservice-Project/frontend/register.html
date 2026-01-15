@@ -43,18 +43,25 @@
                 
                 <form class="auth-form" id="register-form">
                     <div class="role-selection">
-                        <div class="role-option" onclick="selectRole('learner')">
-                            <i class="fas fa-user-graduate"></i>
-                            <h4>Học viên</h4>
-                            <p>Luyện nói tiếng Anh với AI</p>
-                        </div>
-                        
-                        <div class="role-option" onclick="selectRole('mentor')">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            <h4>Mentor</h4>
-                            <p>Hướng dẫn và đánh giá học viên</p>
-                        </div>
-                    </div>
+    <div class="role-option" onclick="selectRole('learner')">
+        <i class="fas fa-user-graduate"></i>
+        <h4>Học viên</h4>
+        <p>Luyện nói tiếng Anh với AI</p>
+    </div>
+
+    <div class="role-option" onclick="selectRole('admin')">
+        <i class="fas fa-user-shield"></i>
+        <h4>Admin</h4>
+        <p>Quản lý hệ thống và người dùng</p>
+    </div>
+
+    <div class="role-option" onclick="selectRole('mentor')">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <h4>Mentor</h4>
+        <p>Hướng dẫn và đánh giá học viên</p>
+    </div>
+</div>
+
                     
                     <input type="hidden" id="user-role" name="role" value="learner">
                     
