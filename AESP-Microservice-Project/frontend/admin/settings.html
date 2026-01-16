@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/reports.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .settings-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; }
+        .helper-text { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Cấu hình Hệ thống</h1>
+            <button class="btn-primary" style="padding: 10px 24px;">Lưu thay đổi</button>
+        </div>
+
+        <div class="settings-grid">
+            <div class="card">
+                <div class="card-header"><h3>Thông số AI Core</h3></div>
+                <div class="form-group">
+                    <label>Model AI mặc định</label>
+                    <input type="text" value="llama-3-70b-instruct" readonly style="background: #f1f5f9;">
+                </div>
+                <div class="form-group">
+                    <label>Giới hạn lượt nói/ngày (Free)</label>
+                    <input type="number" value="10">
+                    <p class="helper-text">Số session tối đa học viên Free có thể thực hiện.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3>Nội dung Chính sách</h3></div>
+                <div class="form-group">
+                    <label>Điều khoản dịch vụ (Terms of Service)</label>
+                    <textarea rows="6">Chào mừng bạn đến với AESP. Khi sử dụng dịch vụ của chúng tôi...</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Chính sách hoàn tiền</label>
+                    <textarea rows="4">Hoàn tiền 100% trong vòng 7 ngày nếu không hài lòng...</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
