@@ -13,6 +13,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            margin-top: 80px;
         }
         
         .time-filter {
@@ -364,52 +365,16 @@
                 <i class="fas fa-share-alt"></i> Chia sẻ tiến độ
             </button>
         </div>
+        <div id="footer"></div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>AI English Speaking</h3>
-                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Tính năng</h3>
-                    <a href="#">Luyện nói với AI</a>
-                    <a href="#">Phân tích phát âm</a>
-                    <a href="#">Hội thoại tương tác</a>
-                    <a href="#">Theo dõi tiến độ</a>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Tài nguyên</h3>
-                    <a href="#">Tài liệu học tập</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Câu hỏi thường gặp</a>
-                    <a href="#">Hỗ trợ</a>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Liên hệ</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 70 Tô Ký, Quận 12, TP.HCM</p>
-                    <p><i class="fas fa-phone"></i> (028) 2345 9786</p>
-                    <p><i class="fas fa-envelope"></i> support@aienglish.com</p>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 AESP. Tất cả các quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
+     <script>
+fetch("footer.html")
+  .then(response => response.text())
+  .then(data => {
+    document.getElementById("footer").innerHTML = data;
+  });
+</script>
 
     <script src="script.js"></script>
     <script>
