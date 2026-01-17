@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/users.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .comment-text { white-space: normal; max-width: 300px; font-size: 13px; color: var(--text-main); }
+        .rating-stars { color: #f59e0b; font-size: 12px; }
+        .target-info { font-size: 12px; color: var(--primary); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Phản hồi & Đánh giá</h1>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Người gửi</th>
+                        <th>Đối tượng đánh giá</th>
+                        <th>Nội dung phản hồi</th>
+                        <th>Mức độ hài lòng</th>
+                        <th>Ngày gửi</th>
+                        <th class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar-circle avatar-orange">T</div>
+                                <div class="user-text"><h4>Trần Thị B</h4><span>user_b@gmail.com</span></div>
+                            </div>
+                        </td>
+                        <td><span class="target-info">Mentor: David Smith</span></td>
+                        <td><p class="comment-text">Cố vấn hướng dẫn rất nhiệt tình, giúp mình cải thiện phát âm âm 'th' rất nhiều.</p></td>
+                        <td>
+                            <div class="rating-stars">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                        </td>
+                        <td class="text-light">15/01/2026</td>
+                        <td class="text-right">
+                            <button class="action-btn"><i class="fa-solid fa-check-double"></i></button>
+                            <button class="action-btn btn-delete"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
