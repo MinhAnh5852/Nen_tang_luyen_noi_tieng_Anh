@@ -17,7 +17,7 @@
         
         <div class="page-header">
             <h1 class="page-title">Quản lý Học viên (Learners)</h1>
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" onclick="alert('Chức năng thêm mới chưa làm!')">
                 <i class="fa-solid fa-plus"></i> Thêm mới
             </button>
         </div>
@@ -28,15 +28,8 @@
                 <input type="text" placeholder="Tìm theo tên hoặc email..." class="form-input input-search">
             </div>
             
-            <select class="form-select">
-                <option>Tất cả gói</option>
-                <option>Free</option>
-                <option>Premium AI</option>
-                <option>Mentor Support</option>
-            </select>
-            
-            <button class="btn btn-dark">
-                Áp dụng
+            <button class="btn btn-dark" onclick="loadUsers()">
+                <i class="fa-solid fa-rotate"></i> Tải lại
             </button>
         </div>
 
@@ -46,42 +39,98 @@
                     <tr>
                         <th class="col-id">ID</th>
                         <th>Thông tin học viên</th>
-                        <th>Level</th>
-                        <th>Gói dịch vụ</th>
+                        <th>Vai trò (Role)</th>
                         <th>Trạng thái</th>
                         <th class="text-right">Hành động</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td class="text-light">#1024</td>
-                        <td>
-                            <div class="user-info">
-                                <div class="avatar-circle avatar-orange">NV</div>
-                                <div class="user-text">
-                                    <h4>Nguyễn Văn A</h4>
-                                    <span>usera@example.com</span> 
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-yellow-soft">B1</span></td>
-                        <td><span class="badge badge-gray-border">Premium AI</span></td>
-                        <td>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider round"></span>
-                            </label>
-                        </td>
-                        <td class="text-right">
-                            <button class="action-btn btn-edit" title="Sửa lịch sử mua gói"><i class="fa-solid fa-cart-shopping"></i></button>
-                            <button class="action-btn btn-delete"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
+                <tbody id="user-table-body">
+                    <tr><td colspan="5" style="text-align:center;">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
 
     </div>
+
+    <script>
+        // Hàm chạy ngay khi mở trang
+        document.addEventListener("DOMContentLoaded", () => {
+            loadUsers();
+        });
+
+        async function loadUsers() {
+            const tableBody = document.getElementById('user-table-body');
+            
+            try {
+                // 1. Gọi API Backend 
+                const response = await fetch('http://localhost:5005/users/all');
+                
+                // Kiểm tra nếu lỗi mạng
+                if (!response.ok) {
+                    throw new Error("Không thể kết nối đến Server!");
+                }
+
+                // 2. Lấy dữ liệu JSON
+                const users = await response.json();
+                console.log("Dữ liệu nhận được:", users); // Debug xem log F12
+
+                // 3. Xóa chữ "Đang tải..." và vẽ dữ liệu mới
+                tableBody.innerHTML = '';
+
+                if (users.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Chưa có dữ liệu nào.</td></tr>';
+                    return;
+                }
+
+                // 4. Duyệt qua từng user và tạo dòng HTML
+                users.forEach(user => {
+                    // Tạo Avatar từ 2 chữ cái đầu của Email (Vì chưa có tên)
+                    const avatarText = user.email.substring(0, 2).toUpperCase();
+                    // Cắt ngắn ID cho đẹp (lấy 6 số cuối)
+                    const shortID = user.id.substring(0, 6);
+                    
+                    // Logic màu sắc cho Role
+                    let roleBadgeClass = 'badge-gray-border';
+                    if (user.role === 'admin') roleBadgeClass = 'badge-yellow-soft'; // Ví dụ Admin màu vàng
+                    
+                    // Logic nút bật tắt (Checked nếu active)
+                    const isChecked = user.status === 'active' ? 'checked' : '';
+
+                    const rowHTML = `
+                        <tr>
+                            <td class="text-light">#${shortID}</td>
+                            <td>
+                                <div class="user-info">
+                                    <div class="avatar-circle avatar-orange">${avatarText}</div>
+                                    <div class="user-text">
+                                        <h4>${user.email}</h4> <span>${user.email}</span> 
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge ${roleBadgeClass}">${user.role.toUpperCase()}</span></td>
+                            <td>
+                                <label class="switch">
+                                    <input type="checkbox" ${isChecked} disabled>
+                                    <span class="slider round"></span>
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                <button class="action-btn btn-edit"><i class="fa-solid fa-pen"></i></button>
+                                <button class="action-btn btn-delete"><i class="fa-solid fa-trash-can"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Thêm dòng vừa tạo vào bảng
+                    tableBody.innerHTML += rowHTML;
+                });
+
+            } catch (error) {
+                console.error("Lỗi:", error);
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Lỗi kết nối Backend! Hãy kiểm tra Docker.<br>${error.message}</td></tr>`;
+            }
+        }
+    </script>
 
 </body>
 </html>

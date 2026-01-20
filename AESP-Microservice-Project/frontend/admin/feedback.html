@@ -29,30 +29,79 @@
                         <th class="text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="feedback-tbody">
                     <tr>
-                        <td>
-                            <div class="user-info">
-                                <div class="avatar-circle avatar-orange">T</div>
-                                <div class="user-text"><h4>Trần Thị B</h4><span>user_b@gmail.com</span></div>
-                            </div>
-                        </td>
-                        <td><span class="target-info">Mentor: David Smith</span></td>
-                        <td><p class="comment-text">Cố vấn hướng dẫn rất nhiệt tình, giúp mình cải thiện phát âm âm 'th' rất nhiều.</p></td>
-                        <td>
-                            <div class="rating-stars">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                        </td>
-                        <td class="text-light">15/01/2026</td>
-                        <td class="text-right">
-                            <button class="action-btn"><i class="fa-solid fa-check-double"></i></button>
-                            <button class="action-btn btn-delete"><i class="fa-solid fa-trash"></i></button>
-                        </td>
+                        <td colspan="6" style="text-align: center; padding: 20px;">Đang tải phản hồi...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <script>
+        // Cấu hình URL API
+        const API_URL = 'http://localhost:5005/users/feedbacks/all';
+
+        async function loadFeedbacks() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Không thể kết nối API");
+                
+                const data = await response.json();
+                const tbody = document.getElementById('feedback-tbody');
+                tbody.innerHTML = ''; // Xóa dòng thông báo đang tải
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Chưa có phản hồi nào.</td></tr>';
+                    return;
+                }
+
+                data.forEach(fb => {
+                    const userName = fb.email.split('@')[0];
+                    const firstLetter = userName.charAt(0).toUpperCase();
+                    
+                    // Xử lý hiển thị sao dựa trên số rating (1-5)
+                    let starsHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        starsHTML += i < fb.rating ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
+                    }
+
+                    const row = `
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="avatar-circle avatar-orange">${firstLetter}</div>
+                                    <div class="user-text">
+                                        <h4 style="text-transform: capitalize;">${userName}</h4>
+                                        <span>${fb.email}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="target-info">${fb.target}</span></td>
+                            <td><p class="comment-text">${fb.content}</p></td>
+                            <td>
+                                <div class="rating-stars">
+                                    ${starsHTML}
+                                </div>
+                            </td>
+                            <td class="text-light">${fb.date}</td>
+                            <td class="text-right">
+                                <button class="action-btn" title="Đánh dấu đã đọc"><i class="fa-solid fa-check-double"></i></button>
+                                <button class="action-btn btn-delete" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('feedback-tbody').innerHTML = 
+                    `<tr><td colspan="6" style="text-align: center; color: red;">Lỗi tải dữ liệu: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Tự động chạy khi trang load xong
+        document.addEventListener('DOMContentLoaded', loadFeedbacks);
+    </script>
 </body>
 </html>

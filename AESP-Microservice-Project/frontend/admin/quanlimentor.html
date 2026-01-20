@@ -42,86 +42,93 @@
             </select>
         </div>
 
-        <div class="mentors-grid">
-            <!-- mentor  -->
-            <div class="mentor-card">
-                <div class="mentor-avatar-wrapper">
-                    <img src="https://ui-avatars.com/api/?name=David+Smith" class="mentor-avatar" alt="Avatar">
-                    <span class="status-dot status-online"></span>
-                </div>
-                
-                <h3 class="mentor-name">David Smith</h3>
-                <div class="mentor-skills">
-                    <span class="skill-tag">IELTS 8.5</span>
-                    <span class="skill-tag">Public Speaking</span>
-                </div>
-                
-                <div class="mentor-rating">
-                    <div class="stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star-half-stroke"></i>
-                    </div>
-                    <span class="rating-count">(48 đánh giá)</span>
-                </div>
-
-                <div class="card-actions">
-                    <button class="btn btn-soft-gray">Hồ sơ</button>
-                    <button class="btn btn-soft-blue">Lịch dạy</button>
-                </div>
+        <div class="mentors-grid" id="mentors-container">
+            <div style="text-align:center; width:100%; padding: 50px; color: #666;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu cố vấn...
             </div>
-
-            <div class="mentor-card">
-                <div class="mentor-avatar-wrapper">
-                    <img src="https://ui-avatars.com/api/?name=Sarah+Lee&background=random" class="mentor-avatar" alt="Avatar">
-                    <span class="status-dot status-offline"></span>
-                </div>
-                
-                <h3 class="mentor-name"></h3>
-                <p class="mentor-skill"></p>
-                
-                <div class="mentor-rating">
-                    <div class="stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                    </div>
-                    <span class="rating-count"></span>
-                </div>
-
-                <div class="card-actions">
-                    <button class="btn btn-soft-gray">Hồ sơ</button>
-                    <button class="btn btn-soft-blue">Lịch dạy</button>
-                </div>
-            </div>
-            
-            <div class="mentor-card pending">
-                <div class="mentor-avatar-wrapper">
-                    <div class="mentor-avatar avatar-placeholder">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                </div>
-                
-                <h3 class="mentor-name"></h3>
-                <p class="mentor-skill"></p>
-                
-                <div class="badge-pending">
-                    <i class="fa-regular fa-clock"></i> Chờ phê duyệt
-                </div>
-
-                <div class="card-actions">
-                    <button class="btn btn-dark">
-                        <i class="fa-solid fa-check"></i> Duyệt hồ sơ
-                    </button>
-                </div>
-            </div>
-
         </div>
     </div>
 
+    <script>
+        const API_URL = 'http://localhost:5005/users/all';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchMentors();
+        });
+
+        async function fetchMentors() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("API Connection Failed");
+                const allUsers = await response.json();
+
+                // 1. Lọc lấy những người có role là 'mentor'
+                const mentors = allUsers.filter(u => u.role === 'mentor');
+                
+                renderMentorCards(mentors);
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('mentors-container').innerHTML = `<p style="color:red; text-align:center; width:100%;">Lỗi tải dữ liệu cố vấn.</p>`;
+            }
+        }
+
+        function renderMentorCards(mentors) {
+            const container = document.getElementById('mentors-container');
+            container.innerHTML = ''; // Xóa dòng loading
+
+            if (mentors.length === 0) {
+                container.innerHTML = '<p style="text-align:center; width:100%;">Chưa có cố vấn nào trong hệ thống.</p>';
+                return;
+            }
+
+            mentors.forEach(m => {
+                const shortName = m.email.split('@')[0];
+                const displaySkill = m.user_level || 'English Expert';
+                const isPending = m.status === 'pending';
+                const statusDot = m.status === 'active' ? 'status-online' : 'status-offline';
+
+                // Template HTML dựa trên mẫu card tĩnh của bạn
+                const cardHTML = `
+                    <div class="mentor-card ${isPending ? 'pending' : ''}">
+                        <div class="mentor-avatar-wrapper">
+                            <img src="https://ui-avatars.com/api/?name=${shortName}&background=random" class="mentor-avatar" alt="Avatar">
+                            <span class="status-dot ${statusDot}"></span>
+                        </div>
+                        
+                        <h3 class="mentor-name" style="text-transform: capitalize;">${shortName}</h3>
+                        <div class="mentor-skills">
+                            <span class="skill-tag">${displaySkill}</span>
+                            <span class="skill-tag">Public Speaking</span>
+                        </div>
+                        
+                        ${!isPending ? `
+                            <div class="mentor-rating">
+                                <div class="stars">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                                </div>
+                                <span class="rating-count">(Hồ sơ mới)</span>
+                            </div>
+                        ` : `
+                            <div class="badge-pending">
+                                <i class="fa-regular fa-clock"></i> Chờ phê duyệt
+                            </div>
+                        `}
+
+                        <div class="card-actions">
+                            ${isPending ? `
+                                <button class="btn btn-dark">
+                                    <i class="fa-solid fa-check"></i> Duyệt hồ sơ
+                                </button>
+                            ` : `
+                                <button class="btn btn-soft-gray">Hồ sơ</button>
+                                <button class="btn btn-soft-blue">Lịch dạy</button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+    </script>
 </body>
 </html>

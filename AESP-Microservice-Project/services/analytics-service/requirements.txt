@@ -1,3 +1,5 @@
 flask
-requests
+pika
+flask-cors
 python-dotenv
+requests

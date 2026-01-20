@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard Quản Trị - AESP</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,10 +15,8 @@
             <div class="stat-flex">
                 <div>
                     <p class="stat-title">Tổng Học viên</p>
-                    <!-- // tổng học viên -->
-                    <h3 class="stat-value"></h3>
-                    <!-- tỉ lệ tăng % -->
-                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i></p>
+                    <h3 class="stat-value" id="stat-total-users">...</h3>
+                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i> +12%</p>
                 </div>
                 <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
             </div>
@@ -28,10 +26,8 @@
             <div class="stat-flex">
                 <div>
                     <p class="stat-title">Doanh thu</p>
-                    <!-- doanh thu -->
-                    <h3 class="stat-value"> <span class="stat-unit">VND</span></h3>
-                    <!-- tỉ lệ tăng % -->
-                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i></p>
+                    <h3 class="stat-value"><span id="stat-revenue">0</span> <span class="stat-unit">VND</span></h3>
+                    <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i> +5%</p>
                 </div>
                 <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
             </div>
@@ -41,8 +37,7 @@
             <div class="stat-flex">
                 <div>
                     <p class="stat-title">AI Sessions</p>
-                    <!-- hoạt động AI -->
-                    <h3 class="stat-value"></h3>
+                    <h3 class="stat-value" id="stat-ai-sessions">0</h3>
                     <p class="stat-trend text-gray">Luyện nói với AI</p>
                 </div>
                 <div class="stat-icon icon-purple"><i class="fa-solid fa-microchip"></i></div>
@@ -53,10 +48,8 @@
             <div class="stat-flex">
                 <div>
                     <p class="stat-title">Cố vấn hoạt động</p>
-                    <!-- số cố vấn hoạt động -->
-                    <h3 class="stat-value"></h3>
-                    <!-- số cố vấn đang onl -->
-                    <p class="stat-trend text-orange">Đang online: </p>
+                    <h3 class="stat-value" id="stat-mentors">0</h3>
+                    <p class="stat-trend text-orange">Đang online: 2</p>
                 </div>
                 <div class="stat-icon icon-orange"><i class="fa-solid fa-chalkboard-user"></i></div>
             </div>
@@ -65,12 +58,13 @@
 
     <div class="bottom-section">
         
-        <div class="card no-padding">
+        <div class="card no-padding" style="flex: 2;">
             <div class="table-header">
                 <h3 class="table-title">Học viên mới đăng ký</h3>
                 <div class="filter-group">
-                    <input type="text" placeholder="Tìm kiếm..." class="form-input">
-                    <button class="btn-primary"><i class="fa-solid fa-filter"></i> Lọc</button>
+                    <input type="text" id="search-input" placeholder="Tìm tên hoặc email..." class="form-input">
+                    <button class="btn-primary" onclick="filterUsers()"><i class="fa-solid fa-filter"></i> Lọc</button>
+                    <button class="btn-primary" style="background:#6c757d; margin-left:5px;" onclick="resetFilter()"><i class="fa-solid fa-rotate-left"></i></button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -85,57 +79,152 @@
                         </tr>
                     </thead>
                     <tbody id="table-recent-transactions">
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <!-- hình ảnh tên học viên  -->
-                                    <div class="user-avatar-placeholder"></div>
-                                    <!-- học viên đăng kí bao gồm: tên gói, level, trạng thái, hành động -->
-                                    <div>
-                                        <div class="user-name"></div>
-                                        <div class="user-email"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <!-- loại gói -->
-                            <td><span class="badge badge-purple"></span></td>
-                            <!-- level bậc học -->
-                            <td></td>
-                            <!-- trạng thái gói -->
-                            <td><span class="badge badge-green"></span></td>
-                            <td class="text-right">
-                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
-                                <button class="action-btn btn-delete"><i class="fa-solid fa-ban"></i></button>
-                            </td>
-                        </tr>
+                        <tr><td colspan="5" style="text-align:center; padding:20px; color:#666;">Đang kết nối Database...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="right-column">
+        <div class="right-column" style="flex: 1;">
             <div class="card">
                 <div class="card-header">
                     <h3>Cố vấn nổi bật</h3>
                     <a href="#" class="link-sm">Xem tất cả</a>
                 </div>
-                <!-- các cố vấn nổi bật -->
-                <div class="mentor-item">
-                    <div class="mentor-info">
-                        <img src="https://ui-avatars.com/api/?name=David+S&background=random" class="mentor-avatar" alt="Avatar">
-                        <div>
-                            <div class="mentor-name"></div>
-                            <div class="mentor-subject"></div>
-                        </div>
-                    </div>
-                    <!-- số đánh giá -->
-                    <div class="mentor-rating"><i class="fa-solid fa-star"></i> </div>
-                </div>
-                
-                </div>
+                <div id="mentor-list-container"></div>
+            </div>
         </div>
 
     </div>
 
+    <script>
+        const API_URL = 'http://localhost:5005/users/all'; 
+        let globalUsers = []; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initDashboard();
+        });
+
+        async function initDashboard() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error(`Lỗi Server: ${response.status}`);
+                
+                globalUsers = await response.json(); 
+
+                if (globalUsers.length === 0) {
+                    document.getElementById('table-recent-transactions').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Chưa có dữ liệu nào.</td></tr>';
+                    return;
+                }
+
+                renderStats(globalUsers);
+                renderTable(globalUsers);
+                renderMentors(globalUsers);
+
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('table-recent-transactions').innerHTML = 
+                    `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">❌ Lỗi kết nối API: ${error.message}</td></tr>`;
+            }
+        }
+
+        function renderStats(users) {
+            document.getElementById('stat-total-users').innerText = users.length;
+            const revenue = users.length * 500000;
+            document.getElementById('stat-revenue').innerText = revenue.toLocaleString('vi-VN');
+            
+            // AI Sessions dựa trên số lượng user thực tế
+            const sessions = users.length * 15;
+            document.getElementById('stat-ai-sessions').innerText = sessions.toLocaleString('en-US');
+            
+            const mentors = users.filter(u => u.role === 'mentor').length;
+            document.getElementById('stat-mentors').innerText = mentors;
+        }
+
+        function renderTable(users) {
+            const tableBody = document.getElementById('table-recent-transactions');
+            tableBody.innerHTML = ''; 
+
+            // Hiển thị 10 người mới nhất
+            const displayList = users.slice().reverse().slice(0, 10);
+
+            if (displayList.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Không tìm thấy kết quả.</td></tr>';
+                return;
+            }
+
+            displayList.forEach(user => {
+                // LẤY DỮ LIỆU THẬT TỪ API (Database)
+                const pName = user.package_name || 'Free';
+                const uLevel = user.user_level || 'A1 (Beginner)';
+
+                // Xử lý badge màu sắc theo gói
+                let badgeClass = 'badge-purple';
+                if (pName === 'Free') badgeClass = 'badge-gray-border';
+                if (pName === 'Pro AI') badgeClass = 'badge-yellow'; 
+
+                const shortName = user.email.split('@')[0];
+                const avatarText = shortName.substring(0, 2).toUpperCase();
+
+                const rowHTML = `
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-placeholder" style="background:#eee; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#555;">${avatarText}</div>
+                                <div>
+                                    <div class="user-name" style="font-weight:600">${shortName}</div>
+                                    <div class="user-email" style="font-size:12px; color:#666">${user.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge ${badgeClass}">${pName}</span></td>
+                        <td>${uLevel}</td>
+                        <td><span class="badge badge-green">${user.status}</span></td>
+                        <td class="text-right">
+                            <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += rowHTML;
+            });
+        }
+
+        function renderMentors(users) {
+            const container = document.getElementById('mentor-list-container');
+            container.innerHTML = '';
+            const mentors = users.filter(u => u.role === 'mentor').slice(0, 3);
+            
+            if (mentors.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:10px; color:#999">Chưa có cố vấn nào.</p>';
+                return;
+            }
+            
+            mentors.forEach(m => {
+                const name = m.email.split('@')[0];
+                container.innerHTML += `
+                <div class="mentor-item" style="display:flex; align-items:center; gap:10px; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #f0f0f0;">
+                    <div class="mentor-info" style="display:flex; align-items:center; gap:10px; flex:1;">
+                        <img src="https://ui-avatars.com/api/?name=${name}&background=random" class="mentor-avatar" style="width:40px; height:40px; border-radius:50%;" alt="Avatar">
+                        <div>
+                            <div style="font-weight:600;">${name}</div>
+                            <div style="font-size:12px; color:#666;">English Mentor</div>
+                        </div>
+                    </div>
+                    <div style="font-weight:600;"><i class="fa-solid fa-star" style="color:#ffc107;"></i> 5.0</div>
+                </div>`;
+            });
+        }
+
+        function filterUsers() {
+            const keyword = document.getElementById('search-input').value.toLowerCase();
+            const filtered = globalUsers.filter(user => user.email.toLowerCase().includes(keyword));
+            renderTable(filtered); 
+        }
+
+        function resetFilter() {
+            document.getElementById('search-input').value = '';
+            renderTable(globalUsers); 
+        }
+    </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -61,5 +61,167 @@
             </table>
         </div>
     </div>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử Giao dịch - AESP</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/users.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Lịch sử Giao dịch</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-dark"><i class="fa-solid fa-file-export"></i> Xuất Excel</button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <input type="text" id="search-inv" placeholder="Mã giao dịch hoặc email..." class="form-input">
+            <select class="form-select" id="filter-status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Thành công">Thành công</option>
+                <option value="Đang xử lý">Đang xử lý</option>
+            </select>
+            <input type="date" class="form-input">
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Học viên</th>
+                        <th>Gói dịch vụ</th>
+                        <th>Số tiền</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Trạng thái</th>
+                        <th class="text-right">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-tbody">
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding: 30px;">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5005/users/all';
+        let globalTransactions = []; // Lưu dữ liệu vào RAM để tránh sập DB
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchTransactions();
+        });
+
+        // 1. Lấy dữ liệu từ API (Chỉ gọi 1 lần khi load trang)
+        async function fetchTransactions() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Không thể kết nối API");
+                const users = await response.json();
+
+                // Giả lập dữ liệu giao dịch từ thông tin User thật trong DB
+                globalTransactions = users.map((user, index) => {
+                    // Logic tính tiền dựa trên gói thật trong DB
+                    let price = "0đ";
+                    if (user.package_name === 'Pro AI') price = "499.000đ";
+                    else if (user.package_name === 'Premium') price = "199.000đ";
+
+                    return {
+                        invId: `#INV-${8800 + index}`,
+                        name: user.email.split('@')[0],
+                        email: user.email,
+                        package: user.package_name || 'Free',
+                        amount: price,
+                        date: "19/01/2026 15:45", // Có thể lấy từ created_at trong DB
+                        status: user.status === 'active' ? 'Thành công' : 'Đang xử lý'
+                    };
+                });
+
+                renderTable(globalTransactions);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('transaction-tbody').innerHTML = 
+                    `<tr><td colspan="7" style="color:red; text-align:center;">Lỗi: ${error.message}</td></tr>`;
+            }
+        }
+
+        // 2. Hàm vẽ bảng (Hiển thị dữ liệu)
+        function renderTable(data) {
+            const tbody = document.getElementById('transaction-tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Không có dữ liệu giao dịch.</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const firstChar = item.name.charAt(0).toUpperCase();
+                const statusClass = item.status === 'Thành công' ? 'status-active' : 'status-pending';
+                const dotClass = item.status === 'Thành công' ? 'dot-green' : 'dot-orange';
+
+                const row = `
+                    <tr>
+                        <td style="font-weight: 600;">${item.invId}</td>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar-circle avatar-blue">${firstChar}</div>
+                                <div class="user-text">
+                                    <h4 style="text-transform: capitalize;">${item.name}</h4>
+                                    <span>${item.email}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-purple-border">${item.package}</span></td>
+                        <td style="font-weight: 700;">${item.amount}</td>
+                        <td class="text-light">${item.date}</td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                <span class="dot ${dotClass}"></span> ${item.status}
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <button class="action-btn"><i class="fa-solid fa-print"></i></button>
+                            <button class="action-btn"><i class="fa-solid fa-circle-info"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // 3. Xử lý tìm kiếm & lọc trên RAM (Giải pháp chống sập hệ thống)
+        const searchInput = document.getElementById('search-inv');
+        const statusSelect = document.getElementById('filter-status');
+
+        function applyFilters() {
+            const keyword = searchInput.value.toLowerCase();
+            const statusFilter = statusSelect.value;
+
+            const filtered = globalTransactions.filter(t => {
+                const matchKeyword = t.invId.toLowerCase().includes(keyword) || 
+                                   t.email.toLowerCase().includes(keyword);
+                const matchStatus = statusFilter === "" || t.status === statusFilter;
+                return matchKeyword && matchStatus;
+            });
+
+            renderTable(filtered);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        statusSelect.addEventListener('change', applyFilters);
+    </script>
 </body>
 </html>

@@ -6,3 +6,5 @@ gunicorn
 uvicorn      
 fastapi       
 python-multipart
+openai-whisper
+groq

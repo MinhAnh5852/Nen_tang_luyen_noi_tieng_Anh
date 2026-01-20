@@ -5,3 +5,6 @@ PyJWT
 pytest
 flask-limiter
 python-dotenv
+flask-cors
+pika
+psycopg2-binary

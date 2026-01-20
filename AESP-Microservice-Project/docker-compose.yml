@@ -1,7 +1,20 @@
 version: "3.9"
 
 services:
-  # --- AI SERVICE GROUP ---
+  # --- TRUNG GIAN DỮ LIỆU ---
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: app-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin123"
+    networks:
+      - app-network
+
+  # --- DATABASES ---
   ai-db:
     image: mysql:8.0
     container_name: ai-db
@@ -12,26 +25,9 @@ services:
       - "3307:3306"
     volumes:
       - ai_db_data:/var/lib/mysql
-    networks:          # <--- Đã thêm
+    networks:
       - app-network
 
-  ai-core-service:
-    build: ./services/ai-core-service
-    container_name: ai-core-service
-    environment:
-      - SQLALCHEMY_DATABASE_URL=mysql+mysqlconnector://root:root@ai-db:3306/xdpm
-      - GROQ_API_KEY=${GROQ_API_KEY}
-    depends_on:
-      - ai-db
-    ports:
-      - "8001:8001"
-    restart: unless-stopped
-    volumes:
-      - ./services/ai-core-service:/app
-    networks:          # <--- Đã thêm
-      - app-network
-
-  # --- USER SERVICE GROUP ---
   user-db:
     image: postgres:15
     container_name: user-db
@@ -43,24 +39,9 @@ services:
       - "5435:5432"
     volumes:
       - user_db_data:/var/lib/postgresql/data
-    networks:          # <--- Đã thêm
+    networks:
       - app-network
 
-  user-service:
-    build: ./services/user-service
-    container_name: user-service
-    environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@user-db:5432/user_db
-      JWT_SECRET_KEY: "change_me_to_a_long_random_secret"
-    depends_on:
-      - user-db
-    ports:
-      - "5005:5000"
-    restart: unless-stopped
-    networks:          # <--- Đã thêm
-      - app-network
-
-  # --- SUBSCRIPTION SERVICE GROUP ---
   subscription-db:
     image: postgres:15
     container_name: subscription-db
@@ -72,7 +53,54 @@ services:
       - "5436:5432"
     volumes:
       - subscription_db_data:/var/lib/postgresql/data
-    networks:          # <--- Đã thêm
+    networks:
+      - app-network
+
+  payment-db:
+    image: postgres:15
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payment_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # --- BACKEND SERVICES ---
+  ai-core-service:
+    build: ./services/ai-core-service
+    container_name: ai-core-service
+    environment:
+      - SQLALCHEMY_DATABASE_URL=mysql+mysqlconnector://root:root@ai-db:3306/xdpm
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      - ai-db
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@user-db:5432/user_db
+      JWT_SECRET_KEY: "change_me_to_a_long_random_secret"
+      RABBITMQ_HOST: app-rabbitmq
+      RABBITMQ_USER: admin
+      RABBITMQ_PASS: admin123
+    depends_on:
+      - user-db
+      - rabbitmq
+    ports:
+      - "5005:5000"
+    restart: unless-stopped
+    networks:
       - app-network
 
   subscription-service:
@@ -85,22 +113,7 @@ services:
     ports:
       - "5001:5001"
     restart: unless-stopped
-    networks:          # <--- Đã thêm
-      - app-network
-
-  # --- PAYMENT SERVICE GROUP ---
-  payment-db:
-    image: postgres:15
-    container_name: payment-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payment_db
-    ports:
-      - "5437:5432"
-    volumes:
-      - payment_db_data:/var/lib/postgresql/data
-    networks:          # <--- Đã thêm
+    networks:
       - app-network
 
   payment-service:
@@ -109,32 +122,34 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@payment-db:5432/payment_db
       SUBSCRIPTION_SERVICE_URL: http://subscription-service:5001
-      STRICT_PAYMENT_TRANSITIONS: "true"
-      PAYMENT_ACTIVATES_SUBSCRIPTION: "true"
+      RABBITMQ_HOST: app-rabbitmq
+      RABBITMQ_USER: admin
+      RABBITMQ_PASS: admin123
     depends_on:
       - payment-db
+      - rabbitmq
     ports:
       - "5002:5002"
     restart: unless-stopped
-    networks:          # <--- Đã thêm
-      - app-network
-
-  # --- ANALYTICS & GATEWAY ---
-  analytics-service:
-    build: ./services/analytics-service
-    container_name: analytics-service
-    ports:
-      - "8006:5000"
-    environment:
-      - USER_SERVICE_URL=http://user-service:5000
-      - PAYMENT_SERVICE_URL=http://payment-service:5002
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=admin
-      - RABBITMQ_PASS=admin123
     networks:
       - app-network
 
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    environment:
+      - RABBITMQ_HOST=app-rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASS=admin123
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8006:5000"
+    restart: on-failure
+    networks:
+      - app-network
+
+  # --- GATEWAY & FRONTEND ---
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -145,9 +160,10 @@ services:
       - user-service
       - payment-service
       - subscription-service
+    restart: always
     networks:
       - app-network
-  # 1. Frontend (Giao diện Admin)
+
   frontend:
     build: ./frontend
     container_name: app-frontend
@@ -155,18 +171,8 @@ services:
       - "3000:80"
     networks:
       - app-network
-  # --- SERVICE RABBITMQ  ---
-  rabbitmq:
-    image: rabbitmq:3-management-alpine # Bản có sẵn giao diện quản lý web
-    container_name: app-rabbitmq
-    ports:
-      - "5672:5672"   
-      - "15672:15672" 
-    environment:
-      RABBITMQ_DEFAULT_USER: "admin"
-      RABBITMQ_DEFAULT_PASS: "admin123"
-    networks:
-      - app-network
+
+# --- KHAI BÁO VOLUMES & NETWORKS ---
 volumes:
   user_db_data:
   subscription_db_data:
