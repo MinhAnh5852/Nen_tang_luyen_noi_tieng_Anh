@@ -131,80 +131,156 @@
 
     <div class="form-group">
         <label>
-    Toàn quyền hệ thống <br>
-    <input type="checkbox">
-</label>
-
+            Toàn quyền hệ thống <br>
+            <input type="checkbox">
+        </label>
     </div>
 </div>
+<button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Đăng ký tài khoản</button>
+<div class="divider">
+    <span>Hoặc đăng ký với</span>
+</div>
+    <div class="social-login">
+        <button type="button" class="social-btn">
+            <i class="fab fa-google"></i>
+            <span>Google</span>
+        </button>
+        <button type="button" class="social-btn">
+            <i class="fab fa-facebook-f"></i>
+            <span>Facebook</span>
+        </button>
+    </div>
+                    
+    <div class="form-footer">
+        <p>Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a></p>
+    </div>
+</form>
+</div>
+</div>
+<div id="footer"></div>
+</main>
 
-                    
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Đăng ký tài khoản</button>
-                    
-                    <div class="divider">
-                        <span>Hoặc đăng ký với</span>
-                    </div>
-                    
-                    <div class="social-login">
-                        <button type="button" class="social-btn">
-                            <i class="fab fa-google"></i>
-                            <span>Google</span>
-                        </button>
-                        
-                        <button type="button" class="social-btn">
-                            <i class="fab fa-facebook-f"></i>
-                            <span>Facebook</span>
-                        </button>
-                    </div>
-                    
-                    <div class="form-footer">
-                        <p>Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a></p>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div id="footer"></div>
-    </main>
-
-  <script>
-fetch("footer.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("footer").innerHTML = data;
-  });
+<script>
+    fetch("footer.html")
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById("footer").innerHTML = data;
+    });
 </script>
 
-    <script>
-function selectRole(role) {
-    document.querySelectorAll('.role-option').forEach(option => {
-        option.classList.remove('selected');
+<script>
+    function selectRole(role) {
+        document.querySelectorAll('.role-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        const selected = document.querySelector(
+            `.role-option[data-role="${role}"]`
+        );
+        if (selected) selected.classList.add('selected');
+
+        document.getElementById('user-role').value = role;
+
+        document.querySelectorAll('.role-section').forEach(sec => {
+            sec.style.display = 'none';
+        });
+
+        if (role === 'learner') {
+            document.getElementById('learner-section').style.display = 'block';
+        }
+        if (role === 'mentor') {
+            document.getElementById('mentor-section').style.display = 'block';
+        }
+        if (role === 'admin') {
+            document.getElementById('admin-section').style.display = 'block';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        selectRole('learner');
     });
+</script>
+<script type="module">
+    // 1. Import các hàm cần thiết từ Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, 
+        createUserWithEmailAndPassword, 
+        signInWithPopup, 
+        GoogleAuthProvider, 
+        FacebookAuthProvider 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const selected = document.querySelector(
-        `.role-option[data-role="${role}"]`
-    );
-    if (selected) selected.classList.add('selected');
+    const firebaseConfig = {
+        apiKey: "AIzaSyAR_mMEOLmcQeewl7ECynfLe-0ymFiqx9g",
+        authDomain: "pj-luyen-noi-tieng-anh.firebaseapp.com",
+        projectId: "pj-luyen-noi-tieng-anh",
+        storageBucket: "pj-luyen-noi-tieng-anh.firebasestorage.app",
+        messagingSenderId: "835156032196",
+        appId: "1:835156032196:web:b8920adabf15ace0bbe791"
+    };
 
-    document.getElementById('user-role').value = role;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    document.querySelectorAll('.role-section').forEach(sec => {
-        sec.style.display = 'none';
-    });
+    // --- HÀM XỬ LÝ CHUNG CHO SOCIAL REGISTER ---
+    async function handleSocialRegister(user) {
+        const role = document.getElementById('user-role').value;
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
 
-    if (role === 'learner') {
-        document.getElementById('learner-section').style.display = 'block';
+        if (!userDoc.exists()) {
+            await setDoc(userRef, {
+                uid: user.uid,
+                fullName: user.displayName,
+                email: user.email,
+                role: role,
+                createdAt: new Date().toISOString(),
+                level: role === 'learner' ? document.getElementById('register-level').value : null
+            });
+        }
+        window.location.href = role + '.html';
     }
-    if (role === 'mentor') {
-        document.getElementById('mentor-section').style.display = 'block';
-    }
-    if (role === 'admin') {
-        document.getElementById('admin-section').style.display = 'block';
-    }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    selectRole('learner');
-});
+    // --- NÚT GOOGLE ---
+    const googleBtn = document.querySelector('.social-btn i.fa-google').parentElement;
+    googleBtn.onclick = async () => {
+        try {
+            const result = await signInWithPopup(auth, new GoogleAuthProvider());
+            await handleSocialRegister(result.user);
+        } catch (error) { alert("Lỗi Google: " + error.message); }
+    };
+
+    // --- NÚT FACEBOOK ---
+    const facebookBtn = document.querySelector('.social-btn i.fa-facebook-f').parentElement;
+    facebookBtn.onclick = async () => {
+        try {
+            const result = await signInWithPopup(auth, new FacebookAuthProvider());
+            await handleSocialRegister(result.user);
+        } catch (error) { alert("Lỗi Facebook: Kiểm tra lại cấu hình Meta."); }
+    };
+
+    // --- FORM ĐĂNG KÝ EMAIL ---
+    document.getElementById('register-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const role = document.getElementById('user-role').value;
+
+        try {
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            await setDoc(doc(db, "users", result.user.uid), {
+                uid: result.user.uid,
+                fullName: document.getElementById('register-name').value,
+                email: email,
+                role: role,
+                createdAt: new Date().toISOString()
+            });
+            window.location.href = role + '.html';
+        } catch (error) { alert("Lỗi: " + error.message); }
+    };
 </script>
 </body>
 </html>

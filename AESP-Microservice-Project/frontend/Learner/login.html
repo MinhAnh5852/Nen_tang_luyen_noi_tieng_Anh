@@ -89,43 +89,103 @@
         <div id="footer"></div>         
     </main>
 
-  <script>
-fetch("footer.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("footer").innerHTML = data;
-  });
-</script>
-
     <script>
-        // Xử lý đăng nhập
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const remember = document.getElementById('remember-me').checked;
-            
-            // Trong thực tế, đây là nơi bạn sẽ gửi dữ liệu đến API
-            console.log('Đăng nhập với:', { email, password, remember });
-            
-            // Hiển thị thông báo thành công
-            alert('Đăng nhập thành công! Đang chuyển hướng...');
-            
-            // Giả lập xác định vai trò để chuyển hướng
-            // Trong thực tế, API sẽ trả về role của người dùng
-            const role = email.includes('admin') ? 'admin' : 
-                        email.includes('mentor') ? 'mentor' : 'learner';
-            
-            // Chuyển hướng đến trang tương ứng
-            if (role === 'admin') {
-                window.location.href = 'admin.html';
-            } else if (role === 'mentor') {
-                window.location.href = 'mentor.html';
-            } else {
-                window.location.href = 'learner.html';
-            }
+        fetch("footer.html")
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("footer").innerHTML = data;
         });
+    </script>
+
+    <script type="module">
+        // 1. Import đầy đủ các thư viện cần thiết
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        signInWithPopup, // Dùng Popup cho đồng bộ với trang Đăng ký
+        GoogleAuthProvider, 
+        FacebookAuthProvider 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Cấu hình Firebase của bạn
+    const firebaseConfig = {
+        apiKey: "AIzaSyAR_mMEOLmcQeewl7ECynfLe-0ymFiqx9g",
+        authDomain: "pj-luyen-noi-tieng-anh.firebaseapp.com",
+        projectId: "pj-luyen-noi-tieng-anh",
+        storageBucket: "pj-luyen-noi-tieng-anh.firebasestorage.app",
+        messagingSenderId: "835156032196",
+        appId: "1:835156032196:web:b8920adabf15ace0bbe791"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Hàm điều hướng thông minh
+    async function handleLoginSuccess(user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            const role = userDoc.data().role;
+            window.location.href = `${role}.html`;
+        } else {
+            // Nếu dùng GG/FB đăng nhập mà chưa có trong DB -> Mặc định là Learner
+            await setDoc(userRef, {
+                uid: user.uid,
+                fullName: user.displayName || "Người dùng Google",
+                email: user.email,
+                role: "learner",
+                createdAt: new Date().toISOString()
+            });
+            window.location.href = 'learner.html';
+        }
+    }
+
+    // Xử lý Google Login
+    const googleBtn = document.querySelector('.social-btn i.fa-google').parentElement;
+    googleBtn.onclick = async () => {
+        try {
+            const result = await signInWithPopup(auth, new GoogleAuthProvider());
+            await handleLoginSuccess(result.user);
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi đăng nhập Google: " + error.message);
+        }
+    };
+    // Xử lý Facebook Login ở trang Login
+    const facebookBtn = document.querySelector('.social-btn i.fa-facebook-f').parentElement;
+    facebookBtn.onclick = async () => {
+        try {
+            const provider = new FacebookAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            // Sau khi đăng nhập FB thành công, dùng lại hàm check Role đã viết ở trên
+            await handleLoginSuccess(result.user); 
+        } catch (error) {
+            console.error("Lỗi Facebook Login:", error.code);
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                alert("Email này đã được đăng ký bằng Google. Vui lòng dùng Google để đăng nhập.");
+            } else {
+                alert("Lỗi Facebook: " + error.message);
+            }
+        }
+    };
+
+    // Xử lý Email Login truyền thống
+    document.getElementById('login-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            await handleLoginSuccess(result.user);
+        } catch (error) {
+            alert("Sai tài khoản hoặc mật khẩu!");
+        }
+    };
     </script>
 </body>
 </html>
