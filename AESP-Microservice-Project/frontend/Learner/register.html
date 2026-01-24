@@ -116,19 +116,13 @@
 <!-- Admin -->
 <div class="role-section" id="admin-section" style="display:none;">
     <div class="form-group">
-        <label>Mã Admin</label>
-        <input type="text" placeholder="ADMIN-XXXX">
-    </div>
-
-    <div class="form-group">
         <label>Phòng ban</label>
         <select>
             <option>Quản trị hệ thống</option>
             <option>Quản lý người dùng</option>
-            <option>Quản lý nội dung</option>
+            <option>Quản lý Mentor</option>
         </select>
     </div>
-
     <div class="form-group">
         <label>
             Toàn quyền hệ thống <br>
@@ -167,7 +161,6 @@
         document.getElementById("footer").innerHTML = data;
     });
 </script>
-
 <script>
     function selectRole(role) {
         document.querySelectorAll('.role-option').forEach(option => {

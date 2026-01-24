@@ -12,6 +12,7 @@ from schemas.chat_schemas import (
     MessageCreate, MessageResponse,
     AudioUploadRequest, AudioAnalysisResponse
 )
+from utils.validators import sanitize_text
 from services.chat_service import ChatService
 from services.websocket_manager import WebSocketManager
 from services.ai_processor import AIProcessor
@@ -67,6 +68,9 @@ async def send_message(
     message_data: MessageCreate,
     db: Session = Depends(get_db)
 ):
+    # Sanitize input trước khi xử lý
+    message_data.text = sanitize_text(message_data.text)
+
     """Gửi tin nhắn text đến AI"""
     chat_service = ChatService(db)
     
@@ -79,7 +83,7 @@ async def send_message(
     
     # Gửi đến AI để xử lý
     ai_response = await ai_processor.process_user_message(
-        user_message=message_data.text,
+        user_message = message_data.text,
         session_id=session_id,
         language_focus=message_data.language_focus
     )
@@ -115,6 +119,7 @@ async def upload_audio_file(
         language_code=audio_data.language_code or "en-US"
     )
     
+
     # Phân tích text
     analysis = await ai_processor.analyze_speech(
         text=text_result["text"],
@@ -158,6 +163,7 @@ async def websocket_chat(
 ):
     """WebSocket cho chat real-time với audio streaming"""
     # Xác thực token (trong thực tế)
+    # TODO: Xác thực token (trong thực tế)
     # user_id = authenticate_token(token)
     
     await websocket_manager.connect(websocket, session_id)
@@ -166,7 +172,7 @@ async def websocket_chat(
         while True:
             data = await websocket.receive_json()
             message_type = data.get("type")
-            
+
             if message_type == "audio_chunk":
                 # Xử lý chunk audio
                 await handle_audio_chunk(
@@ -175,7 +181,7 @@ async def websocket_chat(
                     chunk_data=data.get("data"),
                     timestamp=data.get("timestamp")
                 )
-                
+
             elif message_type == "text_message":
                 # Xử lý text message
                 await handle_text_message(
@@ -184,7 +190,7 @@ async def websocket_chat(
                     text=data.get("text"),
                     message_id=data.get("message_id")
                 )
-                
+
             elif message_type == "typing":
                 # User đang typing
                 await websocket_manager.broadcast(
@@ -202,6 +208,8 @@ async def handle_audio_chunk(websocket, session_id, chunk_data, timestamp):
     """Xử lý audio chunk từ client"""
     # Gửi chunk đến AI service để xử lý real-time
     # TODO: Implement audio streaming logic (e.g., send to RabbitMQ or Speech-to-Text stream)
+    # TODO: Implement audio streaming logic. 
+    # Ví dụ: Đẩy vào RabbitMQ để AI-core-service xử lý hoặc gọi gRPC stream
     pass
 
 async def handle_text_message(websocket, session_id, text, message_id):

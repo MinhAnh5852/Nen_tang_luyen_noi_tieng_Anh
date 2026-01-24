@@ -1,11 +1,19 @@
-<!-- sections/tasks.html -->
-<div class="content-card">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <h2 style="margin:0; font-weight:900;" data-i18n="tasksTitle">Giao Bài</h2>
-    <button id="assignNewTaskBtn" class="btn btn-primary btn-sm" type="button" data-i18n="assignNewTask">Giao Bài Mới</button>
+<div class="content-card" style="border-radius: 16px; padding: 20px;">
+  <h2 style="margin: 0 0 12px 0; font-weight: 900; font-size: 1.5rem;">Giao Bài</h2>
+  
+  <div style="margin-bottom: 24px;">
+    <button id="assignNewTaskBtn" class="btn btn-primary btn-sm" style="border-radius: 8px;">
+        <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Giao Bài Mới
+    </button>
   </div>
 
-  <div class="mini-card" style="margin-top:12px;">
-    <ul id="tasksUl" style="margin:0 0 0 16px;"></ul>
+  <div class="mini-card" style="border-radius: 12px; padding: 20px; background-color: rgba(255,255,255,0.05); min-height: 150px; display: flex; align-items: center; justify-content: center;">
+    <div id="noDataMessage" style="text-align: center; color: #a1a1aa;">
+        <i class="fa-regular fa-folder-open" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+        <p style="margin: 0;">Chưa có bài tập nào được giao.</p>
+    </div>
+    
+    <ul id="tasksUl" style="margin: 0; padding: 0; list-style-type: none; width: 100%; display: none;">
+    </ul>
   </div>
 </div>
