@@ -7,6 +7,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid4()))
+    username = db.Column(db.String(100), nullable=True)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.String(50), default="learner")

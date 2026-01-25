@@ -38,7 +38,9 @@ class SubscriptionService:
 
     @staticmethod
     def get_subscription_by_user(user_id: str):
-        return Subscription.query.filter_by(user_id=user_id).first()
+        return Subscription.query.filter_by(user_id=user_id, status="ACTIVE")\
+                                 .order_by(Subscription.created_at.desc())\
+                                 .first()
 
     @staticmethod
     def activate_subscription(subscription_id: str):

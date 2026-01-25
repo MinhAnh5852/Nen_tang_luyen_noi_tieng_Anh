@@ -1,14 +1,14 @@
-# 1. Sử dụng Nginx Alpine siêu nhẹ
 FROM nginx:alpine
 
-# 2. Xóa sạch file mặc định của Nginx (Để không bao giờ hiện trang Welcome nữa)
+# Xóa cấu hình mặc định
 RUN rm -rf /usr/share/nginx/html/*
 
-# 3. Copy toàn bộ code (gồm index.html, folder admin, folder learner) vào container
-COPY . /usr/share/nginx/html
+# Sao chép nội dung thư mục Learner vào thư mục gốc của Nginx
+COPY ./Learner /usr/share/nginx/html
 
-# 4. Mở cổng
+# Cấp quyền truy cập
+RUN chmod -R 755 /usr/share/nginx/html
+
 EXPOSE 80
 
-# 5. Chạy Nginx
 CMD ["nginx", "-g", "daemon off;"]

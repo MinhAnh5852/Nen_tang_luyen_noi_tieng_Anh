@@ -8,3 +8,4 @@ python-dotenv
 flask-cors
 pika
 psycopg2-binary
+flask-jwt-extended

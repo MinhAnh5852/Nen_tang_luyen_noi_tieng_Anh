@@ -19,3 +19,4 @@ class Payment(db.Model):
 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     paid_at = db.Column(db.DateTime, nullable=True)
+    package_id = db.Column(db.String, nullable=True)

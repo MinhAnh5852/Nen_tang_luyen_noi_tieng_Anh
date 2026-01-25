@@ -1,12 +1,40 @@
 from flask import Blueprint, request, jsonify
-from flask_limiter import Limiter
-
+from werkzeug.security import generate_password_hash
+from database import db
 from services.user_service import AuthService
 from models.user import User
 
 auth_bp = Blueprint("auth", __name__)
 
-@auth_bp.route("/auth/login", methods=["POST"])
+@auth_bp.route("/register", methods=["POST"])
+def register():
+    data = request.get_json() or {}
+    username = data.get("username")
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password")
+    role = (data.get("role") or "learner").lower()
+
+    if not email or not password:
+        return jsonify({"message": "Thiếu email hoặc mật khẩu"}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"message": "Email đã tồn tại"}), 409
+
+    try:
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password),
+            role=role
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"message": "Đăng ký thành công"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": str(e)}), 500
+
+@auth_bp.route("/login", methods=["POST"])
 def login():
     if not request.is_json:
         return jsonify({"error": "Content-Type must be application/json"}), 415
@@ -15,28 +43,21 @@ def login():
     email = (data.get("email") or "").strip().lower()
     password = data.get("password")
 
-    if not email:
-        return jsonify({"error": "Missing field: email"}), 400
-    if not password:
-        return jsonify({"error": "Missing field: password"}), 400
-
     try:
-        # AuthService login: validate credentials + issue JWT
+        # Gọi AuthService để xác thực và lấy token
         token = AuthService().login(email, password)
-
-        # Query user to return user_id + role (string)
         user = User.query.filter_by(email=email).first()
-
-        # An toàn: user vẫn có thể None nếu DB lỗi, nhưng hiếm
-        user_id = getattr(user, "id", None)
-        role_obj = getattr(user, "role", None)
-        role_str = getattr(role_obj, "value", None) or (str(role_obj) if role_obj is not None else None)
+        
+        # Chuyển role sang string để Frontend dễ xử lý
+        role_str = user.role_str
 
         return jsonify({
             "token": token,
-            "user_id": user_id,
-            "role": role_str
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "role": role_str
+            }
         }), 200
-
-    except Exception:
-        return jsonify({"error": "Invalid credentials"}), 401
+    except Exception as e:
+        return jsonify({"error": "Sai thông tin đăng nhập"}), 401
