@@ -2,57 +2,220 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>Quản lý Gói dịch vụ</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/users.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 20px; }
-        .price-val { font-size: 24px; font-weight: 700; color: var(--primary); margin: 12px 0; }
-        .feature-list { margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .price-val { font-size: 24px; font-weight: 700; color: #7f56d9; margin: 12px 0; }
+        .feature-list { margin: 16px 0; padding-top: 16px; border-top: 1px solid #eee; min-height: 120px; }
         .feature-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
-        .feature-item i { color: var(--success); font-size: 12px; }
+        .feature-item i { color: #12b76a; font-size: 12px; }
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 5% auto; padding: 24px; width: 450px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
+        
+        /* Style cho nút icon xóa/sửa */
+        .action-btns { display: flex; gap: 10px; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-edit { color: #7f56d9; }
+        .btn-delete { color: #f04438; }
+        .btn-icon:hover { opacity: 0.7; transform: scale(1.1); }
+
+        .badge-purple-border { border: 1px solid #7f56d9; color: #7f56d9; background: #f9f5ff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-gray-border { border: 1px solid #344054; color: #344054; background: #f2f4f7; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="page-container">
         <div class="page-header">
             <h1 class="page-title">Cấu hình Gói dịch vụ</h1>
-            <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Thêm gói mới</button>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <i class="fa-solid fa-plus"></i> Thêm gói mới
+            </button>
         </div>
 
-        <div class="pricing-grid">
-            <div class="table-card" style="padding: 24px;">
-                <div style="display: flex; justify-content: space-between;">
-                    <span class="badge badge-purple-border">Phổ biến nhất</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
-                </div>
-                <h3 style="margin-top: 15px;">Premium AI</h3>
-                <div class="price-val">199.000đ <span style="font-size: 14px; color: var(--text-light); font-weight: 400;">/tháng</span></div>
-                
-                <div class="feature-list">
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> Không giới hạn hội thoại AI</div>
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> Phân tích ngữ pháp nâng cao</div>
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> Truy cập tất cả chủ đề B1-C1</div>
-                </div>
-                <button class="btn btn-dark" style="width: 100%;">Chỉnh sửa quyền lợi</button>
-            </div>
+        <div class="pricing-grid" id="pricing-container">
+            <p>Đang kết nối đến hệ thống...</p>
+        </div>
+    </div>
 
-            <div class="table-card" style="padding: 24px;">
-                <div style="display: flex; justify-content: space-between;">
-                    <span class="badge badge-gray-border">VIP</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
-                </div>
-                <h3 style="margin-top: 15px;">Mentor Support</h3>
-                <div class="price-val">499.000đ <span style="font-size: 14px; color: var(--text-light); font-weight: 400;">/tháng</span></div>
-                
-                <div class="feature-list">
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> Bao gồm tất cả tính năng AI</div>
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> 4 buổi học 1:1 với Cố vấn</div>
-                    <div class="feature-item"><i class="fa-solid fa-check"></i> Lộ trình cá nhân hóa</div>
-                </div>
-                <button class="btn btn-dark" style="width: 100%;">Chỉnh sửa quyền lợi</button>
+    <div id="planModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="margin-bottom: 20px;">Thông tin Gói mới</h3>
+            <div class="form-group">
+                <label>Tên gói</label>
+                <input type="text" id="planName" placeholder="Ví dụ: Premium AI">
+            </div>
+            <div class="form-group">
+                <label>Giá (VNĐ)</label>
+                <input type="number" id="planPrice" placeholder="199000">
+            </div>
+            <div class="form-group">
+                <label>Nhãn (Badge)</label>
+                <input type="text" id="planBadge" placeholder="VIP / Phổ biến">
+            </div>
+            <div class="form-group">
+                <label>Tính năng (cách nhau bằng dấu phẩy)</label>
+                <textarea id="planFeatures" rows="3" placeholder="Chat không giới hạn, Học 1:1..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" style="flex: 2;" onclick="savePlan()">Lưu lại</button>
+                <button class="btn btn-dark" style="flex: 1;" onclick="closeModal()">Hủy</button>
             </div>
         </div>
     </div>
+
+    <script>
+        const API_URL = '/api/subscriptions/plans'; 
+        let editingPlanId = null; // null = Thêm mới, có giá trị = Đang sửa
+
+        document.addEventListener('DOMContentLoaded', fetchPlans);
+
+        // 1. Lấy dữ liệu
+        async function fetchPlans() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error(`Lỗi server: ${res.status}`);
+                const plans = await res.json();
+                renderPlans(plans);
+            } catch (err) {
+                console.error("Fetch error:", err);
+                document.getElementById('pricing-container').innerHTML = 
+                    `<div style="color: red; padding: 20px;">⚠️ Không thể tải dữ liệu.</div>`;
+            }
+        }
+
+        // 2. Hiển thị Card
+        function renderPlans(plans) {
+            const container = document.getElementById('pricing-container');
+            container.innerHTML = (plans.length === 0) ? '<p>Chưa có gói dịch vụ nào.</p>' : '';
+
+            plans.forEach(plan => {
+                let featuresList = Array.isArray(plan.features) ? plan.features : 
+                                  (plan.features ? plan.features.split(',') : []);
+                
+                const badgeClass = plan.badge_text === 'VIP' ? 'badge-gray-border' : 'badge-purple-border';
+                
+                const card = document.createElement('div');
+                card.className = 'table-card';
+                card.style.padding = '24px';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <span class="badge ${badgeClass}">${plan.badge_text || 'Gói'}</span>
+                        <div class="action-btns">
+                            <button class="btn-icon btn-edit" title="Sửa" onclick="openEditModal('${plan.id}', '${plan.name}', ${plan.price}, '${plan.badge_text || ''}', '${plan.features || ''}')">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" title="Xóa" onclick="deletePlan('${plan.id}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 style="margin-top: 15px;">${plan.name}</h3>
+                    <div class="price-val">${Number(plan.price).toLocaleString('vi-VN')}đ</div>
+                    <div class="feature-list">
+                        ${featuresList.map(f => `
+                            <div class="feature-item"><i class="fa-solid fa-check"></i> ${f.trim()}</div>
+                        `).join('')}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <span style="font-size: 13px; color: #666;">Trạng thái:</span>
+                        <label class="switch">
+                            <input type="checkbox" ${plan.is_active ? 'checked' : ''} onchange="togglePlan('${plan.id}')">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 3. Xử lý Lưu (Thêm/Sửa)
+        async function savePlan() {
+            const name = document.getElementById('planName').value;
+            const price = document.getElementById('planPrice').value;
+            if (!name || !price) return alert("Vui lòng nhập tên và giá!");
+
+            const data = {
+                name: name,
+                price: parseFloat(price),
+                badge_text: document.getElementById('planBadge').value,
+                features: document.getElementById('planFeatures').value,
+                duration_days: 30
+            };
+
+            const method = editingPlanId ? 'PUT' : 'POST';
+            const url = editingPlanId ? `${API_URL}/${editingPlanId}` : API_URL;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    fetchPlans();
+                } else {
+                    alert('Lỗi khi thực hiện thao tác!');
+                }
+            } catch (err) {
+                alert('Không thể kết nối đến Server!');
+            }
+        }
+
+        // 4. Xóa gói
+        async function deletePlan(id) {
+            if (!confirm("Trọng có chắc chắn muốn xóa gói này không? Thao tác này không thể hoàn tác!")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    fetchPlans();
+                } else {
+                    alert("Lỗi khi xóa gói!");
+                }
+            } catch (err) {
+                alert("Lỗi kết nối server!");
+            }
+        }
+
+        // 5. Bật tắt trạng thái
+        async function togglePlan(id) {
+            try {
+                await fetch(`${API_URL}/toggle/${id}`, { method: 'POST' });
+            } catch (err) { console.error("Toggle error:", err); }
+        }
+
+        // Helpers cho Modal
+        function openAddModal() {
+            editingPlanId = null;
+            document.getElementById('modalTitle').innerText = "Thông tin Gói mới";
+            clearForm();
+            openModal();
+        }
+
+        function openEditModal(id, name, price, badge, features) {
+            editingPlanId = id;
+            document.getElementById('modalTitle').innerText = "Chỉnh sửa Gói dịch vụ";
+            document.getElementById('planName').value = name;
+            document.getElementById('planPrice').value = price;
+            document.getElementById('planBadge').value = badge;
+            document.getElementById('planFeatures').value = features;
+            openModal();
+        }
+
+        function openModal() { document.getElementById('planModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('planModal').style.display = 'none'; }
+        function clearForm() {
+            document.querySelectorAll('.modal-content input, .modal-content textarea').forEach(el => el.value = '');
+        }
+    </script>
 </body>
 </html>

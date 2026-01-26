@@ -1,47 +1,88 @@
-from flask import Blueprint, request, jsonify
-from services.subscription_service import SubscriptionService
+from flask import Blueprint, jsonify, request
+from models.subscription import SubscriptionPlan 
+from database import db
 
-subscription_bp = Blueprint("subscription", __name__)
+sub_bp = Blueprint("subscription", __name__)
 
-@subscription_bp.route("/status", methods=["GET"])
-def get_subscription_status():
-    user_id = request.args.get("user_id")
-    if not user_id:
-        return jsonify({"message": "Missing user_id"}), 400
+# 1. Lấy danh sách gói
+@sub_bp.route("/plans", methods=["GET"])
+def get_plans():
+    try:
+        plans = SubscriptionPlan.query.all()
+        return jsonify([p.to_dict() for p in plans]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    # Lấy gói ACTIVE mới nhất từ service đã sửa ở trên
-    subscription = SubscriptionService.get_subscription_by_user(user_id)
+# 2. Tạo gói mới
+@sub_bp.route("/plans", methods=["POST"])
+def create_plan():
+    data = request.get_json()
+    try:
+        raw_features = data.get('features', '')
+        if isinstance(raw_features, list):
+            raw_features = ",".join(raw_features)
+
+        new_plan = SubscriptionPlan(
+            name=data.get('name'),
+            price=data.get('price'),
+            duration_days=data.get('duration_days', 30),
+            badge_text=data.get('badge_text', ''),
+            features=raw_features,
+            is_active=True
+        )
+        db.session.add(new_plan)
+        db.session.commit()
+        return jsonify(new_plan.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+
+# 3. Cập nhật gói (MỚI THÊM)
+@sub_bp.route("/plans/<string:id>", methods=["PUT"])
+def update_plan(id):
+    data = request.get_json()
+    plan = db.session.get(SubscriptionPlan, id)
+    if not plan:
+        return jsonify({"message": "Không tìm thấy gói"}), 404
     
-    if not subscription:
-        return jsonify({
-            "status": "inactive",
-            "package_name": "Gói Miễn phí",
-            "end_date": None
-        }), 200
+    try:
+        plan.name = data.get('name', plan.name)
+        plan.price = data.get('price', plan.price)
+        plan.badge_text = data.get('badge_text', plan.badge_text)
+        
+        # Xử lý features tương tự như khi tạo mới
+        features = data.get('features', plan.features)
+        if isinstance(features, list):
+            features = ",".join(features)
+        plan.features = features
+        
+        db.session.commit()
+        return jsonify(plan.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
 
-    # Ánh xạ tên hiển thị
-    package_names = {
-        "BASIC_MONTHLY": "Gói Cơ bản",
-        "PREMIUM_MONTHLY": "Gói Premium"
-    }
+# 4. Bật/Tắt gói
+@sub_bp.route("/plans/toggle/<string:id>", methods=["POST"])
+def toggle_plan(id):
+    plan = db.session.get(SubscriptionPlan, id)
+    if not plan:
+        return jsonify({"message": "Không tìm thấy gói"}), 404
+    
+    plan.is_active = not plan.is_active
+    db.session.commit()
+    return jsonify({"message": "Thành công", "is_active": plan.is_active}), 200
 
-    return jsonify({
-        "status": "active",
-        "package_name": package_names.get(subscription.package_id, subscription.package_id),
-        "end_date": subscription.end_date.isoformat()
-    }), 200
-# Các route khác giữ nguyên nhưng bỏ tiền tố /subscriptions nếu Nginx đã cấu hình
-@subscription_bp.route("/", methods=["POST"])
-def create_subscription():
-    data = request.get_json(force=True) or {}
-    required = ["user_id", "package_id", "start_date", "end_date"]
-    if not all(data.get(k) for k in required):
-        return jsonify({"message": "Missing fields"}), 400
-
-    subscription = SubscriptionService.create_subscription(
-        user_id=data["user_id"],
-        package_id=data["package_id"],
-        start_date=data["start_date"],
-        end_date=data["end_date"]
-    )
-    return jsonify({"id": subscription.id, "status": subscription.status}), 201
+# 5. Xóa gói (Đã có sẵn của bạn)
+@sub_bp.route("/plans/<string:id>", methods=["DELETE"])
+def delete_plan(id):
+    plan = db.session.get(SubscriptionPlan, id)
+    if not plan:
+        return jsonify({"message": "Không tồn tại"}), 404
+    try:
+        db.session.delete(plan)
+        db.session.commit()
+        return jsonify({"message": "Đã xóa"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

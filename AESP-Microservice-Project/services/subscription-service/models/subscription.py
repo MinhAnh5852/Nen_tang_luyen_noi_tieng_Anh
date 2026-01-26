@@ -1,17 +1,31 @@
 from database import db
-from uuid import uuid4
-from datetime import datetime
+import uuid
 
-class Subscription(db.Model):
-    __tablename__ = "subscriptions"
+class SubscriptionPlan(db.Model):
+    __tablename__ = 'subscription_plans'
+    
+    # Dùng String(36) cho UUID là chuẩn bài
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False, default=0.0)
+    duration_days = db.Column(db.Integer, default=30)
+    badge_text = db.Column(db.String(50))
+    features = db.Column(db.Text) # Lưu dạng chuỗi "Feature 1, Feature 2"
+    is_active = db.Column(db.Boolean, default=True)
 
-    id = db.Column(db.String, primary_key=True, default=lambda: str(uuid4()))
-    user_id = db.Column(db.String, nullable=False, index=True)
-    package_id = db.Column(db.String, nullable=False)
+    def to_dict(self):
+        # Đảm bảo xử lý trường hợp features bị None/Empty một cách an toàn
+        features_list = []
+        if self.features:
+            # Tách chuỗi và xóa khoảng trắng thừa của từng phần tử
+            features_list = [f.strip() for f in self.features.split(',') if f.strip()]
 
-    status = db.Column(db.String, nullable=False, default="ACTIVE")  # ACTIVE | CANCELLED | EXPIRED
-
-    start_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=False)
-
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+        return {
+            "id": self.id,
+            "name": self.name,
+            "price": self.price,
+            "duration_days": self.duration_days,
+            "badge_text": self.badge_text or "",
+            "features": features_list,
+            "is_active": self.is_active
+        }

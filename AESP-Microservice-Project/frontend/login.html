@@ -6,7 +6,9 @@
     <title>Đăng nhập - AESP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/Learner/styles.css" />
+    
+    <link rel="stylesheet" href="Learner/styles.css" />
+    
     <style>
       .auth-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 40px 0; margin-top: 80px; }
       .error-message { color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; padding: 10px; background: #fdf2f2; border-radius: 5px; border: 1px solid #facccc; text-align: center; }
@@ -51,9 +53,7 @@
               Đăng nhập
             </button>
 
-            <div class="divider">
-              <span>Hoặc đăng nhập với</span>
-            </div>
+            <div class="divider"><span>Hoặc đăng nhập với</span></div>
 
             <div class="social-login">
               <button type="button" class="social-btn" id="google-btn">
@@ -89,16 +89,14 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // --- HÀM ĐỒNG BỘ VỚI MYSQL VÀ ĐIỀU HƯỚNG ---
       async function syncAndRedirect(firebaseUser) {
           const btn = document.getElementById('submit-btn');
           const errorDiv = document.getElementById('login-error');
           
-          btn.innerText = "Đang đồng bộ hệ thống...";
+          btn.innerText = "⏳ Đang đồng bộ MySQL...";
           btn.classList.add('btn-loading');
 
           try {
-              // Gọi API liên kết (chỉ gửi Email và Username)
               const response = await fetch('/api/users/auth/login-firebase', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -108,62 +106,61 @@
                   })
               });
 
-              const data = await response.json();
+              const contentType = response.headers.get("content-type");
+              if (!contentType || !contentType.includes("application/json")) {
+                  throw new Error("Lỗi kết nối Gateway! Nginx chưa trỏ đúng vào User Service.");
+              }
 
+              const data = await response.json();
               if (!response.ok) throw new Error(data.error || "Lỗi đồng bộ dữ liệu MySQL!");
 
-              // Lưu thông tin từ MySQL vào LocalStorage
               localStorage.setItem('token', data.token);
               localStorage.setItem('user_role', data.user.role.toLowerCase());
               localStorage.setItem('user_email', data.user.email);
               localStorage.setItem('username', data.user.username);
 
               const role = data.user.role.toLowerCase();
-              
-              // Điều hướng dựa trên Role trong MySQL
-              if (role === 'admin') {
-                  window.location.href = '/admin/index.html';
-              } else if (role === 'mentor') {
-                  window.location.href = '/mentor/mentor.html'; 
-              } else {
-                  window.location.href = '/index.html'; 
-              }
+              if (role === 'admin') window.location.href = '/admin/index.html';
+              else if (role === 'mentor') window.location.href = '/mentor/mentor.html'; 
+              else window.location.href = '/Learner/learner.html'; 
 
           } catch (error) {
               errorDiv.innerText = "❌ " + error.message;
               errorDiv.style.display = "block";
               btn.innerText = "Đăng nhập";
               btn.classList.remove('btn-loading');
-              
-              // Nếu MySQL từ chối, thoát Firebase luôn
               await signOut(auth); 
           }
       }
 
-      // Đăng nhập Email/Pass qua Firebase
       document.getElementById('login-form').onsubmit = async (e) => {
           e.preventDefault();
           const email = document.getElementById('login-email').value;
           const password = document.getElementById('login-password').value;
-          const errorDiv = document.getElementById('login-error');
-          errorDiv.style.display = "none";
-
           try {
               const result = await signInWithEmailAndPassword(auth, email, password);
               await syncAndRedirect(result.user);
           } catch (error) {
-              errorDiv.innerText = "Email hoặc mật khẩu không đúng!";
-              errorDiv.style.display = "block";
+              document.getElementById('login-error').innerText = "Email hoặc mật khẩu không đúng!";
+              document.getElementById('login-error').style.display = "block";
           }
       };
 
-      // Đăng nhập Google qua Firebase
       document.getElementById('google-btn').onclick = async () => {
           try {
-              const result = await signInWithPopup(auth, new GoogleAuthProvider());
+              const provider = new GoogleAuthProvider();
+              
+              // Ép hiển thị bảng chọn tài khoản Google
+              provider.setCustomParameters({
+                  prompt: 'select_account'
+              });
+
+              const result = await signInWithPopup(auth, provider);
               await syncAndRedirect(result.user);
           } catch (error) {
-              alert("Lỗi Google: " + error.message);
+              if (error.code !== 'auth/popup-closed-by-user') {
+                alert("Lỗi Google: " + error.message);
+              }
           }
       };
 
@@ -171,7 +168,7 @@
       fetch("/Learner/footer.html")
         .then((r) => r.text())
         .then((d) => (document.getElementById("footer").innerHTML = d))
-        .catch(err => console.warn("Chưa có file footer"));
+        .catch(err => console.warn("Không tìm thấy footer"));
     </script>
   </body>
 </html>

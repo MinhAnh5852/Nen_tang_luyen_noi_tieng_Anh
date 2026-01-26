@@ -1,57 +1,17 @@
-from models.subscription import Subscription
+from models.subscription import SubscriptionPlan
 from database import db
-from datetime import datetime
-
-def _parse_iso_datetime(value: str) -> datetime:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError("Invalid datetime string")
-    s = value.strip()
-    if s.endswith("Z"):
-        s = s[:-1]
-    return datetime.fromisoformat(s)
 
 class SubscriptionService:
     @staticmethod
-    def create_subscription(user_id, package_id, start_date, end_date):
-        start_dt = _parse_iso_datetime(start_date) if isinstance(start_date, str) else start_date
-        end_dt = _parse_iso_datetime(end_date) if isinstance(end_date, str) else end_date
-
-        subscription = Subscription(
-            user_id=user_id,
-            package_id=package_id,
-            start_date=start_dt,
-            end_date=end_dt,
-            status="ACTIVE"
-        )
-        db.session.add(subscription)
-        db.session.commit()
-        return subscription
-
-    @staticmethod
-    def cancel_subscription(subscription_id: str):
-        subscription = Subscription.query.get(subscription_id)
-        if not subscription:
-            return None
-        subscription.status = "CANCELLED"
-        db.session.commit()
-        return subscription
-
-    @staticmethod
-    def get_subscription_by_user(user_id: str):
-        return Subscription.query.filter_by(user_id=user_id, status="ACTIVE")\
-                                 .order_by(Subscription.created_at.desc())\
-                                 .first()
-
-    @staticmethod
-    def activate_subscription(subscription_id: str):
+    def get_subscription_by_user(user_id):
         """
-        Option A: chỉ activate subscription đã tồn tại (không tạo mới)
+        Logic kiểm tra gói của User. 
+        Hiện tại bạn mới có bảng subscription_plans (danh sách gói), 
+        chưa có bảng UserSubscriptions (người dùng nào mua gói nào).
+        Tạm thời trả về None để hệ thống không crash.
         """
-        subscription = Subscription.query.get(subscription_id)
-        if not subscription:
+        try:
+            # Sau này Trọng sẽ code thêm bảng UserSubscriptions ở đây
+            return None 
+        except Exception as e:
             return None
-        if subscription.end_date < datetime.utcnow():
-            raise ValueError("Subscription expired")
-        subscription.status = "ACTIVE"
-        db.session.commit()
-        return subscription
