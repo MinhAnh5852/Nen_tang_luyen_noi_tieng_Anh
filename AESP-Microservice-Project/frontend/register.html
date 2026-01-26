@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - AESP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Learner/styles.css" />
+    <style>
+      .auth-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 40px 0; margin-top: 80px; }
+      .role-option.selected { border: 2px solid var(--primary-color); background: #f0f7ff; }
+      .error-message { color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; padding: 10px; background: #fdf2f2; border-radius: 5px; border: 1px solid #facccc; text-align: center; }
+      .btn-loading { pointer-events: none; opacity: 0.7; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-container">
+        <a href="index.html" class="logo">
+          <i class="fas fa-robot logo-icon"></i>
+          <span class="logo-text">AESP</span>
+        </a>
+        <div class="auth-buttons">
+          <a href="index.html" class="btn btn-outline">Trở về trang chủ</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>Đăng ký tài khoản</h2>
+            <p>Tạo tài khoản để bắt đầu luyện nói tiếng Anh với AI</p>
+          </div>
+
+          <form class="auth-form" id="register-form">
+            <div class="role-selection" style="display: flex; gap: 10px; margin-bottom: 20px">
+              <div class="role-option" data-role="learner" onclick="selectRole('learner')" style="cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1; text-align: center;">
+                <i class="fas fa-user-graduate"></i>
+                <h4>Học viên</h4>
+              </div>
+              <div class="role-option" data-role="mentor" onclick="selectRole('mentor')" style="cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1; text-align: center;">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h4>Mentor</h4>
+              </div>
+            </div>
+
+            <input type="hidden" id="user-role" name="role" value="learner" />
+
+            <div class="form-group">
+              <label for="register-name">Họ và tên</label>
+              <input type="text" id="register-name" placeholder="Nhập họ và tên" required />
+            </div>
+
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input type="email" id="register-email" placeholder="Nhập địa chỉ email" required />
+            </div>
+
+            <div class="form-group">
+              <label for="register-password">Mật khẩu</label>
+              <input type="password" id="register-password" placeholder="Tối thiểu 8 ký tự" required />
+            </div>
+
+            <div id="register-error" class="error-message"></div>
+
+            <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; padding: 15px; margin-top: 10px;">
+              Đăng ký tài khoản
+            </button>
+
+            <div class="form-footer">
+              <p>Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a></p>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div id="footer"></div>
+    </main>
+
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+      apiKey: "AIzaSyAR_mMEOLmcQeewl7ECynfLe-0ymFiqx9g",
+      authDomain: "pj-luyen-noi-tieng-anh.firebaseapp.com",
+      projectId: "pj-luyen-noi-tieng-anh",
+      storageBucket: "pj-luyen-noi-tieng-anh.firebasestorage.app",
+      messagingSenderId: "835156032196",
+      appId: "1:835156032196:web:b8920adabf15ace0bbe791"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Gắn hàm vào window để onclick trong HTML nhận được
+  window.selectRole = function(role) {
+      document.querySelectorAll(".role-option").forEach((opt) => opt.classList.remove("selected"));
+      const selected = document.querySelector(`.role-option[data-role="${role}"]`);
+      if(selected) selected.classList.add("selected");
+      document.getElementById("user-role").value = role;
+  }
+
+  document.getElementById("register-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const errorDiv = document.getElementById('register-error');
+      
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value.trim().toLowerCase();
+      const password = document.getElementById('register-password').value;
+      const role = document.getElementById("user-role").value;
+
+      errorDiv.style.display = "none";
+      btn.innerText = "Đang xử lý...";
+      btn.classList.add('btn-loading');
+
+      try {
+          // 1. Tạo User trên Firebase
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          
+          // 2. Gọi API Backend (Đường dẫn qua Gateway cổng 80)
+          const response = await fetch('/api/users/auth/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  username: name,
+                  email: email,
+                  password: password, 
+                  role: role
+              })
+          });
+
+          // Xử lý lỗi từ Backend an toàn hơn
+          if (!response.ok) {
+              const contentType = response.headers.get("content-type");
+              let errorMessage = "Lỗi đồng bộ dữ liệu MySQL";
+              if (contentType && contentType.indexOf("application/json") !== -1) {
+                  const data = await response.json();
+                  errorMessage = data.message || data.error || errorMessage;
+              }
+              throw new Error(errorMessage);
+          }
+
+          alert("Đăng ký thành công! Hãy đăng nhập.");
+          window.location.href = "/login.html"; // Dùng / ở đầu
+
+      } catch (error) {
+          console.error("Register Error:", error);
+          errorDiv.innerText = "❌ " + (error.message.includes("email-already-in-use") ? "Email này đã được đăng ký trên hệ thống!" : error.message);
+          errorDiv.style.display = "block";
+          btn.innerText = "Đăng ký tài khoản";
+          btn.classList.remove('btn-loading');
+      }
+  };
+
+  // Khởi tạo Role mặc định và load Footer
+  document.addEventListener("DOMContentLoaded", () => {
+      window.selectRole("learner");
+      // Sửa đường dẫn Footer
+      fetch("Learner/footer.html").then(r => r.text()).then(d => {
+          document.getElementById("footer").innerHTML = d;
+      }).catch(err => console.log("Chưa có footer"));
+  });
+</script>
+  </body>
+</html>

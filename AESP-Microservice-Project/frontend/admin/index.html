@@ -7,11 +7,16 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Thêm hiệu ứng click cho badge RabbitMQ */
+        .badge-green { cursor: pointer; transition: 0.3s; }
+        .badge-green:hover { filter: brightness(1.1); transform: scale(1.05); }
+        .logout-btn { cursor: pointer; }
+    </style>
 </head>
 <body>
 
     <div class="app-container">
-
         <aside class="sidebar">
             <div class="sidebar-header">
                 <i class="fa-solid fa-robot brand-icon"></i>
@@ -24,7 +29,6 @@
                             <i class="fa-solid fa-chart-line"></i> Dashboard
                         </a>
                     </li>
-                    
                     <li class="nav-label">Quản lý User</li>
                     <li>
                         <a href="users.html" target="content-frame" class="nav-link">
@@ -36,7 +40,6 @@
                             <i class="fa-solid fa-chalkboard-user"></i> Cố vấn (Mentors)
                         </a>
                     </li>
-
                     <li class="nav-label">Kinh doanh & Nội dung</li>
                     <li>
                         <a href="packages.html" target="content-frame" class="nav-link">
@@ -53,7 +56,6 @@
                             <i class="fa-solid fa-comments"></i> Phản hồi & Bình luận
                         </a>
                     </li>
-
                     <li class="nav-label">Hệ thống</li>
                     <li>
                         <a href="reports.html" target="content-frame" class="nav-link">
@@ -68,37 +70,35 @@
                 </ul> 
             </nav>
             <div class="sidebar-footer">
-                <div class="logout-btn">
+                <div class="logout-btn" id="btn-logout">
                     <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                 </div>
             </div>
         </aside>
 
         <main class="main-wrapper">
-            
             <header class="top-nav">
                 <div class="header-left">
                     <i class="fa-solid fa-bars menu-toggle"></i>
                     <span>English Speaking Practice Platform Supported by AI</span>
                 </div>
-                <!-- // để liên kết đến RabbitMQ -->
                 <div class="header-right">
-                    <div class="badge badge-green">
+                    <div class="badge badge-green" id="rabbitmq-link" title="Mở trang quản trị RabbitMQ">
                         <span class="status-dot blink"></span>
                         RabbitMQ Connected
                     </div>
-                    <!-- xem thông báo  -->
+                    
                     <div class="notification-box">
                         <i class="fa-regular fa-bell"></i>
-                        <span class="notification-count"></span>
+                        <span class="notification-count">3</span>
                     </div>
-                    <!-- tên tk đã đăng nhập và role-->
+
                     <div class="user-profile">
                         <div class="user-info">
-                            <p class="user-name"></p>
-                            <p class="user-role"></p>
+                            <p class="user-name" id="display-username">Loading...</p>
+                            <p class="user-role" id="display-role">ADMIN</p>
                         </div>
-                        <div class="user-avatar"></div>
+                        <div class="user-avatar" id="display-avatar">A</div>
                     </div>
                 </div>
             </header>
@@ -107,12 +107,54 @@
                 name="content-frame" 
                 src="dashboard.html" 
                 class="full-iframe"
+                id="main-iframe"
                 title="Main Content">
             </iframe>
-
         </main>
-
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Lấy thông tin từ LocalStorage (Đã lưu ở trang Login)
+            const username = localStorage.getItem('user_email') || "Admin";
+            const role = localStorage.getItem('user_role') || "ADMIN";
+
+            // Hiển thị lên giao diện
+            document.getElementById('display-username').innerText = username.split('@')[0];
+            document.getElementById('display-role').innerText = role.toUpperCase();
+            document.getElementById('display-avatar').innerText = username.substring(0, 1).toUpperCase();
+
+            // 2. Xử lý Đăng xuất
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                if (confirm("Bạn có chắc chắn muốn thoát khỏi hệ thống quản trị?")) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    // Điều hướng về trang login gốc (nhảy ra khỏi thư mục /admin)
+                    window.location.href = '/login.html';
+                }
+            });
+
+            // 3. Liên kết RabbitMQ (Mở tab mới)
+            document.getElementById('rabbitmq-link').addEventListener('click', () => {
+                // Link RabbitMQ Dashboard mặc định khi chạy Docker
+                window.open('http://localhost:15672', '_blank');
+            });
+
+            // 4. Xử lý trạng thái Active cho Sidebar
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // 5. Bảo vệ trang Admin (Auth Guard)
+            if (role.toLowerCase() !== 'admin') {
+                alert("Bạn không có quyền truy cập vùng này!");
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
 </body>
 </html>
