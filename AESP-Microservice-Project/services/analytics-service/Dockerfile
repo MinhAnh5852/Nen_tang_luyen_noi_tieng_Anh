@@ -1,17 +1,17 @@
-# 1. Chọn image Python làm nền
-FROM python:3.10-slim
+FROM python:3.9-slim
 
-# 2. Tạo thư mục làm việc trong container
 WORKDIR /app
 
-# 3. Copy file requirements trước (tối ưu cache)
+# Chỉ cài đặt các thư viện cần thiết cho việc build nếu thực sự cần
+# Với pymysql thường không cần gcc
 COPY requirements.txt .
-
-# 4. Cài thư viện Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy toàn bộ source code vào container
 COPY . .
 
-# 6. Lệnh chạy service
-CMD ["python", "app.py"]
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 5003
+
+# Khởi chạy đồng thời Worker và API
+CMD ["sh", "-c", "python mq_worker.py & python app.py"]  

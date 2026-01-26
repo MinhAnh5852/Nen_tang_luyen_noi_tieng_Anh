@@ -1,3 +1,137 @@
+# version: "3.9"
+
+# services:
+#   # --- DATABASE ---
+#   user-db:
+#     image: mysql:8.0
+#     container_name: user-db
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - user_db_data:/var/lib/mysql
+#       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+#     healthcheck:
+#       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - app-network
+
+#   # --- MESSAGE BROKER ---
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+#     environment:
+#       RABBITMQ_DEFAULT_USER: guest
+#       RABBITMQ_DEFAULT_PASS: guest
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - app-network
+
+#   phpmyadmin:
+#     image: phpmyadmin:latest
+#     container_name: app-phpmyadmin
+#     environment:
+#       PMA_HOST: user-db
+#     ports:
+#       - "8080:80"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: USER SERVICE ---
+#   user-service:
+#     build: ./services/user-service
+#     container_name: user-service
+#     ports:
+#       - "5000:5000"
+#     environment:
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: SUBSCRIPTION SERVICE ---
+#   subscription-service:
+#     build: ./services/subscription-service
+#     container_name: subscription-service
+#     ports:
+#       - "5001:5001"
+#     environment:
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/subscription_db
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#       DEBUG: "True"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: MENTOR MANAGEMENT SERVICE (THÊM MỚI Ở ĐÂY) ---
+#   mentor-management-service:
+#     build: ./services/mentor-management-service
+#     container_name: mentor-management-service
+#     ports:
+#       - "5002:5002"
+#     environment:
+#       PYTHONUNBUFFERED: "1"
+#       # Dùng chung database user_db để quản lý role và thông tin mentor
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+#       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#     # Chạy song song cả Worker và App
+#     command: sh -c "python mq_worker.py & python app.py"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- GATEWAY ---
+#   api-gateway:
+#     build: ./api-gateway
+#     container_name: api-gateway
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./frontend:/usr/share/nginx/html:ro
+#     depends_on:
+#       - user-service
+#       - subscription-service
+#       - mentor-management-service # Phải đợi cả service mentor chạy
+#     restart: always
+#     networks:
+#       - app-network
+
+# volumes:
+#   user_db_data:
+
+# networks:
+#   app-network:
+#     driver: bridge
 version: "3.9"
 
 services:
@@ -87,7 +221,7 @@ services:
     networks:
       - app-network
 
-  # --- BACKEND: MENTOR MANAGEMENT SERVICE (THÊM MỚI Ở ĐÂY) ---
+  # --- BACKEND: MENTOR MANAGEMENT SERVICE ---
   mentor-management-service:
     build: ./services/mentor-management-service
     container_name: mentor-management-service
@@ -95,11 +229,29 @@ services:
       - "5002:5002"
     environment:
       PYTHONUNBUFFERED: "1"
-      # Dùng chung database user_db để quản lý role và thông tin mentor
       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       JWT_SECRET_KEY: change_me_to_a_long_random_secret
-    # Chạy song song cả Worker và App
+    command: sh -c "python mq_worker.py & python app.py"
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # --- BACKEND: ANALYTIC SERVICE (THÊM MỚI Ở ĐÂY) ---
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    ports:
+      - "5003:5003"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
     command: sh -c "python mq_worker.py & python app.py"
     depends_on:
       user-db:
@@ -121,7 +273,8 @@ services:
     depends_on:
       - user-service
       - subscription-service
-      - mentor-management-service # Phải đợi cả service mentor chạy
+      - mentor-management-service
+      - analytics-service # Thêm analytic service vào đây để Gateway đợi nó
     restart: always
     networks:
       - app-network

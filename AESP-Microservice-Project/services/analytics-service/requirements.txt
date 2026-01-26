@@ -1,4 +1,6 @@
 flask
+flask-sqlalchemy
+pymysql
 pika
 flask-cors
 python-dotenv

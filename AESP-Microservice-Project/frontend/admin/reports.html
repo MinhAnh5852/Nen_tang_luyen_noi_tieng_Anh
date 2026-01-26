@@ -3,85 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo cáo hệ thống</title>
+    <title>Báo cáo hệ thống - AESP</title>
     <link rel="stylesheet" href="css/reports.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --text-main: #1e293b; --blue: #3b82f6; --orange: #f59e0b; --red: #ef4444; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .stat-title { color: #64748b; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
+        .progress-track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 1s ease-in-out; }
+        .fill-orange { background: var(--orange); }
+        .fill-blue { background: var(--blue); }
+        .fill-red { background: var(--red); }
+        .pulse-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .badge-gray { background: #e2e8f0; color: #475569; }
+    </style>
 </head>
-<body>
+<body style="background: #f8fafc; padding: 24px; font-family: 'Inter', sans-serif;">
+
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h1 style="font-size: 24px; font-weight: 700; color: var(--text-main);">Báo cáo Hệ thống</h1>
-        <button class="btn-primary" onclick="window.print()">
-            <i class="fa-solid fa-download"></i> Xuất PDF
-        </button>
+        <h1 style="font-size: 24px; font-weight: 700; color: var(--text-main);">Báo cáo Hệ thống (Live)</h1>
+        <div id="error-msg" style="color: red; font-size: 14px;"></div>
+        <div style="display: flex; gap: 10px;">
+            <button style="padding: 8px 16px; cursor: pointer;" onclick="fetchSystemData()">Làm mới</button>
+        </div>
     </div>
 
-    <div class="stats-grid">
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
         <div class="card">
-            <div class="stat-title">RabbitMQ Queue <div class="pulse-dot"></div></div>
-            <div class="stat-value" id="mq-value">0</div>
-            <div class="progress-track"><div id="mq-progress" class="progress-fill fill-orange" style="width: 0%"></div></div>
+            <div class="stat-title">RabbitMQ Status <div class="pulse-dot"></div></div>
+            <div class="stat-value" id="mq-value">Connected</div>
+            <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Queue: <span id="queue-name">user_events</span></div>
+            <div class="progress-track"><div id="mq-progress" class="progress-fill fill-orange" style="width: 100%"></div></div>
         </div>
         <div class="card">
-            <div class="stat-title">API Gateway <span class="badge badge-gray">NGINX</span></div>
-            <div class="stat-value" id="api-value">0</div>
+            <div class="stat-title">Gateway Traffic <span class="badge badge-gray">NGINX</span></div>
+            <div class="stat-value" id="api-value">0 req/s</div>
             <div class="progress-track"><div id="api-progress" class="progress-fill fill-blue" style="width: 0%"></div></div>
         </div>
         <div class="card">
-            <div class="stat-title">Docker Memory <span>Total: 4GB</span></div>
+            <div class="stat-title">Docker Memory <span>4GB</span></div>
             <div class="stat-value" id="mem-value">0 GB</div>
             <div class="progress-track"><div id="mem-progress" class="progress-fill fill-red" style="width: 0%"></div></div>
         </div>
     </div>
 
     <div class="card" style="margin-top: 20px;">
-        <div class="card-header"><h3>Biểu đồ tăng trưởng (User Growth)</h3></div>
-        <div style="height: 300px;"><canvas id="userGrowthChart"></canvas></div>
+        <div class="card-header"><h3 style="margin: 0;">Biểu đồ tăng trưởng</h3></div>
+        <div style="height: 350px;"><canvas id="userGrowthChart"></canvas></div>
+        <p id="last-update" style="font-size: 12px; color: #64748b; text-align: right;"></p>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5005/users/all';
+        // SỬA LẠI ĐƯỜNG DẪN: Dùng đường dẫn tương đối để Gateway xử lý
+        const ANALYTICS_URL = '/api/analytics/summary';
+        let growthChart = null;
+
         async function fetchSystemData() {
             try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("API sập");
-                const users = await response.json();
-                const total = users.length;
-
-                document.getElementById('mq-value').innerText = Math.floor(total * 0.6) + 2;
-                document.getElementById('api-value').innerText = Math.floor(Math.random() * 40) + 110;
-                const memUsed = (1.2 + (total * 0.02)).toFixed(1);
-                document.getElementById('mem-value').innerText = memUsed + " GB";
+                const response = await fetch(ANALYTICS_URL);
+                if (!response.ok) throw new Error("API sập (HTTP " + response.status + ")");
                 
-                document.getElementById('mq-progress').style.width = '30%';
-                document.getElementById('api-progress').style.width = '70%';
+                const data = await response.json();
+                const total = data.total_users || 0;
+                document.getElementById('error-msg').innerText = "";
+
+                // Tính toán ảo các chỉ số khác dựa trên total thực
+                const traffic = Math.floor(Math.random() * 15) + (total * 2); 
+                document.getElementById('api-value').innerText = traffic + " req/s";
+                document.getElementById('api-progress').style.width = Math.min(traffic, 100) + '%';
+
+                const memUsed = (1.2 + (total * 0.005)).toFixed(2);
+                document.getElementById('mem-value').innerText = memUsed + " GB";
                 document.getElementById('mem-progress').style.width = `${(memUsed/4)*100}%`;
+                
+                // ĐÃ SỬA: Bỏ ký tự lạ 手
+                document.getElementById('last-update').innerText = `Cập nhật lúc: ${getFormattedTime()}`;
 
                 renderChart(total);
             } catch (err) {
-                console.error("Lỗi kết nối:", err);
-                document.querySelector('.page-header').innerHTML += '<span style="color:red">⚠️ Lỗi kết nối API</span>';
+                console.error("Lỗi:", err);
+                document.getElementById('error-msg').innerText = "⚠️ Lỗi: " + err.message;
+                document.getElementById('mq-value').innerText = "Disconnected";
+                document.getElementById('mq-value').style.color = "red";
             }
         }
+
         function renderChart(total) {
             const ctx = document.getElementById('userGrowthChart').getContext('2d');
-            new Chart(ctx, {
+            if (growthChart) { growthChart.destroy(); }
+            growthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Tháng 10', 'Tháng 11', 'Tháng 12', 'Tháng 1'],
+                    labels: ['Tháng 11', 'Tháng 12', 'Tháng 1'],
                     datasets: [{
-                        label: 'Người dùng',
-                        data: [total*0.3, total*0.5, total*0.8, total],
+                        label: 'Tổng người dùng',
+                        data: [Math.floor(total*0.5), Math.floor(total*0.8), total],
                         borderColor: '#3b82f6',
-                        fill: true,
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
                         tension: 0.4
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
+
+        // ĐÃ SỬA: Tên hàm sạch sẽ
+        function getFormattedTime() {
+            return new Date().toLocaleTimeString('vi-VN');
+        }
+
         document.addEventListener("DOMContentLoaded", fetchSystemData);
+        setInterval(fetchSystemData, 10000);
     </script>
 </body>
 </html>

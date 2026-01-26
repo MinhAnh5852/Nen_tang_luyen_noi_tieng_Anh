@@ -15,7 +15,7 @@
             <div class="stat-flex">
                 <div>
                     <p class="stat-title">Tổng Học viên</p>
-                    <h3 class="stat-value" id="stat-total-users">...</h3>
+                    <h3 class="stat-value" id="stat-total-users">0</h3>
                     <p class="stat-trend text-green"><i class="fa-solid fa-arrow-up"></i> +12%</p>
                 </div>
                 <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
@@ -57,7 +57,6 @@
     </div>
 
     <div class="bottom-section">
-        
         <div class="card no-padding" style="flex: 2;">
             <div class="table-header">
                 <h3 class="table-title">Học viên mới đăng ký</h3>
@@ -94,71 +93,73 @@
                 <div id="mentor-list-container"></div>
             </div>
         </div>
-
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5005/users/all'; 
+        // Gọi qua API Gateway (Nginx)
+        const ANALYTICS_API = '/api/analytics/summary';
+        const USERS_API = '/api/users/all'; 
         let globalUsers = []; 
 
         document.addEventListener("DOMContentLoaded", () => {
             initDashboard();
+            // Tự động làm mới số liệu mỗi 30 giây (Real-time nhẹ)
+            setInterval(initDashboard, 30000);
         });
 
         async function initDashboard() {
             try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`Lỗi Server: ${response.status}`);
+                // 1. Lấy dữ liệu thống kê từ Analytics Service
+                const analyticsRes = await fetch(ANALYTICS_API);
+                if (analyticsRes.ok) {
+                    const stats = await analyticsRes.json();
+                    updateStatsDisplay(stats);
+                }
+
+                // 2. Lấy danh sách chi tiết từ User Service
+                const usersRes = await fetch(USERS_API);
+                if (!usersRes.ok) throw new Error(`Lỗi Server: ${usersRes.status}`);
                 
-                globalUsers = await response.json(); 
+                globalUsers = await usersRes.json(); 
 
                 if (globalUsers.length === 0) {
-                    document.getElementById('table-recent-transactions').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Chưa có dữ liệu nào.</td></tr>';
+                    document.getElementById('table-recent-transactions').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Chưa có dữ liệu học viên.</td></tr>';
                     return;
                 }
 
-                renderStats(globalUsers);
                 renderTable(globalUsers);
                 renderMentors(globalUsers);
 
             } catch (error) {
                 console.error("Lỗi:", error);
                 document.getElementById('table-recent-transactions').innerHTML = 
-                    `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">❌ Lỗi kết nối API: ${error.message}</td></tr>`;
+                    `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">❌ Lỗi kết nối hệ thống: ${error.message}</td></tr>`;
             }
         }
 
-        function renderStats(users) {
-            document.getElementById('stat-total-users').innerText = users.length;
-            const revenue = users.length * 500000;
-            document.getElementById('stat-revenue').innerText = revenue.toLocaleString('vi-VN');
+        function updateStatsDisplay(data) {
+            // Cập nhật từ Analytics Service thực tế
+            document.getElementById('stat-total-users').innerText = data.total_users || 0;
+            document.getElementById('stat-mentors').innerText = data.active_mentors || 0;
+            document.getElementById('stat-revenue').innerText = (data.total_revenue || 0).toLocaleString('vi-VN');
             
-            // AI Sessions dựa trên số lượng user thực tế
-            const sessions = users.length * 15;
-            document.getElementById('stat-ai-sessions').innerText = sessions.toLocaleString('en-US');
-            
-            const mentors = users.filter(u => u.role === 'mentor').length;
-            document.getElementById('stat-mentors').innerText = mentors;
+            // Giả lập AI Sessions dựa trên hoạt động (hoặc lấy từ data nếu có)
+            const sessions = (data.total_users || 0) * 12;
+            document.getElementById('stat-ai-sessions').innerText = sessions.toLocaleString();
         }
 
         function renderTable(users) {
             const tableBody = document.getElementById('table-recent-transactions');
             tableBody.innerHTML = ''; 
 
-            // Hiển thị 10 người mới nhất
-            const displayList = users.slice().reverse().slice(0, 10);
-
-            if (displayList.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Không tìm thấy kết quả.</td></tr>';
-                return;
-            }
+            // Hiển thị 10 người đăng ký gần nhất
+            const displayList = [...users].reverse().slice(0, 10);
 
             displayList.forEach(user => {
-                // LẤY DỮ LIỆU THẬT TỪ API (Database)
                 const pName = user.package_name || 'Free';
                 const uLevel = user.user_level || 'A1 (Beginner)';
+                const uStatus = user.status || 'Active';
 
-                // Xử lý badge màu sắc theo gói
                 let badgeClass = 'badge-purple';
                 if (pName === 'Free') badgeClass = 'badge-gray-border';
                 if (pName === 'Pro AI') badgeClass = 'badge-yellow'; 
@@ -169,17 +170,17 @@
                 const rowHTML = `
                     <tr>
                         <td>
-                            <div class="user-cell">
-                                <div class="user-avatar-placeholder" style="background:#eee; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#555;">${avatarText}</div>
+                            <div class="user-cell" style="display:flex; align-items:center; gap:10px;">
+                                <div style="background:#4e73df; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; font-size:12px;">${avatarText}</div>
                                 <div>
-                                    <div class="user-name" style="font-weight:600">${shortName}</div>
-                                    <div class="user-email" style="font-size:12px; color:#666">${user.email}</div>
+                                    <div style="font-weight:600">${shortName}</div>
+                                    <div style="font-size:11px; color:#666">${user.email}</div>
                                 </div>
                             </div>
                         </td>
                         <td><span class="badge ${badgeClass}">${pName}</span></td>
                         <td>${uLevel}</td>
-                        <td><span class="badge badge-green">${user.status}</span></td>
+                        <td><span class="badge badge-green">${uStatus}</span></td>
                         <td class="text-right">
                             <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
                         </td>
@@ -192,6 +193,8 @@
         function renderMentors(users) {
             const container = document.getElementById('mentor-list-container');
             container.innerHTML = '';
+            
+            // Lọc ra các user có quyền mentor
             const mentors = users.filter(u => u.role === 'mentor').slice(0, 3);
             
             if (mentors.length === 0) {
@@ -203,11 +206,11 @@
                 const name = m.email.split('@')[0];
                 container.innerHTML += `
                 <div class="mentor-item" style="display:flex; align-items:center; gap:10px; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #f0f0f0;">
-                    <div class="mentor-info" style="display:flex; align-items:center; gap:10px; flex:1;">
-                        <img src="https://ui-avatars.com/api/?name=${name}&background=random" class="mentor-avatar" style="width:40px; height:40px; border-radius:50%;" alt="Avatar">
+                    <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                        <img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:40px; height:40px; border-radius:50%;" alt="Avatar">
                         <div>
                             <div style="font-weight:600;">${name}</div>
-                            <div style="font-size:12px; color:#666;">English Mentor</div>
+                            <div style="font-size:12px; color:#666;">English Specialist</div>
                         </div>
                     </div>
                     <div style="font-weight:600;"><i class="fa-solid fa-star" style="color:#ffc107;"></i> 5.0</div>
