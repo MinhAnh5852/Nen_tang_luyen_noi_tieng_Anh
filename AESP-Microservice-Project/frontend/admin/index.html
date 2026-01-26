@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -154,6 +154,227 @@
                 alert("Bạn không có quyền truy cập vùng này!");
                 window.location.href = '/login.html';
             }
+        });
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESP Admin System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .badge-green { cursor: pointer; transition: 0.3s; }
+        .badge-green:hover { filter: brightness(1.1); transform: scale(1.05); }
+        .logout-btn { cursor: pointer; }
+
+        /* CSS CHO HỆ THỐNG THÔNG BÁO KIỂU FACEBOOK */
+        .notification-box { position: relative; cursor: pointer; padding: 5px; }
+        .notification-count {
+            position: absolute; top: -2px; right: -2px; background: #ef4444;
+            color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px;
+            border-radius: 50%; display: none; align-items: center; justify-content: center;
+            border: 2px solid white; z-index: 10;
+        }
+
+        .notification-dropdown {
+            position: absolute; top: 45px; right: -10px; width: 320px;
+            background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none; z-index: 9999; overflow: hidden; border: 1px solid #e2e8f0;
+        }
+        .nt-header { padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 700; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .nt-list { max-height: 350px; overflow-y: auto; }
+        .nt-item { 
+            padding: 12px; border-bottom: 1px solid #f8fafc; display: flex; gap: 12px; transition: 0.2s; cursor: pointer;
+        }
+        .nt-item:hover { background: #f0f9ff; }
+        .nt-item.unread { background: #f8fafc; border-left: 4px solid #3b82f6; }
+        .nt-avatar { background: #3b82f6; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; }
+        .nt-info h4 { margin: 0; font-size: 13px; color: #1e293b; }
+        .nt-info p { margin: 3px 0 0; font-size: 12px; color: #64748b; line-height: 1.4; }
+        .nt-time { font-size: 10px; color: #94a3b8; margin-top: 5px; }
+        .nt-empty { padding: 30px; text-align: center; color: #94a3b8; font-size: 13px; }
+        .nt-footer { padding: 10px; text-align: center; border-top: 1px solid #f1f5f9; background: #fff; }
+        .nt-footer a { color: #3b82f6; text-decoration: none; font-size: 12px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-robot brand-icon"></i>
+                <span>AESP Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" target="content-frame" class="nav-link active"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                    <li class="nav-label">Quản lý User</li>
+                    <li><a href="users.html" target="content-frame" class="nav-link"><i class="fa-solid fa-users"></i> Học viên (Learners)</a></li>
+                    <li><a href="quanlimentor.html" target="content-frame" class="nav-link"><i class="fa-solid fa-chalkboard-user"></i> Cố vấn (Mentors)</a></li>
+                    <li class="nav-label">Kinh doanh & Nội dung</li>
+                    <li><a href="packages.html" target="content-frame" class="nav-link"><i class="fa-solid fa-box-open"></i> Gói dịch vụ & Giá</a></li>
+                    <li><a href="transactions.html" target="content-frame" class="nav-link"><i class="fa-solid fa-history"></i> Lịch sử thanh toán</a></li>
+                    <li><a href="feedback.html" id="nav-feedback" target="content-frame" class="nav-link"><i class="fa-solid fa-comments"></i> Phản hồi & Bình luận</a></li>
+                    <li class="nav-label">Hệ thống</li>
+                    <li><a href="reports.html" target="content-frame" class="nav-link"><i class="fa-solid fa-server"></i> Thống kê & Báo cáo</a></li>
+                    <li>
+                        <a href="settings.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-gears"></i> Chính sách hệ thống
+                        </a>
+                    </li>
+                </ul> 
+            </nav>
+            <div class="sidebar-footer">
+                <div class="logout-btn" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</div>
+            </div>
+        </aside>
+
+        <main class="main-wrapper">
+            <header class="top-nav">
+                <div class="header-left">
+                    <i class="fa-solid fa-bars menu-toggle"></i>
+                    <span>English Speaking Practice Platform Supported by AI</span>
+                </div>
+                <div class="header-right">
+                    <div class="badge badge-green" id="rabbitmq-link">
+                        <span class="status-dot blink"></span> RabbitMQ Connected
+                    </div>
+                    
+                    <div class="notification-box" id="nt-wrapper">
+                        <i class="fa-regular fa-bell" style="font-size: 20px;"></i>
+                        <span class="notification-count" id="fb-count-badge">0</span>
+                        
+                        <div class="notification-dropdown" id="nt-dropdown">
+                            <div class="nt-header">
+                                <span>Thông báo mới</span>
+                                <span id="unread-txt" style="color: #3b82f6; font-size: 11px;">0 mới</span>
+                            </div>
+                            <div class="nt-list" id="nt-list">
+                                <div class="nt-empty">Đang tải thông báo...</div>
+                            </div>
+                            <div class="nt-footer">
+                                <a href="javascript:void(0)" onclick="goToFeedbackPage()">Xem tất cả phản hồi</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <p class="user-name" id="display-username">Loading...</p>
+                            <p class="user-role" id="display-role">ADMIN</p>
+                        </div>
+                        <div class="user-avatar" id="display-avatar">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <iframe name="content-frame" src="dashboard.html" class="full-iframe" id="main-iframe"></iframe>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const username = localStorage.getItem('user_email') || "Admin";
+            const role = localStorage.getItem('user_role') || "ADMIN";
+
+            document.getElementById('display-username').innerText = username.split('@')[0];
+            document.getElementById('display-role').innerText = role.toUpperCase();
+            document.getElementById('display-avatar').innerText = username.substring(0, 1).toUpperCase();
+
+            // --- LOGIC THÔNG BÁO FEEDBACK ---
+            const badge = document.getElementById('fb-count-badge');
+            const dropdown = document.getElementById('nt-dropdown');
+            const ntList = document.getElementById('nt-list');
+            const unreadTxt = document.getElementById('unread-txt');
+            const iframe = document.getElementById('main-iframe');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            // 1. Hàm lấy dữ liệu và cập nhật bảng thông báo
+            window.updateFeedbackNotifications = async function() {
+                try {
+                    const res = await fetch('/api/users/feedbacks/all');
+                    if (res.ok) {
+                        const data = await res.json();
+                        
+                        // Lọc những cái CHƯA ĐỌC (is_read === false)
+                        const unreadItems = data.filter(item => item.is_read === false);
+                        const count = unreadItems.length;
+
+                        // Cập nhật quả chuông (Chỉ hiện số chưa đọc)
+                        if (count > 0) {
+                            badge.innerText = count > 99 ? '99+' : count;
+                            badge.style.display = 'flex';
+                            unreadTxt.innerText = `${count} mới`;
+                        } else {
+                            badge.style.display = 'none';
+                            unreadTxt.innerText = `0 mới`;
+                        }
+
+                        // Vẽ danh sách (Hiện 5 cái mới nhất, bất kể đọc hay chưa)
+                        ntList.innerHTML = '';
+                        if (data.length === 0) {
+                            ntList.innerHTML = '<div class="nt-empty">Không có phản hồi nào</div>';
+                        } else {
+                            data.slice(0, 5).forEach(item => {
+                                const isUnread = !item.is_read ? 'unread' : '';
+                                const firstChar = item.email.charAt(0).toUpperCase();
+                                ntList.innerHTML += `
+                                    <div class="nt-item ${isUnread}" onclick="goToFeedbackPage()">
+                                        <div class="nt-avatar">${firstChar}</div>
+                                        <div class="nt-info">
+                                            <h4>${item.email.split('@')[0]} đánh giá ${item.rating}⭐</h4>
+                                            <p>${item.content.substring(0, 45)}...</p>
+                                            <div class="nt-time">${item.date}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    }
+                } catch (err) { console.error("Lỗi thông báo:", err); }
+            };
+
+            // 2. Logic Ấn mở - Ấn ẩn (Click chuông)
+            document.getElementById('nt-wrapper').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = dropdown.style.display === 'block';
+                dropdown.style.display = isOpen ? 'none' : 'block';
+            });
+
+            // Click ra ngoài để đóng bảng
+            document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+
+            // 3. Hàm chuyển trang
+            window.goToFeedbackPage = () => {
+                iframe.src = 'feedback.html';
+                dropdown.style.display = 'none';
+                // Active menu sidebar
+                navLinks.forEach(l => {
+                    l.classList.remove('active');
+                    if (l.getAttribute('href') === 'feedback.html') l.classList.add('active');
+                });
+            };
+
+            // Khởi chạy
+            updateFeedbackNotifications();
+            setInterval(updateFeedbackNotifications, 15000); // Check mỗi 15s
+
+            // Đăng xuất & Sidebar Active
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                if (confirm("Bạn có chắc chắn thoát?")) { localStorage.clear(); window.location.href = '/login.html'; }
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
         });
     </script>
 </body>

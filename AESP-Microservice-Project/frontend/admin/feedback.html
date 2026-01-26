@@ -2,36 +2,55 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>Quản lý Phản hồi - AESP</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/users.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .comment-text { white-space: normal; max-width: 300px; font-size: 13px; color: var(--text-main); }
+        .comment-text { white-space: normal; max-width: 300px; font-size: 13px; color: #1e293b; line-height: 1.5; }
         .rating-stars { color: #f59e0b; font-size: 12px; }
-        .target-info { font-size: 12px; color: var(--primary); font-weight: 600; }
+        .target-info { font-size: 12px; color: #3b82f6; font-weight: 600; background: #eff6ff; padding: 2px 8px; border-radius: 4px; }
+        .avatar-orange { background-color: #f97316; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-action { background: none; border: none; cursor: pointer; transition: transform 0.2s; padding: 5px; }
+        .btn-action:hover { transform: scale(1.2); }
+        
+        /* HIỆU ỨNG DÒNG ĐÃ ĐỌC */
+        .row-read {
+            background-color: #f8fafc !important;
+            opacity: 0.5;
+            filter: grayscale(0.8);
+            border-left: 3px solid #cbd5e1;
+        }
+        
+        tr { transition: all 0.3s ease; border-bottom: 1px solid #f1f5f9; }
     </style>
 </head>
-<body>
+<body style="background: #f8fafc; padding: 20px; font-family: 'Inter', sans-serif;">
     <div class="page-container">
         <div class="page-header">
-            <h1 class="page-title">Phản hồi & Đánh giá</h1>
+            <h1 class="page-title" style="font-size: 24px; color: #1e293b;">Phản hồi & Đánh giá</h1>
+            <button class="btn-primary" onclick="loadFeedbacks()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                <i class="fa-solid fa-rotate"></i> Làm mới dữ liệu
+            </button>
         </div>
 
-        <div class="table-card">
-            <table>
-                <thead>
+        <div class="table-card" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f1f5f9;">
                     <tr>
-                        <th>Người gửi</th>
-                        <th>Đối tượng đánh giá</th>
-                        <th>Nội dung phản hồi</th>
-                        <th>Mức độ hài lòng</th>
-                        <th>Ngày gửi</th>
-                        <th class="text-right">Thao tác</th>
+                        <th style="text-align: left; padding: 15px;">Người gửi</th>
+                        <th style="text-align: left; padding: 15px;">Đối tượng</th>
+                        <th style="text-align: left; padding: 15px;">Nội dung</th>
+                        <th style="text-align: left; padding: 15px;">Đánh giá</th>
+                        <th style="text-align: left; padding: 15px;">Ngày gửi</th>
+                        <th style="text-align: right; padding: 15px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="feedback-tbody">
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 20px;">Đang tải phản hồi...</td>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Đang kết nối API...</td>
                     </tr>
                 </tbody>
             </table>
@@ -39,55 +58,63 @@
     </div>
 
     <script>
-        // Cấu hình URL API
-        const API_URL = 'http://localhost:5005/users/feedbacks/all';
+        const API_URL = '/api/users/feedbacks/all';
 
         async function loadFeedbacks() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("Không thể kết nối API");
+                if (!response.ok) throw new Error("Lỗi HTTP: " + response.status);
                 
                 const data = await response.json();
                 const tbody = document.getElementById('feedback-tbody');
-                tbody.innerHTML = ''; // Xóa dòng thông báo đang tải
+                tbody.innerHTML = ''; 
 
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Chưa có phản hồi nào.</td></tr>';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">📭 Chưa có phản hồi nào trong hệ thống.</td></tr>';
                     return;
                 }
 
                 data.forEach(fb => {
-                    const userName = fb.email.split('@')[0];
+                    const email = fb.email || "Guest";
+                    const userName = email.split('@')[0];
                     const firstLetter = userName.charAt(0).toUpperCase();
                     
-                    // Xử lý hiển thị sao dựa trên số rating (1-5)
+                    // Kiểm tra trạng thái đã đọc từ DB để gán class CSS
+                    const readClass = fb.is_read ? 'row-read' : '';
+                    
                     let starsHTML = '';
-                    for (let i = 0; i < 5; i++) {
-                        starsHTML += i < fb.rating ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
+                    const score = parseInt(fb.rating) || 0;
+                    for (let i = 1; i <= 5; i++) {
+                        starsHTML += i <= score ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
                     }
 
                     const row = `
-                        <tr>
-                            <td>
+                        <tr id="fb-row-${fb.id}" class="${readClass}">
+                            <td style="padding: 15px;">
                                 <div class="user-info">
-                                    <div class="avatar-circle avatar-orange">${firstLetter}</div>
+                                    <div class="avatar-orange">${firstLetter}</div>
                                     <div class="user-text">
-                                        <h4 style="text-transform: capitalize;">${userName}</h4>
-                                        <span>${fb.email}</span>
+                                        <h4 style="text-transform: capitalize; margin:0; font-size:14px;">${userName}</h4>
+                                        <span style="font-size:12px; color:#64748b;">${email}</span>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="target-info">${fb.target}</span></td>
-                            <td><p class="comment-text">${fb.content}</p></td>
-                            <td>
-                                <div class="rating-stars">
-                                    ${starsHTML}
-                                </div>
-                            </td>
-                            <td class="text-light">${fb.date}</td>
-                            <td class="text-right">
-                                <button class="action-btn" title="Đánh dấu đã đọc"><i class="fa-solid fa-check-double"></i></button>
-                                <button class="action-btn btn-delete" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                            <td style="padding: 15px;"><span class="target-info">${fb.target || 'Hệ thống'}</span></td>
+                            <td style="padding: 15px;"><p class="comment-text">${fb.content || '...'}</p></td>
+                            <td style="padding: 15px;"><div class="rating-stars">${starsHTML}</div></td>
+                            <td style="padding: 15px; color: #64748b; font-size: 13px;">${fb.date}</td>
+                            <td style="padding: 15px; text-align: right;">
+                                <button class="btn-action" onclick="markAsRead(${fb.id})" style="color: #10b981;" title="Đánh dấu đã đọc">
+                                    <i class="fa-solid fa-check-double"></i>
+                                </button>
+                                
+                                <button class="btn-action" onclick="replyUser('${email}')" style="color: #3b82f6; margin: 0 10px;" title="Gửi phản hồi trả lời">
+                                    <i class="fa-solid fa-reply"></i>
+                                </button>
+
+                                <button class="btn-action" onclick="deleteFeedback(${fb.id})" style="color: #ef4444;" title="Xóa vĩnh viễn">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -96,11 +123,78 @@
             } catch (error) {
                 console.error("Lỗi:", error);
                 document.getElementById('feedback-tbody').innerHTML = 
-                    `<tr><td colspan="6" style="text-align: center; color: red;">Lỗi tải dữ liệu: ${error.message}</td></tr>`;
+                    `<tr><td colspan="6" style="text-align: center; padding: 30px; color: #ef4444;">⚠️ Lỗi: Không thể tải dữ liệu. Hãy kiểm tra Backend.</td></tr>`;
             }
         }
 
-        // Tự động chạy khi trang load xong
+        // Chức năng: Đánh dấu đã đọc và LƯU VÀO DATABASE
+        async function markAsRead(id) {
+            try {
+                const response = await fetch(`/api/users/feedbacks/${id}/read`, { method: 'PUT' });
+                if (response.ok) {
+                    const row = document.getElementById(`fb-row-${id}`);
+                    if (row) {
+                        row.classList.add('row-read'); // Làm tối dòng ngay lập tức
+                    }
+                    // Cập nhật lại số lượng thông báo ở quả chuông (Index)
+                    if (window.parent && typeof window.parent.updateFeedbackCount === 'function') {
+                        window.parent.updateFeedbackCount();
+                    }
+                } else {
+                    alert("Lỗi server khi cập nhật trạng thái đọc.");
+                }
+            } catch (err) {
+                console.error("Lỗi kết nối API Read:", err);
+            }
+        }
+
+        // Xóa khỏi Database
+        async function deleteFeedback(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa phản hồi này vĩnh viễn?")) {
+                try {
+                    const response = await fetch(`/api/users/feedbacks/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        const row = document.getElementById(`fb-row-${id}`);
+                        if (row) {
+                            row.style.opacity = '0';
+                            row.style.transform = 'scale(0.9)';
+                            setTimeout(() => {
+                                row.remove();
+                                if (window.parent && typeof window.parent.updateFeedbackCount === 'function') {
+                                    window.parent.updateFeedbackCount();
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        alert("Lỗi: Không thể xóa phản hồi trên server.");
+                    }
+                } catch (err) {
+                    alert("Lỗi kết nối khi xóa.");
+                }
+            }
+        }
+
+        // Gửi tin nhắn trả lời
+        async function replyUser(email) {
+            const replyMsg = prompt(`Nhập nội dung phản hồi gửi đến ${email}:`);
+            if (replyMsg && replyMsg.trim() !== "") {
+                try {
+                    const response = await fetch('/api/users/feedbacks/reply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, message: replyMsg })
+                    });
+                    if (response.ok) {
+                        alert("Đã gửi thành công tới " + email);
+                    } else {
+                        alert("Lỗi khi gửi phản hồi.");
+                    }
+                } catch (err) {
+                    alert("Không thể kết nối API phản hồi.");
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', loadFeedbacks);
     </script>
 </body>
