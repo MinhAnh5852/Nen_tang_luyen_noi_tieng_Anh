@@ -11,7 +11,6 @@ services:
       - "3307:3306"
     volumes:
       - user_db_data:/var/lib/mysql
-      # Trọng nhớ map thêm file init.sql (nếu có) để tạo database subscription_db nhé
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -56,7 +55,6 @@ services:
   user-service:
     build: ./services/user-service
     container_name: user-service
-    # Sửa cổng về 5000 để không trùng với subscription
     ports:
       - "5000:5000"
     environment:
@@ -72,19 +70,41 @@ services:
     networks:
       - app-network
 
-  # --- BACKEND: SUBSCRIPTION SERVICE (THÊM MỚI Ở ĐÂY) ---
+  # --- BACKEND: SUBSCRIPTION SERVICE ---
   subscription-service:
     build: ./services/subscription-service
     container_name: subscription-service
     ports:
       - "5001:5001"
     environment:
-      # Chú ý: Dùng chung user-db nhưng database name là subscription_db
       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/subscription_db
       JWT_SECRET_KEY: change_me_to_a_long_random_secret
       DEBUG: "True"
     depends_on:
       user-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # --- BACKEND: MENTOR MANAGEMENT SERVICE (THÊM MỚI Ở ĐÂY) ---
+  mentor-management-service:
+    build: ./services/mentor-management-service
+    container_name: mentor-management-service
+    ports:
+      - "5002:5002"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      # Dùng chung database user_db để quản lý role và thông tin mentor
+      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      JWT_SECRET_KEY: change_me_to_a_long_random_secret
+    # Chạy song song cả Worker và App
+    command: sh -c "python mq_worker.py & python app.py"
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -100,7 +120,8 @@ services:
       - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - user-service
-      - subscription-service # Phải đợi cả 2 service chạy
+      - subscription-service
+      - mentor-management-service # Phải đợi cả service mentor chạy
     restart: always
     networks:
       - app-network

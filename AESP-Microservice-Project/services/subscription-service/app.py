@@ -23,7 +23,7 @@ def create_app():
         from controllers.internal_controller import internal_bp
         
         # Thống nhất prefix để Nginx Gateway trỏ vào đúng
-        app.register_blueprint(sub_bp, url_prefix='/api/subscriptions')
+        app.register_blueprint(sub_bp, url_prefix='/')
         app.register_blueprint(internal_bp, url_prefix='/api/internal')
         
         logger.info(">>> Blueprints registered successfully!")

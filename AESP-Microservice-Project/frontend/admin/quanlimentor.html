@@ -3,21 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Cố vấn</title>
+    <title>Quản lý Cố vấn - AESP</title>
     
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/mentor.css">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Hiệu ứng nhấp nháy cho badge chờ duyệt */
+        .badge-pending {
+            animation: pulse 2s infinite;
+            background: #fff4e5;
+            color: #ff9800;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .btn-loading { pointer-events: none; opacity: 0.6; }
+    </style>
 </head>
 <body>
 
     <div class="page-container">
-        
         <div class="page-header">
             <h1 class="page-title">Đội ngũ Cố vấn (Mentors)</h1>
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" onclick="alert('Tính năng đang phát triển!')">
                 <i class="fa-solid fa-user-plus"></i> Thêm Cố vấn
             </button>
         </div>
@@ -25,103 +43,125 @@
         <div class="filter-bar">
             <div class="search-wrapper">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" placeholder="Tìm theo tên, kỹ năng..." class="form-input input-search">
+                <input type="text" id="mentor-search" placeholder="Tìm theo tên..." class="form-input input-search">
             </div>
             
-            <select class="form-select">
-                <option>Tất cả chuyên môn</option>
-                <option>IELTS</option>
-                <option>TOEIC</option>
-                <option>Giao tiếp</option>
-            </select>
-
-            <select class="form-select">
-                <option>Tất cả trạng thái</option>
-                <option>Đang hoạt động</option>
-                <option>Chờ duyệt</option>
+            <select class="form-select" id="status-filter">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="pending">Chờ duyệt</option>
             </select>
         </div>
 
         <div class="mentors-grid" id="mentors-container">
             <div style="text-align:center; width:100%; padding: 50px; color: #666;">
-                <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu cố vấn...
+                <i class="fa-solid fa-spinner fa-spin"></i> Đang kết nối Mentor Service...
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5005/users/all';
+        // TRỎ VỀ GATEWAY (Cổng 80)
+        const API_URL = '/api/mentors/profiles';
 
-        document.addEventListener("DOMContentLoaded", () => {
-            fetchMentors();
-        });
+        document.addEventListener("DOMContentLoaded", fetchMentors);
 
+        // Lấy danh sách Mentor từ Backend
         async function fetchMentors() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("API Connection Failed");
-                const allUsers = await response.json();
-
-                // 1. Lọc lấy những người có role là 'mentor'
-                const mentors = allUsers.filter(u => u.role === 'mentor');
+                if (!response.ok) throw new Error("Không thể kết nối Mentor Service qua Gateway");
+                const mentors = await response.json();
                 
+                window.allMentors = mentors; // Lưu lại để search/filter
                 renderMentorCards(mentors);
             } catch (error) {
                 console.error("Lỗi:", error);
-                document.getElementById('mentors-container').innerHTML = `<p style="color:red; text-align:center; width:100%;">Lỗi tải dữ liệu cố vấn.</p>`;
+                document.getElementById('mentors-container').innerHTML = 
+                    `<div style="color:red; text-align:center; width:100%;">
+                        <i class="fa-solid fa-circle-exclamation"></i> Lỗi: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Hàm Duyệt hoặc Từ chối Mentor
+        async function handleAction(mentorId, action, btnElement) {
+            const confirmMsg = action === 'approve' ? "Xác nhận duyệt hồ sơ này?" : "Xác nhận xóa/từ chối hồ sơ này?";
+            if (!confirm(confirmMsg)) return;
+
+            btnElement.classList.add('btn-loading');
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+            try {
+                const response = await fetch(`/api/mentors/verify/${mentorId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action })
+                });
+
+                if (response.ok) {
+                    alert(action === 'approve' ? "Đã duyệt cố vấn thành công!" : "Đã từ chối hồ sơ.");
+                    fetchMentors(); // Tải lại danh sách
+                } else {
+                    throw new Error("Cập nhật thất bại");
+                }
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+                fetchMentors();
             }
         }
 
         function renderMentorCards(mentors) {
             const container = document.getElementById('mentors-container');
-            container.innerHTML = ''; // Xóa dòng loading
+            container.innerHTML = '';
 
             if (mentors.length === 0) {
-                container.innerHTML = '<p style="text-align:center; width:100%;">Chưa có cố vấn nào trong hệ thống.</p>';
+                container.innerHTML = '<p style="text-align:center; width:100%;">Không tìm thấy cố vấn nào.</p>';
                 return;
             }
 
             mentors.forEach(m => {
-                const shortName = m.email.split('@')[0];
-                const displaySkill = m.user_level || 'English Expert';
-                const isPending = m.status === 'pending';
+                const isPending = m.status === 'pending' || m.status === 'rejected';
                 const statusDot = m.status === 'active' ? 'status-online' : 'status-offline';
 
-                // Template HTML dựa trên mẫu card tĩnh của bạn
                 const cardHTML = `
-                    <div class="mentor-card ${isPending ? 'pending' : ''}">
+                    <div class="mentor-card ${m.status}">
                         <div class="mentor-avatar-wrapper">
-                            <img src="https://ui-avatars.com/api/?name=${shortName}&background=random" class="mentor-avatar" alt="Avatar">
+                            <img src="https://ui-avatars.com/api/?name=${m.username}&background=random" class="mentor-avatar" alt="Avatar">
                             <span class="status-dot ${statusDot}"></span>
                         </div>
                         
-                        <h3 class="mentor-name" style="text-transform: capitalize;">${shortName}</h3>
+                        <h3 class="mentor-name" style="text-transform: capitalize;">${m.username}</h3>
+                        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">${m.email}</p>
+                        
                         <div class="mentor-skills">
-                            <span class="skill-tag">${displaySkill}</span>
-                            <span class="skill-tag">Public Speaking</span>
+                            ${m.skills.map(skill => `<span class="skill-tag">${skill.trim()}</span>`).join('')}
                         </div>
                         
-                        ${!isPending ? `
+                        ${m.status === 'active' ? `
                             <div class="mentor-rating">
                                 <div class="stars">
-                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                                 </div>
-                                <span class="rating-count">(Hồ sơ mới)</span>
+                                <span class="rating-count">(${m.rating || 5.0})</span>
                             </div>
                         ` : `
                             <div class="badge-pending">
-                                <i class="fa-regular fa-clock"></i> Chờ phê duyệt
+                                <i class="fa-regular fa-clock"></i> ${m.status === 'pending' ? 'Chờ phê duyệt' : 'Đã từ chối'}
                             </div>
                         `}
 
                         <div class="card-actions">
-                            ${isPending ? `
-                                <button class="btn btn-dark">
-                                    <i class="fa-solid fa-check"></i> Duyệt hồ sơ
+                            ${m.status === 'pending' ? `
+                                <button class="btn btn-dark" onclick="handleVerify('${m.id}', 'approve', this)">
+                                    <i class="fa-solid fa-check"></i> Duyệt ngay
+                                </button>
+                                <button class="btn btn-outline" style="color:red" onclick="handleVerify('${m.id}', 'reject', this)">
+                                    Từ chối
                                 </button>
                             ` : `
-                                <button class="btn btn-soft-gray">Hồ sơ</button>
-                                <button class="btn btn-soft-blue">Lịch dạy</button>
+                                <button class="btn btn-soft-gray" onclick="alert('Xem hồ sơ chi tiết')">Hồ sơ</button>
+                                <button class="btn btn-soft-blue" onclick="alert('Lịch dạy')">Lịch dạy</button>
                             `}
                         </div>
                     </div>
@@ -129,6 +169,22 @@
                 container.insertAdjacentHTML('beforeend', cardHTML);
             });
         }
+
+        // Hàm bắc cầu để khớp với tên hàm onclick trong template
+        window.handleVerify = handleAction;
+
+        // Xử lý Filter & Search
+        document.getElementById('mentor-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = window.allMentors.filter(m => m.username.toLowerCase().includes(val));
+            renderMentorCards(filtered);
+        });
+
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'all') renderMentorCards(window.allMentors);
+            else renderMentorCards(window.allMentors.filter(m => m.status === val));
+        });
     </script>
 </body>
 </html>
