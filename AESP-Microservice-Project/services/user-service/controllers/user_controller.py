@@ -1,6 +1,7 @@
 import os
 import pika
 import json
+import uuid  # Thêm uuid để đồng bộ ID
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash
@@ -9,54 +10,50 @@ from models.user import User, Feedback
 
 user_bp = Blueprint("users", __name__)
 
-# --- HÀM GỬI TIN NHẮN RABBITMQ (Đã tối ưu timeout) ---
-def send_to_analytics(event_type, data=None):
+# --- HÀM GỬI TIN NHẮN RABBITMQ ---
+def send_to_mq(event_type, data=None):
     connection = None
     try:
-        rabbitmq_host = os.getenv("RABBITMQ_HOST", "app-rabbitmq")
-        rabbitmq_user = os.getenv("RABBITMQ_USER", "admin")
-        rabbitmq_pass = os.getenv("RABBITMQ_PASS", "admin123")
-        
-        credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)
-        # Thêm socket_timeout để tránh treo API nếu RabbitMQ chưa sẵn sàng
-        params = pika.ConnectionParameters(
-            host=rabbitmq_host,
-            credentials=credentials,
-            socket_timeout=2
-        )
+        # Sử dụng đúng tên service RabbitMQ trong Docker network
+        rabbitmq_url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@app-rabbitmq:5672/')
+        params = pika.URLParameters(rabbitmq_url)
+        params.socket_timeout = 2 
         
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
-        channel.queue_declare(queue='analytics_queue', durable=True)
+        
+        channel.queue_declare(queue='user_events', durable=True)
         
         message = {"event": event_type}
-        if data: message.update(data)
+        if data: 
+            message.update(data)
             
         channel.basic_publish(
             exchange='',
-            routing_key='analytics_queue',
+            routing_key='user_events',
             body=json.dumps(message),
             properties=pika.BasicProperties(delivery_mode=2, content_type='application/json')
         )
+        print(f">>> [MQ Success]: Event {event_type} sent to user_events")
     except Exception as e:
-        print(f"!!! RabbitMQ Alert: {e}") # Không làm crash API nếu RabbitMQ lỗi
+        # Chỉ in log cảnh báo, không làm crash luồng chính
+        print(f"!!! RabbitMQ Warning (User Controller): {e}") 
     finally:
         if connection and not connection.is_closed:
             connection.close()
 
-# --- 1. LẤY DANH SÁCH USERS (Cho Dashboard Admin) ---
+# --- 1. LẤY DANH SÁCH USERS ---
 @user_bp.route("/all", methods=["GET"])
 def get_all_users():
     try:
         users = User.query.all()
         result = []
         for u in users:
-            # Đảm bảo trả về đúng các field mà Frontend đang gọi
             result.append({
                 "id": u.id,
                 "username": u.username or u.email.split('@')[0],
                 "email": u.email,
-                "role": str(u.role).lower(), # Trả về 'admin', 'learner', 'mentor'
+                "role": str(u.role).lower(),
                 "status": str(u.status).lower() if u.status else "active",
                 "package_name": u.package_name or 'Free'
             })
@@ -69,6 +66,7 @@ def get_all_users():
 @jwt_required()
 def get_current_user():
     try:
+        # Identity từ token thường là string của User ID
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
@@ -78,12 +76,13 @@ def get_current_user():
             "id": user.id,
             "username": user.username or user.email.split('@')[0],
             "email": user.email,
-            "role": str(user.role).lower()
+            "role": str(user.role).lower(),
+            "package_name": user.package_name or 'Free'
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- 3. ĐĂNG KÝ (Có tích hợp Analytics) ---
+# --- 3. ĐĂNG KÝ (Đồng bộ UUID và MQ) ---
 @user_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json(force=True, silent=True) or {}
@@ -97,17 +96,25 @@ def register():
         return jsonify({"error": "Email đã tồn tại"}), 409
 
     try:
+        # Sử dụng UUID để thống nhất ID trên toàn hệ thống
         u = User(
+            id=str(uuid.uuid4()), 
             email=email, 
             username=data.get("username") or email.split('@')[0],
             password=generate_password_hash(password), 
-            role=(data.get("role") or "learner").lower()
+            role=(data.get("role") or "learner").lower(),
+            status="active"
         )
         db.session.add(u)
         db.session.commit()
 
-        # Gửi dữ liệu sang Analytics Service qua RabbitMQ
-        send_to_analytics("new_user_registered", {"email": email, "id": str(u.id)})
+        # Gửi MQ không chặn (Async-like behavior)
+        send_to_mq("USER_REGISTERED", {
+            "user_id": str(u.id),
+            "email": u.email,
+            "username": u.username,
+            "role": u.role
+        })
         
         return jsonify({"id": u.id, "message": "Tạo tài khoản thành công"}), 201
     except Exception as e:

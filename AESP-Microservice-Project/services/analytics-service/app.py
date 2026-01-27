@@ -1,32 +1,30 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from database import db
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_cors import CORS
+from sqlalchemy import func
 import os
 
 app = Flask(__name__)
-# Đảm bảo DATABASE_URL trong docker-compose là analytics_db
+
+# Cấu hình Database & JWT
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = "AESP_Secret_Key_2026_Trọng" # Phải khớp với User Service
 
+CORS(app)
 db.init_app(app)
+jwt = JWTManager(app)
 
-from models import SystemStat, ActivityLog
+# Import Models sau khi db.init_app
+from models import SystemStat, ActivityLog, PracticeSession
 
-# Khởi tạo Database và dữ liệu mẫu
-with app.app_context():
-    db.create_all()
-    # Tự động chèn các row nếu chưa có để Dashboard không bị lỗi
-    for k in ['total_users', 'active_mentors', 'total_revenue']:
-        if not SystemStat.query.get(k):
-            db.session.add(SystemStat(key=k, value=0))
-    db.session.commit()
-
+# API 1: Dành cho Admin (Giữ nguyên chức năng cũ)
 @app.route("/summary", methods=["GET"])
 def get_summary():
     try:
         stats = SystemStat.query.all()
         summary = {s.key: s.value for s in stats}
-        
-        # Lấy 5 log hoạt động gần nhất
         logs = ActivityLog.query.order_by(ActivityLog.created_at.desc()).limit(5).all()
         
         return jsonify({
@@ -36,9 +34,41 @@ def get_summary():
             "recent_activities": [log.message for log in logs]
         }), 200
     except Exception as e:
-        # In log ra docker console để dễ debug
-        print(f"ERROR Analytics: {e}")
+        print(f"ERROR Admin Analytics: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
+
+# API 2: DÀNH CHO LEARNER DASHBOARD (MỚI)
+@app.route("/my-progress", methods=["GET"])
+@jwt_required()
+def get_my_progress():
+    try:
+        user_id = get_jwt_identity()
+
+        # 1. Tính tổng thời gian luyện tập (SUM duration_seconds)
+        total_seconds = db.session.query(func.sum(PracticeSession.duration_seconds))\
+            .filter(PracticeSession.user_id == user_id).scalar() or 0
+        
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        time_str = f"{hours}h {minutes}m"
+
+        # 2. Tính độ chính xác trung bình (AVG accuracy_score)
+        avg_accuracy = db.session.query(func.avg(PracticeSession.accuracy_score))\
+            .filter(PracticeSession.user_id == user_id).scalar() or 0
+
+        # 3. Giả lập Streak và Lesson (Để hiện Dashboard đẹp)
+        # Phần này Trọng có thể query thêm từ bảng users nếu cần
+        return jsonify({
+            "total_time": time_str,
+            "accuracy": round(avg_accuracy, 1),
+            "lessons_completed": 12, # Demo
+            "streak": 15,            # Demo
+            "ai_suggestion": "Phát âm của bạn rất tốt, hãy thử luyện thêm chủ đề 'Job Interview' nhé!"
+        }), 200
+
+    except Exception as e:
+        print(f"ERROR Learner Analytics: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5003)

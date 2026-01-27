@@ -23,7 +23,7 @@
           <span class="logo-text">AESP</span>
         </a>
         <div class="auth-buttons">
-          <a href="/index.html" class="btn btn-outline">Trở về trang chủ</a>
+          <a href="index.html" class="btn btn-outline">Trở về trang chủ</a>
         </div>
       </div>
     </header>
@@ -122,7 +122,7 @@
               const role = data.user.role.toLowerCase();
               if (role === 'admin') window.location.href = '/admin/index.html';
               else if (role === 'mentor') window.location.href = '/mentor/mentor.html'; 
-              else window.location.href = '/Learner/learner.html'; 
+              else window.location.href = '/Learner/index.html'; 
 
           } catch (error) {
               errorDiv.innerText = "❌ " + error.message;
@@ -165,7 +165,7 @@
       };
 
       // Load Footer
-      fetch("/Learner/footer.html")
+      fetch("Learner/footer.html")
         .then((r) => r.text())
         .then((d) => (document.getElementById("footer").innerHTML = d))
         .catch(err => console.warn("Không tìm thấy footer"));

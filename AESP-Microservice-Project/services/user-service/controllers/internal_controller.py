@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify, current_app
 import jwt
-from models.user import User # Import ngay từ đầu để dùng
+from models.user import User 
 
 internal_bp = Blueprint("internal", __name__)
 
-@internal_bp.route("/verify", methods=["GET"]) # Bỏ /internal vì Prefix đã có trong app.py
+@internal_bp.route("/verify", methods=["GET"])
 def verify():
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
@@ -18,13 +18,18 @@ def verify():
 
     try:
         # 1. Giải mã Token
+        # LƯU Ý: Flask-JWT-Extended mặc định dùng 'sub' làm identity (user_id)
         payload = jwt.decode(token, secret, algorithms=["HS256"])
 
-        user_id = payload.get("user_id")
+        # Kiểm tra cả hai trường hợp 'sub' (từ Firebase sync) và 'user_id' (từ Auth truyền thống)
+        user_id = payload.get("sub") or payload.get("user_id")
         role_from_token = payload.get("role")
 
-        # 2. Normalize Role (Đảm bảo trả về chuỗi thường: admin, learner, mentor)
-        role_str = str(role_from_token).lower()
+        if not user_id:
+            return jsonify({"valid": False, "error": "Token missing identity (sub/user_id)"}), 401
+
+        # 2. Chuẩn hóa Role (Normalize)
+        role_str = str(role_from_token).lower() if role_from_token else "learner"
         if "." in role_str:
             role_str = role_str.split(".", 1)[1]
 
@@ -43,27 +48,32 @@ def verify():
 
 @internal_bp.route("/learners", methods=["GET"])
 def get_learners():
-    # Kiểm tra quyền Mentor
     auth = request.headers.get("Authorization", "")
-    token = auth.split(" ", 1)[1] if " " in auth else ""
+    if not auth.startswith("Bearer "):
+        return jsonify({"error": "Missing token"}), 401
+        
+    token = auth.split(" ", 1)[1].strip()
     secret = current_app.config.get("JWT_SECRET_KEY")
     
     try:
         payload = jwt.decode(token, secret, algorithms=["HS256"])
-        # Kiểm tra role (phải trùng với Enum: learner, mentor, admin)
-        if payload.get("role") not in ["mentor", "admin"]:
+        # Đồng bộ khóa 'role'
+        user_role = str(payload.get("role", "")).lower()
+        
+        if user_role not in ["mentor", "admin"]:
             return jsonify({"error": "Unauthorized"}), 403
-    except:
-        return jsonify({"error": "Invalid token"}), 401
-
-    # Lấy danh sách học viên từ MySQL
-    # Lưu ý: Role trong DB mình đang lưu là chữ thường 'learner'
-    learners = User.query.filter_by(role="learner").all()
-    
-    result = [{
-        "id": u.id, 
-        "email": u.email, 
-        "status": str(u.status) # Chuyển Enum status sang string
-    } for u in learners]
-    
-    return jsonify(result), 200
+            
+        # Truy vấn danh sách learner từ database
+        learners = User.query.filter_by(role="learner").all()
+        
+        result = [{
+            "id": u.id, 
+            "email": u.email, 
+            "username": u.username or u.email.split('@')[0],
+            "status": str(u.status).lower() if u.status else "active"
+        } for u in learners]
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Invalid token or session: {str(e)}"}), 401

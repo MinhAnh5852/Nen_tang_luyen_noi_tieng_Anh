@@ -5,126 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AESP - Luyện nói tiếng Anh với AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Learner/styles.css"> 
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        main { flex: 1; }
+        
+        /* Style cho khung nhúng Footer */
+        .footer-container {
+            width: 100%;
+            height: auto;
+            border: none;
+            overflow: hidden;
+        }
+        .footer-frame {
+            width: 100%;
+            height: 300px; /* Điều chỉnh chiều cao khớp với file footer.html của bạn */
+            border: none;
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="container header-container">
-            <a href="/index.html" class="logo">
+            <a href="index.html" class="logo">
                 <i class="fas fa-robot logo-icon"></i>
                 <span class="logo-text">AESP</span>
             </a>
             
             <nav class="nav-links">
-                <a href="/index.html">Trang chủ</a>
                 <a href="#features">Tính năng</a>
                 <a href="#pricing">Giá cả</a>
                 <a href="#about">Về chúng tôi</a>
             </nav>
             
-            <div class="auth-buttons" id="auth-area">
-                <a href="/login.html" class="btn btn-outline">Đăng nhập</a>
-                <a href="/register.html" class="btn btn-primary">Đăng ký</a>
+            <div class="auth-buttons">
+                <a href="login.html" class="btn btn-outline">Đăng nhập</a>
+                <a href="register.html" class="btn btn-primary">Đăng ký</a>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <section class="hero-section" style="padding: 80px 0; text-align: center; margin-top: 80px;">
-            <h1 style="font-size: 3.2rem; margin-bottom: 20px; line-height: 1.2; color: var(--dark-color);">
-                Luyện nói tiếng Anh với <span style="background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; background-clip: text; color: transparent;">AI thông minh</span>
+        <section class="hero-section" style="padding: 100px 0; text-align: center; margin-top: 50px;">
+            <h1 style="font-size: 3.5rem; margin-bottom: 20px; color: #1e293b;">
+                Luyện nói tiếng Anh với <span style="color: #4361ee;">AI thông minh</span>
             </h1>
-            <p id="welcome-msg" style="font-size: 1.2rem; max-width: 700px; margin: 0 auto 30px; color: var(--gray-color);">
-                Cải thiện kỹ năng giao tiếp tiếng Anh của bạn với hệ thống AI được thiết kế riêng để phân tích phát âm, ngữ điệu và phản hồi tức thì.
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto 40px; color: #64748b;">
+                Hệ thống hỗ trợ luyện giao tiếp và phản xạ tức thì. Hãy đăng nhập để bắt đầu lộ trình của riêng bạn.
             </p>
-            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 40px;">
-                <a href="/register.html" id="main-cta" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.1rem;">Bắt đầu miễn phí</a>
-                <a href="#features" class="btn btn-outline" style="padding: 15px 30px; font-size: 1.1rem;">Tìm hiểu thêm</a>
+            
+            <div class="cta-area">
+                <a href="login.html" class="btn btn-primary" style="padding: 18px 45px; font-size: 1.1rem; border-radius: 50px;">
+                    Bắt đầu ngay bây giờ
+                </a>
             </div>
         </section>
-        
-        <div id="footer"></div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <div class="footer-container">
+        <iframe src="Learner/footer.html" class="footer-frame" scrolling="no"></iframe>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAR_mMEOLmcQeewl7ECynfLe-0ymFiqx9g",
-            authDomain: "pj-luyen-noi-tieng-anh.firebaseapp.com",
-            projectId: "pj-luyen-noi-tieng-anh",
-            storageBucket: "pj-luyen-noi-tieng-anh.firebasestorage.app",
-            messagingSenderId: "835156032196",
-            appId: "1:835156032196:web:b8920adabf15ace0bbe791"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const token = localStorage.getItem('token');
-            const userEmail = localStorage.getItem('user_email');
-            const role = localStorage.getItem('user_role');
-            const authArea = document.getElementById('auth-area');
-            const welcomeMsg = document.getElementById('welcome-msg');
-            const mainCta = document.getElementById('main-cta');
-
-            if (token && userEmail) {
-                // Hiển thị tên người dùng và nút đăng xuất
-                authArea.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <span style="font-weight: 500; color: var(--primary-color);">
-                            Chào, ${userEmail.split('@')[0]} (${role})
-                        </span>
-                        <button id="logout-btn" class="btn btn-outline">Đăng xuất</button>
-                    </div>
-                `;
-
-                welcomeMsg.innerHTML = `Chào mừng quay trở lại! Bạn đã sẵn sàng luyện tập tiếp chưa?`;
-                
-                // Điều phối nút bấm theo Role
-                if (role === 'admin') {
-                    mainCta.innerText = "Vào Dashboard Admin";
-                    mainCta.href = "/admin/users.html";
-                } else if (role === 'mentor') {
-                    mainCta.innerText = "Quản lý lớp học";
-                    mainCta.href = "/mentor/mentor.html";
-                } else {
-                    mainCta.innerText = "Tiếp tục bài học";
-                    mainCta.href = "/Learner/learner.html";
-                }
-
-                // Gán sự kiện cho nút đăng xuất (vì dùng type="module" nên không dùng onclick trực tiếp được)
-                document.getElementById('logout-btn').addEventListener('click', handleLogout);
-            }
-        });
-
-        // Hàm đăng xuất toàn diện
-        async function handleLogout() {
-            if(confirm("Bạn có chắc muốn đăng xuất không?")) {
-                try {
-                    // 1. Đăng xuất Firebase
-                    await signOut(auth);
-                    // 2. Xóa dữ liệu Local
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    // 3. Ép về trang chủ gốc để reset đường dẫn
-                    window.location.href = '/index.html'; 
-                } catch (error) {
-                    console.error("Lỗi đăng xuất:", error);
-                    localStorage.clear();
-                    window.location.href = '/index.html';
-                }
-            }
-        }
-
-        // Load Footer
-        fetch("Learner/footer.html")
-          .then(r => r.text())
-          .then(data => document.getElementById("footer").innerHTML = data)
-          .catch(() => console.log("Không tìm thấy footer"));
-    </script>
 </body>
 </html>

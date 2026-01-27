@@ -1,44 +1,90 @@
-<!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>AESP</h3>
-                    <p>Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng giao tiếp một cách hiệu quả và cá nhân hóa.</p>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Tính năng</h3>
-                    <a href="#">Luyện nói với AI</a>
-                    <a href="#">Phân tích phát âm</a>
-                    <a href="#">Hội thoại tương tác</a>
-                    <a href="#">Theo dõi tiến độ</a>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Tài nguyên</h3>
-                    <a href="#">Tài liệu học tập</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Câu hỏi thường gặp</a>
-                    <a href="#">Hỗ trợ</a>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Liên hệ</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 70 Tô Ký, Quận 12, TP.HCM</p>
-                    <p><i class="fas fa-phone"></i> (028) 2345 9786</p>
-                    <p><i class="fas fa-envelope"></i> support@aienglish.com</p>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ===== FIX FOOTER NỞ THEO NỘI DUNG & KHÔNG ĐÈ ===== */
+footer {
+    /* Tạo khoảng cách phía trên theo tỉ lệ % so với chiều rộng màn hình */
+    padding-top: 5%; 
+    padding-bottom: 20px;
+    
+    /* Đảm bảo footer luôn nằm trong luồng văn bản (không dùng absolute/fixed) */
+    position: relative;
+    width: 100%;
+    background-color: var(--dark-color); /* Lấy màu từ styles.css */
+    color: white;
+    
+    /* Tự động co dãn theo nội dung bên trong */
+    height: auto; 
+    clear: both; /* Chống tràn nếu có thành phần float phía trên */
+}
+
+.footer-content {
+    display: grid;
+    /* Tự động chia cột linh hoạt, xuống dòng khi màn hình nhỏ */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Đảm bảo các link trong footer không bị dính sát nhau khi thu nhỏ */
+.footer-column a, .footer-column p {
+    display: block;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #94a3b8;
+}
+</style>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>AESP</h3>
+                <p>
+                    Nền tảng luyện nói tiếng Anh với AI tiên tiến, giúp bạn cải thiện kỹ năng
+                    giao tiếp một cách hiệu quả và cá nhân hóa.
+                </p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 AESP. Tất cả các quyền được bảo lưu.</p>
+
+            <div class="footer-column">
+                <h3>Tính năng</h3>
+                <a href="#">Luyện nói với AI</a>
+                <a href="#">Phân tích phát âm</a>
+                <a href="#">Hội thoại tương tác</a>
+                <a href="#">Theo dõi tiến độ</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Tài nguyên</h3>
+                <a href="#">Tài liệu học tập</a>
+                <a href="#">Blog</a>
+                <a href="#">Câu hỏi thường gặp</a>
+                <a href="#">Hỗ trợ</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Liên hệ</h3>
+                <p><i class="fas fa-map-marker-alt"></i> 70 Tô Ký, Quận 12, TP.HCM</p>
+                <p><i class="fas fa-phone"></i> (028) 2345 9786</p>
+                <p><i class="fas fa-envelope"></i> support@aienglish.com</p>
             </div>
         </div>
-    </footer>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 AESP. Tất cả các quyền được bảo lưu.</p>
+        </div>
+    </div>
+</footer>

@@ -4,5 +4,6 @@ pymysql
 pika
 flask-cors
 python-dotenv
+flask-jwt-extended
 requests
 cryptography

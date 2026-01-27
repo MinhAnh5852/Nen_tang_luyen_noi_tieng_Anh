@@ -13,10 +13,14 @@ auth_bp = Blueprint("auth", __name__)
 # --- HÀM BỔ TRỢ: GỬI TIN NHẮN ĐẾN RABBITMQ ---
 def send_mq_message(message):
     try:
-        url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@rabbitmq:5672/')
+        # Ưu tiên lấy URL từ biến môi trường RABBITMQ_URL
+        url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@app-rabbitmq:5672/')
         params = pika.URLParameters(url)
+        params.socket_timeout = 5  # Thêm timeout để tránh treo app
+        
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
+        
         channel.queue_declare(queue='user_events', durable=True)
         
         channel.basic_publish(
@@ -28,17 +32,16 @@ def send_mq_message(message):
         connection.close()
         print(f">>> [MQ Success]: Đã gửi sự kiện {message.get('event')}")
     except Exception as e:
-        print(f">>> [RabbitMQ Error]: {e}")
+        # CHỈ IN LỖI, KHÔNG QUĂNG EXCEPTION ĐỂ TRÁNH ROLLBACK DB
+        print(f">>> [MQ Warning]: Không thể gửi message: {e}")
 
-# --- 1. ĐĂNG KÝ (Cập nhật: Gửi đầy đủ thông tin Mentor) ---
+# --- 1. ĐĂNG KÝ ---
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json() or {}
-    username = data.get("username")
     email = (data.get("email") or "").strip().lower()
     password = data.get("password")
-    role = (data.get("role") or "learner").lower()
-
+    
     if not email or not password:
         return jsonify({"message": "Email và mật khẩu là bắt buộc"}), 400
 
@@ -48,16 +51,16 @@ def register():
     try:
         new_user = User(
             id=str(uuid.uuid4()),
-            username=username,
+            username=data.get("username") or email.split('@')[0],
             email=email,
             password=generate_password_hash(password),
-            role=role,
+            role=(data.get("role") or "learner").lower(),
             status="active"
         )
         db.session.add(new_user)
         db.session.commit()
 
-        # FIX: Gửi đầy đủ username cho Mentor Service nhận diện
+        # Đồng bộ an toàn
         send_mq_message({
             "event": "USER_REGISTERED",
             "user_id": new_user.id,
@@ -71,48 +74,12 @@ def register():
         db.session.rollback()
         return jsonify({"message": f"Lỗi lưu Database: {str(e)}"}), 500
 
-# --- 6. CẬP NHẬT ROLE (Fix: Tự tạo Profile nếu đổi lên Mentor) ---
-@auth_bp.route("/update-role", methods=["POST"])
-def update_role():
-    data = request.get_json()
-    try:
-        user = User.query.get(data.get('id'))
-        if user:
-            old_role = user.role
-            new_role = data.get('role').lower()
-            
-            user.username = data.get('username')
-            user.role = new_role
-            
-            new_password = data.get('password')
-            if new_password and str(new_password).strip() != "":
-                user.password = generate_password_hash(new_password)
-            
-            db.session.commit()
-
-            # Nếu nâng cấp lên Mentor, tự động tạo Profile chờ duyệt
-            if old_role != 'mentor' and new_role == 'mentor':
-                send_mq_message({
-                    "event": "USER_REGISTERED",
-                    "user_id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "role": "mentor"
-                })
-
-            return jsonify({"message": "Cập nhật thành công"}), 200
-        return jsonify({"message": "User không tồn tại"}), 404
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"message": f"Lỗi cập nhật: {str(e)}"}), 500
-
-# --- 7. ĐĂNG NHẬP QUA FIREBASE ---
+# --- 2. ĐĂNG NHẬP QUA FIREBASE ---
 @auth_bp.route("/login-firebase", methods=["POST"])
 def login_firebase():
     data = request.get_json() or {}
     email = (data.get("email") or "").strip().lower()
-    username = data.get("username")
-
+    
     if not email:
         return jsonify({"error": "Thiếu email từ Firebase"}), 400
 
@@ -124,7 +91,7 @@ def login_firebase():
             is_new = True
             user = User(
                 id=str(uuid.uuid4()),
-                username=username,
+                username=data.get("username") or email.split('@')[0],
                 email=email,
                 password="FIREBASE_AUTHENTICATED",
                 role="learner",
@@ -133,9 +100,13 @@ def login_firebase():
             db.session.add(user)
             db.session.commit()
 
-        token = create_access_token(identity=str(user.id))
+        # QUAN TRỌNG: Thêm user_id và role vào payload của Token
+        additional_claims = {
+            "user_id": str(user.id),
+            "role": user.role
+        }
+        token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
 
-        # Nếu là người mới đăng nhập Google, gửi tin nhắn đồng bộ các service
         if is_new:
             send_mq_message({
                 "event": "USER_REGISTERED",
@@ -147,28 +118,76 @@ def login_firebase():
 
         return jsonify({
             "token": token,
-            "user": {"id": user.id, "email": user.email, "role": user.role, "username": user.username}
+            "user": {
+                "id": user.id, 
+                "email": user.email, 
+                "role": user.role, 
+                "username": user.username
+            }
         }), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Lỗi đồng bộ Firebase: {str(e)}"}), 500
 
-# --- GIỮ NGUYÊN CÁC ROUTE CÒN LẠI ---
+# --- 3. ĐĂNG NHẬP THƯỜNG ---
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password")
+    
     try:
         user = User.query.filter_by(email=email).first()
         if not user or not check_password_hash(user.password, password):
             return jsonify({"error": "Email hoặc mật khẩu không chính xác"}), 401
-        token = create_access_token(identity=str(user.id))
-        return jsonify({"token": token, "user": {"id": user.id, "email": user.email, "role": user.role, "username": user.username}}), 200
+            
+        # Thêm thông tin vào token tương tự Firebase login
+        additional_claims = {"user_id": str(user.id), "role": user.role}
+        token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
+        
+        return jsonify({
+            "token": token, 
+            "user": {
+                "id": user.id, 
+                "email": user.email, 
+                "role": user.role, 
+                "username": user.username
+            }
+        }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@auth_bp.route("/all", methods=["GET"])
-def get_all_users():
-    users = User.query.all()
-    return jsonify([{"id": u.id, "username": u.username, "email": u.email, "role": u.role, "status": u.status} for u in users]), 200
+# --- 4. CẬP NHẬT ROLE ---
+@auth_bp.route("/update-role", methods=["POST"])
+def update_role():
+    data = request.get_json() or {}
+    user_id = data.get('id')
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User không tồn tại"}), 404
+            
+        old_role = user.role
+        new_role = (data.get('role') or old_role).lower()
+        
+        user.username = data.get('username', user.username)
+        user.role = new_role
+        
+        if data.get('password'):
+            user.password = generate_password_hash(data.get('password'))
+        
+        db.session.commit()
+
+        if old_role != 'mentor' and new_role == 'mentor':
+            send_mq_message({
+                "event": "USER_REGISTERED",
+                "user_id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "role": "mentor"
+            })
+
+        return jsonify({"message": "Cập nhật thành công"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Lỗi cập nhật: {str(e)}"}), 500
