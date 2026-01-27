@@ -1,5 +1,8 @@
 flask
-flask_sqlalchemy
-psycopg2-binary
-requests
+flask-sqlalchemy
+pymysql
 pika
+flask-cors
+python-dotenv
+requests
+cryptography

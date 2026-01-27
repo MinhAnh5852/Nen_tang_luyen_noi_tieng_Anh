@@ -132,6 +132,161 @@
 # networks:
 #   app-network:
 #     driver: bridge
+# =================================================================BACKUPPP TRƯỚC SERVICE PAYMENT =================================
+# version: "3.9"
+
+# services:
+#   # --- DATABASE ---
+#   user-db:
+#     image: mysql:8.0
+#     container_name: user-db
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - user_db_data:/var/lib/mysql
+#       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+#     healthcheck:
+#       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - app-network
+
+#   # --- MESSAGE BROKER ---
+#   rabbitmq:
+#     image: rabbitmq:3-management
+#     container_name: rabbitmq
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+#     environment:
+#       RABBITMQ_DEFAULT_USER: guest
+#       RABBITMQ_DEFAULT_PASS: guest
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - app-network
+
+#   phpmyadmin:
+#     image: phpmyadmin:latest
+#     container_name: app-phpmyadmin
+#     environment:
+#       PMA_HOST: user-db
+#     ports:
+#       - "8080:80"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: USER SERVICE ---
+#   user-service:
+#     build: ./services/user-service
+#     container_name: user-service
+#     ports:
+#       - "5000:5000"
+#     environment:
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: SUBSCRIPTION SERVICE ---
+#   subscription-service:
+#     build: ./services/subscription-service
+#     container_name: subscription-service
+#     ports:
+#       - "5001:5001"
+#     environment:
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/subscription_db
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#       DEBUG: "True"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: MENTOR MANAGEMENT SERVICE ---
+#   mentor-management-service:
+#     build: ./services/mentor-management-service
+#     container_name: mentor-management-service
+#     ports:
+#       - "5002:5002"
+#     environment:
+#       PYTHONUNBUFFERED: "1"
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+#       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+#       JWT_SECRET_KEY: change_me_to_a_long_random_secret
+#     command: sh -c "python mq_worker.py & python app.py"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- BACKEND: ANALYTIC SERVICE (THÊM MỚI Ở ĐÂY) ---
+#   analytics-service:
+#     build: ./services/analytics-service
+#     container_name: analytics-service
+#     ports:
+#       - "5003:5003"
+#     environment:
+#       PYTHONUNBUFFERED: "1"
+#       DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
+#       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+#     command: sh -c "python mq_worker.py & python app.py"
+#     depends_on:
+#       user-db:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
+
+#   # --- GATEWAY ---
+#   api-gateway:
+#     build: ./api-gateway
+#     container_name: api-gateway
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./frontend:/usr/share/nginx/html:ro
+#     depends_on:
+#       - user-service
+#       - subscription-service
+#       - mentor-management-service
+#       - analytics-service # Thêm analytic service vào đây để Gateway đợi nó
+#     restart: always
+#     networks:
+#       - app-network
+
+# volumes:
+#   user_db_data:
+
+# networks:
+#   app-network:
+#     driver: bridge
+
 version: "3.9"
 
 services:
@@ -154,115 +309,83 @@ services:
     networks:
       - app-network
 
-  # --- MESSAGE BROKER ---
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - app-network
+  # --- BACKEND SERVICES ---
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: app-phpmyadmin
-    environment:
-      PMA_HOST: user-db
-    ports:
-      - "8080:80"
-    depends_on:
-      user-db:
-        condition: service_healthy
-    networks:
-      - app-network
-
-  # --- BACKEND: USER SERVICE ---
   user-service:
     build: ./services/user-service
     container_name: user-service
-    ports:
-      - "5000:5000"
     environment:
-      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
-      JWT_SECRET_KEY: change_me_to_a_long_random_secret
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4
+      - JWT_SECRET_KEY=change_me_to_a_long_random_secret
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
       user-db:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
     networks:
       - app-network
 
-  # --- BACKEND: SUBSCRIPTION SERVICE ---
-  subscription-service:
-    build: ./services/subscription-service
-    container_name: subscription-service
-    ports:
-      - "5001:5001"
-    environment:
-      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/subscription_db
-      JWT_SECRET_KEY: change_me_to_a_long_random_secret
-      DEBUG: "True"
-    depends_on:
-      user-db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  # --- BACKEND: MENTOR MANAGEMENT SERVICE ---
+  # ĐÃ THÊM LẠI: Mentor Management Service (Cổng 5002)
   mentor-management-service:
     build: ./services/mentor-management-service
     container_name: mentor-management-service
     ports:
       - "5002:5002"
     environment:
-      PYTHONUNBUFFERED: "1"
-      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-      JWT_SECRET_KEY: change_me_to_a_long_random_secret
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - JWT_SECRET_KEY=change_me_to_a_long_random_secret
     command: sh -c "python mq_worker.py & python app.py"
     depends_on:
       user-db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    restart: unless-stopped
     networks:
       - app-network
 
-  # --- BACKEND: ANALYTIC SERVICE (THÊM MỚI Ở ĐÂY) ---
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment-service
+    ports:
+      - "5004:5004"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/payment_db?charset=utf8mb4
+      - USER_SERVICE_URL=http://user-service:5000/internal/upgrade-package
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - app-network
+
   analytics-service:
     build: ./services/analytics-service
     container_name: analytics-service
     ports:
       - "5003:5003"
     environment:
-      PYTHONUNBUFFERED: "1"
-      DATABASE_URL: mysql+pymysql://root:root@user-db:3306/user_db
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-    command: sh -c "python mq_worker.py & python app.py"
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/analytics_db?charset=utf8mb4
+    command: python app.py
     depends_on:
       user-db:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
     networks:
       - app-network
 
-  # --- GATEWAY ---
+  subscription-service:
+    build: ./services/subscription-service
+    container_name: subscription-service
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/subscription_db?charset=utf8mb4
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # --- GATEWAY & INFRA ---
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -272,15 +395,45 @@ services:
       - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - user-service
-      - subscription-service
-      - mentor-management-service
-      - analytics-service # Thêm analytic service vào đây để Gateway đợi nó
-    restart: always
+      - payment-service
+      - analytics-service
+      - mentor-management-service # Đã thêm vào để Gateway đợi Mentor
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+    networks:
+      - app-network
+
+  nifi:
+    image: apache/nifi:latest
+    container_name: nifi
+    ports:
+      - "8443:8443"
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=trong_password_123456
+    volumes:
+      - ./nifi-drivers:/opt/nifi/nifi-current/lib/drivers
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_flow:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_db_repo:/opt/nifi/nifi-current/database_repository
     networks:
       - app-network
 
 volumes:
   user_db_data:
+  nifi_conf:
+  nifi_flow:
+  nifi_db_repo:
 
 networks:
   app-network:

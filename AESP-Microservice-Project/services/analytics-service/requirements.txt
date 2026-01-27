@@ -5,3 +5,4 @@ pika
 flask-cors
 python-dotenv
 requests
+cryptography
