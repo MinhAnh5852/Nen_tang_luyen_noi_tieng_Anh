@@ -428,6 +428,19 @@ services:
       - nifi_db_repo:/opt/nifi/nifi-current/database_repository
     networks:
       - app-network
+  
+  phpmyadmin:
+     image: phpmyadmin:latest
+     container_name: app-phpmyadmin
+     environment:
+       PMA_HOST: user-db
+     ports:
+       - "8080:80"
+     depends_on:
+       user-db:
+         condition: service_healthy
+     networks:
+       - app-network
 
 volumes:
   user_db_data:
@@ -438,3 +451,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+
