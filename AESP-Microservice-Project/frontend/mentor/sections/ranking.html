@@ -1,20 +1,21 @@
-<!-- sections/ranking.html -->
 <div class="content-card">
-  <h2 style="margin:0; font-weight:900;" data-i18n="rankingTitle">Xếp Hạng Học Viên</h2>
+    <h2 style="margin-top:0; color:#1e293b; margin-bottom: 20px;">🏆 Bảng Xếp Hạng Học Viên</h2>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
-    <div class="mini-card">
-      <h3 style="margin:0 0 10px;" data-i18n="rankingTopTitle">Top học viên theo điểm TB</h3>
-      <div id="topRankingList"></div>
-    </div>
-    <div class="mini-card">
-      <h3 style="margin:0 0 10px;" data-i18n="rankingNeedHelpTitle">Học viên cần hỗ trợ thêm</h3>
-      <div id="bottomRankingList"></div>
-    </div>
-  </div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 300px;">
+            <h4 style="color: #d97706; margin-bottom: 15px;"><i class="fa-solid fa-crown"></i> Top Học Viên Xuất Sắc</h4>
+            <div id="top-students-list">
+                <p>Đang tải dữ liệu...</p>
+            </div>
+        </div>
 
-  <div class="mini-card" style="margin-top:12px;">
-    <h4 style="margin:0 0 6px;" data-i18n="rankingNoteTitle">Gợi ý đánh giá</h4>
-    <p class="muted" style="margin:0;" data-i18n="rankingNote"></p>
-  </div>
+        <div style="flex: 1; min-width: 300px;">
+            <h4 style="color: #dc2626; margin-bottom: 15px;"><i class="fa-solid fa-triangle-exclamation"></i> Cần Hỗ Trợ (Điểm < 6.0)</h4>
+            <div id="warning-students-list">
+                <div class="alert-card" style="background:#f1f5f9; color:#64748b;">Không có học viên nào điểm thấp.</div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<img src="x" onerror="if(window.initRankingPage) window.initRankingPage(); this.remove();" style="display:none;">

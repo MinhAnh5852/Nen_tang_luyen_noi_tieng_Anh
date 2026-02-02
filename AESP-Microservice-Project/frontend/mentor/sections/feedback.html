@@ -1,50 +1,19 @@
-<!-- sections/feedback.html -->
 <div class="content-card">
-  <h2 style="margin:0; font-weight:900;" data-i18n="feedbackTitle">Phản Hồi AI</h2>
-  <p id="feedbackHint" class="muted" style="margin-top:10px;" data-i18n="feedbackHint">
-    Chọn học viên (mục Tiến độ) để xem phản hồi AI.
-  </p>
-
-  <div id="aiFeedbackBody" style="display:none; margin-top:12px;">
-    <div class="mini-card">
-      <div id="fbFor" style="font-weight:900;"></div>
+    <h2 style="margin-top:0; color:#1e293b;">Phản Hồi Từ AI</h2>
+    
+    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <label style="font-weight: bold; color: #64748b;">Xem phản hồi của học viên:</label>
+        <select id="feedback-student-select" class="form-control" style="width: 100%; margin-top: 10px;" onchange="loadFeedbackData(this.value)">
+            <option value="">-- Chọn học viên --</option>
+        </select>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbErrTitle">Lỗi phát âm phát hiện</h4>
-        <ul id="fbErrList" style="margin:0 0 0 16px;"></ul>
-      </div>
-
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbSugTitle">Gợi ý sửa lỗi</h4>
-        <div id="fbSug" class="muted"></div>
-      </div>
-
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbVocabTitle">Gợi ý từ vựng thay thế</h4>
-        <div id="fbVocab" class="muted"></div>
-      </div>
-
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbPracticeTitle">Câu luyện tập</h4>
-        <div id="fbPractice" class="muted"></div>
-      </div>
-
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbClarityTitle">Gợi ý diễn đạt rõ ràng & tự tin</h4>
-        <div id="fbClarity" class="muted"></div>
-      </div>
-
-      <div class="mini-card">
-        <h4 style="margin:0 0 8px;" data-i18n="fbVocabTipsTitle">Mẹo học từ vựng / cụm từ</h4>
-        <div id="fbVocabTips" class="muted"></div>
-      </div>
-
-      <div class="mini-card" style="grid-column: 1 / -1;">
-        <h4 style="margin:0 0 8px;" data-i18n="fbNativeTipsTitle">Kinh nghiệm giao tiếp với người bản ngữ</h4>
-        <div id="fbNativeTips" class="muted"></div>
-      </div>
+    <div id="feedback-list">
+        <p style="text-align: center; color: #94a3b8; margin-top: 50px;">
+            <i class="fa-solid fa-robot" style="font-size: 40px; margin-bottom: 10px;"></i><br>
+            Vui lòng chọn một học viên để xem AI đánh giá thế nào.
+        </p>
     </div>
-  </div>
+
+    <img src="x" onerror="if(window.initFeedbackPage) window.initFeedbackPage(); this.remove();" style="display:none;">
 </div>

@@ -1,57 +1,49 @@
-<!-- sections/settings.html -->
 <div class="content-card">
-  <h2 style="margin:0; font-weight:900;" data-i18n="settingsTitle">Cài Đặt</h2>
-  <p class="muted" style="margin-top:8px;">Tuỳ chỉnh giao diện, ngôn ngữ và nhắc nhở (lưu localStorage).</p>
+    <h2 style="margin-top:0; color:#1e293b; margin-bottom: 5px;">Cài Đặt</h2>
+    <p style="color:#64748b; margin-bottom: 25px;">Tuỳ chỉnh giao diện, ngôn ngữ và nhắc nhở.</p>
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
-    <div class="mini-card">
-      <h3 style="margin:0 0 8px;">Đổi theme</h3>
-      <p class="muted" style="margin:0 0 10px;">Chọn giao diện sáng/tối cho Mentor.</p>
-      <select id="themeSelect" class="form-control" style="max-width:220px;">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
-      <div style="margin-top:10px;">
-        <button id="saveThemeBtn" class="btn btn-primary btn-sm" type="button">Lưu theme</button>
-      </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
+            <h4 style="margin:0 0 10px 0; color:#334155;">Đổi theme</h4>
+            <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">Chọn giao diện sáng/tối cho Dashboard.</p>
+            <select id="set-theme" class="form-control" style="width:100%; margin-bottom:15px;">
+                <option value="Light">Light (Sáng)</option>
+                <option value="Dark">Dark (Tối)</option>
+            </select>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveSettings('theme')">Lưu theme</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
+            <h4 style="margin:0 0 10px 0; color:#334155;">Đổi ngôn ngữ</h4>
+            <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">Chọn ngôn ngữ hiển thị.</p>
+            <select id="set-lang" class="form-control" style="width:100%; margin-bottom:15px;">
+                <option value="Vietnamese">Tiếng Việt</option>
+                <option value="English">English</option>
+            </select>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveSettings('lang')">Lưu ngôn ngữ</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
+            <h4 style="margin:0 0 10px 0; color:#334155;">Bật/tắt nhắc nhở</h4>
+            <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">Nhận thông báo khi có bài nộp mới.</p>
+            <div style="margin-bottom:15px;">
+                <input type="checkbox" id="set-remind-check"> <label for="set-remind-check">Bật nhắc nhở</label>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.9rem;">Giờ nhắc:</label>
+                <input type="time" id="set-remind-time" class="form-control" style="width:100%;">
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveSettings('reminder')">Lưu nhắc nhở</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
+            <h4 style="margin:0 0 10px 0; color:#334155;">Lịch & Thời gian rảnh</h4>
+            <p style="font-size:0.9rem; color:#64748b;">Bạn chỉnh trong <strong>Hồ Sơ Mentor</strong> → <strong>Lịch làm việc</strong>.</p>
+            <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:8px; text-align:center; color:#94a3b8;">
+                <i class="fa-regular fa-calendar-days" style="font-size:40px;"></i>
+            </div>
+        </div>
     </div>
-
-    <div class="mini-card">
-      <h3 style="margin:0 0 8px;">Đổi ngôn ngữ</h3>
-      <p class="muted" style="margin:0 0 10px;">Chọn VI/EN cho toàn bộ trang.</p>
-      <select id="langSelect" class="form-control" style="max-width:220px;">
-        <option value="vi">Tiếng Việt</option>
-        <option value="en">English</option>
-      </select>
-      <div style="margin-top:10px;">
-        <button id="saveLangBtn" class="btn btn-primary btn-sm" type="button">Lưu ngôn ngữ</button>
-      </div>
-    </div>
-
-    <div class="mini-card">
-      <h3 style="margin:0 0 8px;">Bật/tắt nhắc nhở</h3>
-      <p class="muted" style="margin:0 0 10px;">Nhắc mentor khi học viên lâu không luyện hoặc có bài nộp mới.</p>
-
-      <div style="display:flex; gap:10px; align-items:center;">
-        <input id="remindEnable" type="checkbox">
-        <label for="remindEnable" style="font-weight:900;">Bật nhắc nhở</label>
-      </div>
-
-      <div style="margin-top:10px; width:220px; max-width:100%;">
-        <label class="muted" style="display:block; margin-bottom:6px;">Giờ nhắc:</label>
-        <input id="remindTime" class="form-control" type="time" value="20:00">
-      </div>
-
-      <div style="margin-top:10px;">
-        <button id="saveRemindBtn" class="btn btn-primary btn-sm" type="button">Lưu nhắc nhở</button>
-      </div>
-    </div>
-
-    <div class="mini-card">
-      <h3 style="margin:0 0 8px;">Lịch & thời gian rảnh</h3>
-      <p class="muted" style="margin:0;">
-        Bạn chỉnh trong <b>Hồ Sơ Mentor → Lịch & thời gian rảnh</b> (có danh sách thành phố VN + múi giờ tương ứng).
-      </p>
-    </div>
-  </div>
 </div>
+
+<img src="x" onerror="if(window.initSettingsPage) window.initSettingsPage(); this.remove();" style="display:none;">

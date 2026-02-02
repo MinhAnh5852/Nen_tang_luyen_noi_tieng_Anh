@@ -1,19 +1,47 @@
-<div class="content-card" style="border-radius: 16px; padding: 20px;">
-  <h2 style="margin: 0 0 12px 0; font-weight: 900; font-size: 1.5rem;">Giao Bài</h2>
-  
-  <div style="margin-bottom: 24px;">
-    <button id="assignNewTaskBtn" class="btn btn-primary btn-sm" style="border-radius: 8px;">
-        <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Giao Bài Mới
-    </button>
-  </div>
-
-  <div class="mini-card" style="border-radius: 12px; padding: 20px; background-color: rgba(255,255,255,0.05); min-height: 150px; display: flex; align-items: center; justify-content: center;">
-    <div id="noDataMessage" style="text-align: center; color: #a1a1aa;">
-        <i class="fa-regular fa-folder-open" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
-        <p style="margin: 0;">Chưa có bài tập nào được giao.</p>
+<div class="content-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin:0; color:#1e293b;">Giao Bài Tập</h2>
+        <button class="btn btn-primary" onclick="openTaskModal()">
+            <i class="fa-solid fa-plus"></i> Giao Bài Mới
+        </button>
     </div>
-    
-    <ul id="tasksUl" style="margin: 0; padding: 0; list-style-type: none; width: 100%; display: none;">
-    </ul>
-  </div>
+
+    <div id="task-list-container">
+        <p style="text-align:center;">Đang tải danh sách...</p>
+    </div>
 </div>
+
+<div class="modal-overlay" id="taskModal">
+    <div class="modal-content" style="width: 600px;">
+        <button class="close-modal" onclick="closeTaskModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h3 style="margin-top:0; color:#1e293b;">📋 Giao Bài Tập Mới</h3>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Học viên nhận bài:</label>
+            <select id="task-learner" class="form-control" style="width:100%; padding:12px;">
+                <option value="">-- Chọn học viên --</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Tiêu đề bài tập:</label>
+            <input type="text" id="task-title" class="form-control" style="width:100%;" placeholder="Ví dụ: Luyện nói chủ đề Family">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Hạn nộp (Deadline):</label>
+            <input type="date" id="task-deadline" class="form-control" style="width:100%;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display:block; margin-bottom:5px; font-weight:600;">Nội dung/Yêu cầu:</label>
+            <textarea id="task-desc" class="form-control" rows="4" style="width:100%;" placeholder="Nhập hướng dẫn chi tiết..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;" onclick="submitTask()">
+            <i class="fa-solid fa-paper-plane"></i> Gửi Bài Tập
+        </button>
+    </div>
+</div>
+
+<img src="x" onerror="if(window.initTaskPage) window.initTaskPage(); this.remove();" style="display:none;">
