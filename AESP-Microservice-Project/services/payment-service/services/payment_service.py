@@ -10,11 +10,12 @@ STRICT_PAYMENT_TRANSITIONS = os.getenv("STRICT_PAYMENT_TRANSITIONS", "true").low
 
 class PaymentService:
     @staticmethod
-    def create_payment(user_id, amount, method, package_name=None, currency="VND"):
+    def create_payment(user_id, amount, method, package_id, package_name=None): # Bổ sung package_id
         """Khởi tạo giao dịch mới vào payment_db"""
         payment = Payment(
             user_id=user_id,
-            package_name=package_name,
+            package_id=package_id,     # Lưu ID để đồng bộ
+            package_name=package_name, # Lưu tên để hiển thị
             amount=int(amount),
             payment_method=method,
             status="PENDING",
@@ -59,21 +60,22 @@ class PaymentService:
         
         # Nếu SUCCESS, cập nhật thời gian thanh toán thực tế và gọi User Service
         if status == "SUCCESS":
-            payment.paid_at = datetime.utcnow() # Cập nhật thời điểm nhận tiền
+            payment.paid_at = datetime.utcnow() 
             
             try:
-                # Gọi sang User Service để đồng bộ quyền lợi user
+                # Gửi đầy đủ thông tin sang User Service để đồng bộ
                 response = requests.put(
                     Config.USER_SERVICE_INTERNAL_URL, 
                     json={
                         "user_id": payment.user_id,
-                        "package_name": payment.package_name
+                        "package_id": payment.package_id,   # THÊM DÒNG NÀY: Quan trọng để React so sánh
+                        "package_name": payment.package_name # THÊM DÒNG NÀY: Để hiện tên gói
                     },
                     timeout=5
                 )
                 
                 if response.status_code != 200:
-                    print(f">>> [Lỗi Nâng Cấp] User Service trả về lỗi cho User {payment.user_id}")
+                    print(f">>> [Lỗi Nâng Cấp] User Service trả về lỗi {response.status_code} cho User {payment.user_id}")
                 else:
                     print(f">>> [Thành Công] Đã nâng cấp gói {payment.package_name} cho User {payment.user_id}")
             except Exception as e:
@@ -84,7 +86,7 @@ class PaymentService:
 
     @staticmethod
     def attach_provider_txn(*, payment_id, provider_txn_id):
-        """Lưu mã đối soát ngân hàng (Cần thiết cho NiFi đối soát sau này)"""
+        """Lưu mã đối soát ngân hàng"""
         payment = Payment.query.get(payment_id)
         if not payment:
             return None

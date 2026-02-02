@@ -1,0 +1,90 @@
+/* Container chính của Header */
+.main-header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Shadow nhẹ hơn cho sang */
+    height: 80px; /* Chiều cao cố định để dễ tính toán marginTop */
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px; /* Tăng lề hai bên */
+    width: 100%;
+    max-width: 1400px; /* Mở rộng chiều ngang tối đa */
+    margin: 0 auto;
+}
+
+/* Logo */
+.logo {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    color: #4361ee;
+    font-size: 32px; /* Tăng kích thước icon robot */
+}
+
+.logo-text {
+    font-size: 28px; /* Tăng size chữ AESP */
+    font-weight: 800;
+    background: linear-gradient(to right, #4361ee, #3a0ca3);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+/* Menu điều hướng */
+.nav-links {
+    display: flex;
+    gap: 40px; /* Tăng khoảng cách giữa các chữ */
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 500;
+    font-size: 16px; /* Tăng size chữ menu */
+    transition: all 0.3s ease;
+    padding: 10px 0;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-links a.active, .nav-links a:hover {
+    color: #4361ee;
+    border-bottom-color: #4361ee; /* Gạch chân dày hơn cho rõ ràng */
+}
+
+/* User Menu */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+/* Nút Đăng xuất theo phong cách mới */
+.btn-logout {
+    padding: 10px 20px;
+    border-radius: 50px; /* Bo tròn hoàn toàn */
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid #ef4444;
+    color: #ef4444;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background-color: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+}

@@ -1,0 +1,59 @@
+/* src/pages/Learner/Practice.css */
+.practice-area {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.conversation-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    height: 380px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    background: #ffffff;
+}
+
+.message { margin-bottom: 20px; display: flex; flex-direction: column; }
+.message.user { align-items: flex-end; }
+.message.ai { align-items: flex-start; }
+
+.message-content {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 15px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.message.ai .message-content { background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 2px; }
+.message.user .message-content { background: #4361ee; color: white; border-bottom-right-radius: 2px; }
+
+.feedback-note {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    color: #92400e;
+}
+
+.recording-button {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #4361ee; color: white; border: none;
+    font-size: 1.5rem; cursor: pointer; transition: 0.3s;
+}
+
+.recording-button.recording {
+    background: #ef4444;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

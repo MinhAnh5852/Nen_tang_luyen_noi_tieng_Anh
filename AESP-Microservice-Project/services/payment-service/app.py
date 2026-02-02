@@ -16,7 +16,7 @@ def create_app():
         db.create_all() # Tự động tạo bảng transactions trong MySQL
 
     from controllers.payment_controller import payment_bp
-    app.register_blueprint(payment_bp, url_prefix='/')
+    app.register_blueprint(payment_bp, url_prefix='/api/payments')
 
     return app
 

@@ -1,0 +1,47 @@
+/* src/components/Footer.css */
+.footer-container {
+    padding-top: 5%; 
+    padding-bottom: 20px;
+    position: relative;
+    width: 100%;
+    background-color: #1e293b; /* Thay màu dark-color nếu biến chưa nhận */
+    color: white;
+    height: auto; 
+    clear: both;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-column a, .footer-column p {
+    display: block;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    color: #cbd5e1;
+    text-decoration: none;
+}
+
+.footer-column a:hover {
+    color: #3b82f6;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #94a3b8;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.social-icons a {
+    font-size: 1.2rem;
+}
