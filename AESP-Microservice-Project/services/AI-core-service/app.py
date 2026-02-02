@@ -1,0 +1,127 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+import time
+
+# Import các service và database
+from services.ai_analysis import analyze_speech
+from services.speech_to_text import transcribe_audio
+from database import db
+from models import PracticeSession, ChatHistory
+
+# 1. Load biến môi trường
+load_dotenv()
+
+app = Flask(__name__)
+# Bật CORS cho toàn bộ ứng dụng để Gateway/Frontend có thể truy cập
+CORS(app)
+
+# 2. Cấu hình kết nối Database
+db_url = os.environ.get("DATABASE_URL")
+if not db_url:
+    print("WARNING: DATABASE_URL not found in .env")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# 3. Khởi tạo Database
+db.init_app(app)
+
+# Tự động tạo bảng với cơ chế chờ đợi Database sẵn sàng
+with app.app_context():
+    for i in range(5):  # Thử lại 5 lần
+        try:
+            db.create_all()
+            print("Database connected and tables created.")
+            break
+        except Exception as e:
+            print(f"Waiting for database... ({i+1}/5). Error: {e}")
+            time.sleep(3)
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    """
+    Endpoint xử lý hội thoại văn bản và lưu lịch sử.
+    """
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        user_text = data.get("text", "")
+        topic = data.get("topic", "General English")
+        
+        # Ép kiểu user_id sang int để khớp với Model
+        try:
+            user_id = int(data.get("user_id", 1))
+        except (ValueError, TypeError):
+            user_id = 1
+
+        if not user_text:
+            return jsonify({"error": "No text provided"}), 400
+            
+        # --- BƯỚC 1: Lưu tin nhắn của User vào DB ---
+        user_msg = ChatHistory(user_id=user_id, role="user", message=user_text)
+        db.session.add(user_msg)
+        
+        # --- BƯỚC 2: Gọi AI xử lý ---
+        result = analyze_speech(user_text, topic)
+        
+        if "error" in result:
+            db.session.rollback()
+            return jsonify(result), 500
+            
+        # --- BƯỚC 3: Lưu phản hồi của AI vào DB ---
+        ai_reply = result.get("reply", "")
+        ai_msg = ChatHistory(user_id=user_id, role="ai", message=ai_reply)
+        db.session.add(ai_msg)
+
+        # --- BƯỚC 4: Lưu kết quả luyện tập (Score) ---
+        accuracy = result.get("accuracy", 0)
+        practice = PracticeSession(
+            user_id=user_id, 
+            topic=topic, 
+            accuracy_score=float(accuracy)
+        )
+        db.session.add(practice)
+        
+        # Lưu tất cả thay đổi vào MySQL
+        db.session.commit()
+            
+        return jsonify(result), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Chat error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/transcribe", methods=["POST"])
+def transcribe():
+    """
+    Endpoint nhận file âm thanh và chuyển thành văn bản qua Whisper.
+    """
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+            
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        if file:
+            result_text = transcribe_audio(file)
+            
+            if isinstance(result_text, dict) and "error" in result_text:
+                return jsonify(result_text), 500
+                
+            return jsonify({"text": result_text}), 200
+            
+    except Exception as e:
+        print(f"Transcribe error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    # Chạy trên port 5005 để Gateway điều hướng tới
+    app.run(host="0.0.0.0", port=5005)

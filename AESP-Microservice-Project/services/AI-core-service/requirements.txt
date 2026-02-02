@@ -1,10 +1,9 @@
 flask
-python-dotenv
-requests
-psycopg2-binary
-gunicorn
-uvicorn      
-fastapi       
-python-multipart
-openai-whisper
+flask-cors
+flask-sqlalchemy
+pymysql
 groq
+python-dotenv
+flask-jwt-extended
+requests
+cryptography

@@ -9,18 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* NHÚNG NGUYÊN VĂN CSS TỪ STYLES.CSS */
         :root {
             --primary-color: #4361ee;
             --secondary-color: #3a0ca3;
-            --accent-color: #4cc9f0;
-            --success-color: #4ade80;
-            --warning-color: #f59e0b;
-            --danger-color: #3a0ca3;
-            --light-color: #f8fafc;
+            --danger-color: #ef4444;
             --dark-color: #1e293b;
-            --gray-color: #64748b;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             --radius: 12px;
             --transition: all 0.3s ease;
         }
@@ -35,16 +29,8 @@
             font-family: 'Poppins', sans-serif;
             color: var(--dark-color);
             background-color: #f1f5f9;
-            line-height: 1.6;
-            height: 100vh; /* Giữ màn hình cố định cho Iframe */
-            overflow: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+            height: 100vh;
+            overflow: hidden; /* Cố định màn hình để Iframe tự scroll bên trong */
         }
 
         /* Header Styles */
@@ -55,6 +41,13 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .header-container {
@@ -69,13 +62,10 @@
             align-items: center;
             gap: 10px;
             text-decoration: none;
+            cursor: pointer;
         }
 
-        .logo-icon {
-            color: var(--primary-color);
-            font-size: 28px;
-        }
-
+        .logo-icon { color: var(--primary-color); font-size: 28px; }
         .logo-text {
             font-size: 24px;
             font-weight: 700;
@@ -85,82 +75,56 @@
             color: transparent;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
+        .nav-links { display: flex; gap: 30px; }
         .nav-links a {
             text-decoration: none;
             color: var(--dark-color);
             font-weight: 500;
             transition: var(--transition);
             cursor: pointer;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
         }
 
         .nav-links a:hover, .nav-links a.active {
             color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
         }
 
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .user-menu { display: flex; align-items: center; gap: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             background-color: var(--primary-color);
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-weight: 600;
         }
 
-        .user-name {
-            font-weight: 500;
-        }
-
-        .btn {
-            padding: 10px 24px;
+        .btn-logout {
+            padding: 8px 15px;
             border-radius: var(--radius);
             font-weight: 600;
             cursor: pointer;
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            background: transparent;
             transition: var(--transition);
-            border: none;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
         }
 
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-            transform: translateY(-2px);
+        .btn-logout:hover {
+            background-color: var(--danger-color);
+            color: white;
         }
         
-        /* CSS dành riêng cho Iframe để khớp với layout */
+        /* Iframe configuration */
         iframe {
             width: 100%;
-            height: calc(100vh - 80px);
+            height: calc(100vh - 80px); /* Trừ đi chiều cao header */
             border: none;
-            margin-top: 80px; /* Bằng chiều cao Header */
+            margin-top: 80px; 
             background-color: #f1f5f9;
         }
     </style>
@@ -170,15 +134,15 @@
 
 <header>
     <div class="container header-container">
-        <a href="javascript:void(0)" class="logo" onclick="location.reload()">
+        <div class="logo" onclick="location.reload()">
             <i class="fas fa-robot logo-icon"></i>
             <span class="logo-text">AESP</span>
-        </a>
+        </div>
 
         <nav class="nav-links">
             <a class="active" onclick="changeTab(this,'/Learner/learner.html')">Bảng điều khiển</a>
             <a onclick="changeTab(this,'/Learner/practice.html')">Luyện tập AI</a>
-            <a onclick="changeTab(this,'/Learner/progress.html')">Tiến độ Học Tập</a>
+            <a onclick="changeTab(this,'/Learner/progress.html')">Tiến độ</a>
             <a onclick="changeTab(this,'/Learner/subscription.html')">Gói dịch vụ</a>
             <a onclick="changeTab(this,'/Learner/profile.html')">Hồ sơ</a>
         </nav>
@@ -186,11 +150,9 @@
         <div class="user-menu">
             <div class="user-info">
                 <div class="user-avatar" id="display-avatar">?</div>
-                <span class="user-name" id="display-name">Loading...</span>
+                <span class="user-name" id="display-name">Học viên</span>
             </div>
-            <button id="btn-logout" class="btn btn-outline" style="padding: 8px 15px; font-size: 14px; border-color: var(--danger-color); color: var(--danger-color);">
-                Đăng xuất
-            </button>
+            <button id="btn-logout" class="btn-logout">Đăng xuất</button>
         </div>
     </div>
 </header>
@@ -198,6 +160,7 @@
 <iframe id="main-frame" src="/Learner/learner.html"></iframe>
 
 <script>
+    // Hàm chuyển đổi tab mượt mà
     function changeTab(el, page) {
         document.querySelectorAll(".nav-links a").forEach(a => a.classList.remove("active"));
         el.classList.add("active");
@@ -205,21 +168,24 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        // Kiểm tra Token (Để bảo mật)
         const token = localStorage.getItem('token');
-        const userName = localStorage.getItem('username') || "Học viên";
+        const userName = localStorage.getItem('username') || "Hoài Bảo";
 
         if (!token) {
+            // Nếu chưa đăng nhập, trả về trang login
             window.location.replace("/login.html");
             return;
         }
 
+        // Hiển thị thông tin người dùng
         document.getElementById("display-name").innerText = userName;
         document.getElementById("display-avatar").innerText = userName.charAt(0).toUpperCase();
 
+        // Xử lý đăng xuất
         document.getElementById("btn-logout").onclick = () => {
             if (confirm("Bạn có chắc muốn đăng xuất?")) {
                 localStorage.clear();
-                sessionStorage.clear();
                 window.location.replace("/index.html");
             }
         };

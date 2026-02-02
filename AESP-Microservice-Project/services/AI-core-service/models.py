@@ -1,19 +1,19 @@
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
-from database import Base
+from database import db
+from datetime import datetime
 
-class Topic(Base):
-    __tablename__ = "practice_topics" # Khớp với DB bạn vẽ
-    Topic_ID = Column(Integer, primary_key=True, index=True)
-    Level_ID = Column(Integer)
-    Title = Column(String(255))
-    Description = Column(Text)
-    Initial_AI_Prompt = Column(Text)
+class PracticeSession(db.Model):
+    __tablename__ = 'practice_sessions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    topic = db.Column(db.String(100))
+    duration_seconds = db.Column(db.Integer, default=0)
+    accuracy_score = db.Column(db.Float) # Điểm từ Groq trả về
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class Session(Base):
-    __tablename__ = "ai_sessions" # Khớp với DB bạn vẽ
-    Session_ID = Column(Integer, primary_key=True, index=True)
-    Learner_ID = Column(Integer) # Tham chiếu logic sang User-service
-    Topic_ID = Column(Integer, ForeignKey("practice_topics.Topic_ID"))
-    Transcript = Column(Text)
-    AI_Grammar_Score = Column(Float)
-    AI_Pronunciation_Score = Column(Float)
+class ChatHistory(db.Model):
+    __tablename__ = 'chat_histories'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    role = db.Column(db.String(10), nullable=False) # 'user' hoặc 'ai'
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

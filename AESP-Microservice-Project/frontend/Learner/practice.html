@@ -6,429 +6,324 @@
     <title>Luyện tập với AI - AESP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text: #1e293b;
+            --gray: #64748b;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: var(--bg); 
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
         .practice-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            margin-top: 80px;
+            margin-bottom: 25px;
         }
-        
-        .mode-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+
+        .practice-header h1 { font-size: 1.5rem; margin: 0; }
+        #welcome-user { color: var(--gray); font-size: 0.9rem; margin: 5px 0 0 0; }
+
+        /* Topic Selection */
+        .content-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
         }
-        
-        .mode-card {
-            flex: 1;
-            background: white;
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .topic-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .topic-card:hover { transform: translateY(-3px); }
+        .topic-card.selected {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        .topic-card h4 { margin: 0; font-size: 0.95rem; }
+
+        /* Chat Area */
+        .practice-area {
+            background: var(--white);
             padding: 25px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
         }
-        
-        .mode-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .mode-card.active {
-            border-color: var(--primary-color);
-            background: rgba(67, 97, 238, 0.05);
-        }
-        
-        .mode-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-        
-        .ai-icon { color: var(--primary-color); }
-        .partner-icon { color: var(--success-color); }
-        .mentor-icon { color: var(--accent-color); }
-        
-        .topic-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 25px 0;
-        }
-        
-        .topic-card {
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .topic-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .topic-card.selected {
-            border: 2px solid var(--primary-color);
-            background: rgba(67, 97, 238, 0.05);
-        }
-        
-        .topic-icon {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-        
-        .practice-area {
-            background: white;
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-top: 30px;
-        }
-        
-        .speech-container {
-            text-align: center;
-            padding: 40px 20px;
-            background: #f8fafc;
-            border-radius: var(--radius);
-            margin: 30px 0;
-        }
-        
-        .recording-button {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-bottom: 20px;
-        }
-        
-        .recording-button.recording {
-            background: var(--danger-color);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
+
         .conversation-box {
-            background: white;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: var(--radius);
             padding: 20px;
-            height: 300px;
+            height: 380px;
             overflow-y: auto;
             margin-bottom: 20px;
+            background: #ffffff;
         }
-        
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-        }
-        
-        .message.user {
-            justify-content: flex-end;
-        }
-        
+
+        .message { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .message.user { align-items: flex-end; }
+        .message.ai { align-items: flex-start; }
+
         .message-content {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 18px;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
-        
-        .message.ai .message-content {
-            background: #f3f4f6;
+
+        .message.ai .message-content { background: #f1f5f9; color: var(--text); border-bottom-left-radius: 2px; }
+        .message.user .message-content { background: var(--primary); color: white; border-bottom-right-radius: 2px; }
+
+        /* Feedback Badge */
+        .feedback-note {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            color: #92400e;
         }
-        
-        .message.user .message-content {
-            background: var(--primary-color);
+
+        /* Controls */
+        .controls-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: var(--radius);
+        }
+
+        .recording-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--primary);
             color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .recording-button.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        #recording-status { margin-top: 15px; font-weight: 500; font-size: 0.9rem; color: var(--gray); }
+
+        .btn-outline {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-container">
-            <a href="learner.html" class="logo">
-                <i class="fas fa-robot logo-icon"></i>
-                <span class="logo-text">AESP</span>
-            </a>
-            
-            <nav class="nav-links">
-                <a href="learner.html">Bảng điều khiển</a>
-                <a href="practice.html" class="active">Luyện tập với AI</a>
-                <a href="progress.html">Tiến độ học tập</a>
-                <a href="subscription.html">Gói dịch vụ</a>
-                <a href="profile.html">Hồ sơ</a>
-            </nav>
-            
-            <div class="user-menu">
-                <div class="user-info">
-                    <div class="user-avatar">NV</div>
-                    <span class="user-name">Nguyễn Văn A</span>
-                </div>
-                <a href="index.html" class="btn btn-outline">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
     <main class="container">
         <div class="practice-header">
-            <h1>Luyện tập với AI</h1>
             <div>
-                <button class="btn btn-outline">
-                    <i class="fas fa-history"></i> Lịch sử luyện tập
-                </button>
+                <h1>AESP AI Speaking</h1>
+                <p id="welcome-user">Đang tải dữ liệu học viên...</p>
             </div>
+            <button class="btn-outline" onclick="location.reload()">
+                <i class="fas fa-redo"></i> Làm mới
+            </button>
         </div>
         
-        <!-- Practice Mode Selection -->
-        <div class="mode-selector">
-            <div class="mode-card active" onclick="selectMode('ai')">
-                <div class="mode-icon ai-icon">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h3>Luyện với AI</h3>
-                <p>Tương tác với AI trong thời gian thực</p>
-            </div>
-            
-            <div class="mode-card" onclick="selectMode('partner')">
-                <div class="mode-icon partner-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3>Luyện với người học</h3>
-                <p>Kết nối với người học khác</p>
-            </div>
-            
-            <div class="mode-card" onclick="selectMode('mentor')">
-                <div class="mode-icon mentor-icon">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                <h3>Luyện với Mentor</h3>
-                <p>Buổi học 1-1 với chuyên gia</p>
-            </div>
-        </div>
-        
-        <!-- Topic Selection -->
         <div class="content-card">
-            <h2>Chọn chủ đề luyện tập</h2>
-            <p style="color: var(--gray-color); margin-bottom: 20px;">Chọn chủ đề bạn muốn tập trung luyện tập:</p>
-            
+            <h3 style="margin-top:0; font-size: 1rem;">1. Chọn chủ đề hội thoại</h3>
             <div class="topic-grid">
-                <div class="topic-card" onclick="selectTopic(this, 'work')">
-                    <div class="topic-icon" style="color: #4361ee;">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <h4>Công việc</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">24 bài tập</p>
-                </div>
-                
-                <div class="topic-card" onclick="selectTopic(this, 'travel')">
-                    <div class="topic-icon" style="color: #4cc9f0;">
-                        <i class="fas fa-plane"></i>
-                    </div>
-                    <h4>Du lịch</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">18 bài tập</p>
-                </div>
-                
-                <div class="topic-card" onclick="selectTopic(this, 'daily')">
-                    <div class="topic-icon" style="color: var(--success-color);">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <h4>Cuộc sống hàng ngày</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">30 bài tập</p>
-                </div>
-                
-                <div class="topic-card" onclick="selectTopic(this, 'business')">
-                    <div class="topic-icon" style="color: var(--warning-color);">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h4>Kinh doanh</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">15 bài tập</p>
-                </div>
-                
-                <div class="topic-card" onclick="selectTopic(this, 'healthcare')">
-                    <div class="topic-icon" style="color: var(--danger-color);">
-                        <i class="fas fa-heartbeat"></i>
-                    </div>
-                    <h4>Chăm sóc sức khỏe</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">12 bài tập</p>
-                </div>
-                
-                <div class="topic-card" onclick="selectTopic(this, 'custom')">
-                    <div class="topic-icon" style="color: var(--gray-color);">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <h4>Tùy chỉnh</h4>
-                    <p style="color: var(--gray-color); font-size: 0.9rem;">Tạo chủ đề riêng</p>
-                </div>
+                <div class="topic-card" onclick="selectTopic(this)"><h4>Công việc</h4></div>
+                <div class="topic-card" onclick="selectTopic(this)"><h4>Du lịch</h4></div>
+                <div class="topic-card selected" onclick="selectTopic(this)"><h4>Hàng ngày</h4></div>
+                <div class="topic-card" onclick="selectTopic(this)"><h4>Sức khỏe</h4></div>
             </div>
         </div>
-        
-        <!-- Difficulty Level -->
-        <div class="content-card">
-            <h2>Chọn độ khó</h2>
-            <div style="display: flex; gap: 15px; margin-top: 20px;">
-                <button class="btn btn-outline active">Dễ</button>
-                <button class="btn btn-outline">Trung bình</button>
-                <button class="btn btn-outline">Khó</button>
-                <button class="btn btn-outline">Thử thách</button>
-            </div>
-        </div>
-        
-        <!-- Practice Area -->
+
         <div class="practice-area">
-            <h2>Bắt đầu luyện tập</h2>
-            <p style="color: var(--gray-color); margin-bottom: 20px;">Chủ đề: <span id="selected-topic">Công việc</span> • Độ khó: <span id="selected-difficulty">Trung bình</span></p>
-            
-            <!-- Conversation Box -->
             <div class="conversation-box" id="conversation-box">
                 <div class="message ai">
                     <div class="message-content">
-                        <strong>AI:</strong> Xin chào! Tôi là trợ lý AI của AESP. Hôm nay chúng ta sẽ luyện tập chủ đề giao tiếp công việc. Hãy giới thiệu bản thân bạn bằng tiếng Anh.
-                    </div>
-                </div>
-                
-                <div class="message user">
-                    <div class="message-content">
-                        <strong>Bạn:</strong> Hello, my name is Nguyen Van A. I work as a marketing manager.
-                    </div>
-                </div>
-                
-                <div class="message ai">
-                    <div class="message-content">
-                        <strong>AI:</strong> Great introduction! Now, tell me about your daily responsibilities at work.
+                        <strong>AI:</strong> Hello! I'm your AESP assistant. Please select a topic and click the microphone to start our conversation.
                     </div>
                 </div>
             </div>
             
-            <!-- Speech Practice -->
-            <div class="speech-container">
-                <button class="recording-button" onclick="toggleRecording(this)">
+            <div class="controls-container">
+                <button class="recording-button" id="mic-btn" onclick="toggleSpeechRecognition()">
                     <i class="fas fa-microphone"></i>
                 </button>
-                <p id="recording-status">Nhấn nút để bắt đầu nói</p>
-                <p style="color: var(--gray-color); margin-top: 10px;">Nói về công việc hàng ngày của bạn</p>
-                
-                <div style="margin-top: 30px;">
-                    <button class="btn btn-primary" onclick="startConversation()">
-                        <i class="fas fa-play"></i> Bắt đầu hội thoại
-                    </button>
-                    <button class="btn btn-outline" style="margin-left: 15px;">
-                        <i class="fas fa-redo"></i> Làm mới
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Tips -->
-            <div style="background: #f0f9ff; padding: 20px; border-radius: var(--radius); margin-top: 30px;">
-                <h4><i class="fas fa-lightbulb" style="color: var(--warning-color);"></i> Mẹo luyện tập</h4>
-                <p>• Nói rõ ràng và tự nhiên<br>
-                   • Đừng lo lắng về lỗi sai<br>
-                   • Tập trung vào ngữ điệu<br>
-                   • Sử dụng từ vựng đã học</p>
+                <p id="recording-status">Nhấn mic để bắt đầu nói</p>
             </div>
         </div>
-             <div id="footer"></div>
-
     </main>
 
-    <script src="script.js"></script>
     <script>
-        function selectMode(mode) {
-            // Update card selection
-            document.querySelectorAll('.mode-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            // Update UI based on mode
-            if (mode === 'partner') {
-                alert('Chế độ luyện tập với người học sẽ sớm có mặt!');
-            } else if (mode === 'mentor') {
-                alert('Vui lòng đặt lịch với Mentor trong trang Gói dịch vụ');
+        // 1. Khởi tạo dữ liệu người dùng
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username') || localStorage.getItem('username') || 'Học viên';
+        const userId = urlParams.get('user_id') || localStorage.getItem('user_id') || 'admin-001';
+        
+        document.getElementById('welcome-user').textContent = `Học viên: ${username} | ID: ${userId}`;
+
+        // 2. Cấu hình Nhận diện giọng nói (Web Speech API)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; // Luyện tiếng Anh
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                sendToAI(transcript);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                updateMicUI();
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Lỗi nhận diện:", event.error);
+                document.getElementById('recording-status').textContent = "Không nghe rõ, vui lòng thử lại.";
+                isListening = false;
+                updateMicUI();
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.");
+                return;
             }
-        }
-        
-        function selectTopic(element, topic) {
-            // Remove selection from all topics
-            document.querySelectorAll('.topic-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Add selection to clicked topic
-            element.classList.add('selected');
-            document.getElementById('selected-topic').textContent = element.querySelector('h4').textContent;
-        }
-        
-        let isRecording = false;
-        
-        function toggleRecording(button) {
-            isRecording = !isRecording;
-            button.classList.toggle('recording');
-            
-            const status = document.getElementById('recording-status');
-            const icon = button.querySelector('i');
-            
-            if (isRecording) {
-                status.textContent = 'Đang ghi âm... Nói ngay bây giờ!';
-                icon.className = 'fas fa-stop';
-                
-                // Simulate adding user message
-                setTimeout(() => {
-                    addMessage('user', 'I usually start my day by checking emails and planning marketing campaigns.');
-                }, 2000);
+
+            if (!isListening) {
+                recognition.start();
+                isListening = true;
+                document.getElementById('recording-status').textContent = "Đang lắng nghe... Hãy nói tiếng Anh";
             } else {
-                status.textContent = 'Đang phân tích phát âm của bạn...';
-                icon.className = 'fas fa-microphone';
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    status.textContent = 'Phân tích hoàn tất! Độ chính xác: 85%';
-                    addMessage('ai', 'Good job! Your pronunciation is clear. Try to work on your intonation when describing daily tasks.');
-                }, 1500);
+                recognition.stop();
+                isListening = false;
+            }
+            updateMicUI();
+        }
+
+        function updateMicUI() {
+            const btn = document.getElementById('mic-btn');
+            if (isListening) {
+                btn.classList.add('recording');
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+            } else {
+                btn.classList.remove('recording');
+                btn.innerHTML = '<i class="fas fa-microphone"></i>';
             }
         }
-        
-        function addMessage(sender, text) {
-            const conversationBox = document.getElementById('conversation-box');
+
+        // 3. Logic xử lý hội thoại
+        function selectTopic(element) {
+            document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function sendToAI(text) {
+            const topic = document.querySelector('.topic-card.selected h4').textContent;
+            const status = document.getElementById('recording-status');
+            
+            addMessage('user', text);
+            status.textContent = "AI đang phân tích và trả lời...";
+
+            try {
+                // Gọi tới API Gateway
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: text, 
+                        topic: topic,
+                        user_id: userId 
+                    })
+                });
+
+                if (!response.ok) throw new Error("Network error");
+                
+                const data = await response.json();
+                
+                // Hiển thị phản hồi và đánh giá
+                addMessage('ai', data.reply, data.accuracy, data.correction);
+                status.textContent = `Hoàn tất! Độ chính xác: ${data.accuracy}%`;
+                
+            } catch (e) {
+                addMessage('ai', "Rất tiếc, tôi gặp lỗi khi kết nối với máy chủ.");
+                status.textContent = "Lỗi kết nối.";
+            }
+        }
+
+        function addMessage(sender, text, accuracy = null, correction = null) {
+            const box = document.getElementById('conversation-box');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = `<strong>${sender === 'ai' ? 'AI' : 'Bạn'}:</strong> ${text}`;
+            let html = `<div class="message-content"><strong>${sender==='ai'?'AI':'Bạn'}:</strong> ${text}</div>`;
             
-            messageDiv.appendChild(contentDiv);
-            conversationBox.appendChild(messageDiv);
-            conversationBox.scrollTop = conversationBox.scrollHeight;
+            // Nếu là phản hồi từ AI và có chấm điểm, hiển thị thêm phần sửa lỗi
+            if (sender === 'ai' && accuracy !== null) {
+                html += `<div class="feedback-note">
+                            <i class="fas fa-check-circle"></i> Accuracy: ${accuracy}% <br>
+                            <i class="fas fa-magic"></i> Suggestion: ${correction}
+                         </div>`;
+            }
+            
+            messageDiv.innerHTML = html;
+            box.appendChild(messageDiv);
+            box.scrollTop = box.scrollHeight;
         }
-        
-        function startConversation() {
-            addMessage('ai', 'Great! Let me ask you another question. What is the most challenging part of your job?');
-            document.getElementById('recording-status').textContent = 'Hãy trả lời câu hỏi của AI';
-        }
-
-        fetch("footer.html")
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("footer").innerHTML = data;
-  });
     </script>
 </body>
 </html>

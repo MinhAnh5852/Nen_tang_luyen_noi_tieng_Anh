@@ -323,6 +323,23 @@ services:
         condition: service_healthy
     networks:
       - app-network
+# 2. AI Core Service (MỚI THÊM)
+  ai-core-service:
+    build: ./services/AI-core-service
+    container_name: ai-core-service
+    ports:
+      - "5005:5005"
+    environment:
+      # Override biến môi trường để kết nối vào user-db trong mạng Docker
+      - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/xdpm?charset=utf8mb4
+      # Lưu ý: Thay Key mới của bạn vào đây hoặc để trong file .env ở root
+      - GROQ_API_KEY=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
+      - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trọng
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - app-network
 
   # ĐÃ THÊM LẠI: Mentor Management Service (Cổng 5002)
   mentor-management-service:
@@ -398,6 +415,7 @@ services:
       - payment-service
       - analytics-service
       - mentor-management-service # Đã thêm vào để Gateway đợi Mentor
+      - ai-core-service
     networks:
       - app-network
 
