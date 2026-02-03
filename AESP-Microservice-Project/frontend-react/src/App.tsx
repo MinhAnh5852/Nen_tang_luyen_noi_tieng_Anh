@@ -20,22 +20,20 @@ function App() {
   const userRole = localStorage.getItem('user_role')?.toLowerCase(); 
   const isAuthenticated = !!token;
 
-  // Layout cho trang công khai (Landing, Login, Register)
   const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="app-viewport">
       <PublicHeader />
-      {/* Tăng marginTop lên 90px để né PublicHeader cố định */}
-      <main style={{ flex: '1 0 auto', marginTop: '90px' }}> 
+      <main className="main-content"> 
         {children}
       </main>
       <Footer />
     </div>
   );
 
-  // Thành phần bảo vệ route và chuyển hướng dựa trên vai trò
   const ProtectedLayout = () => {
     if (!isAuthenticated) return <Navigate to="/login" />;
 
+    // Chuyển hướng cho Admin/Mentor theo yêu cầu hệ thống AESP
     if (userRole === 'admin') {
       window.location.href = '/admin/index.html';
       return null;
@@ -45,17 +43,10 @@ function App() {
       return null;
     }
 
-    // Giao diện dành riêng cho Learner
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
-        {/* Đảm bảo Header có z-index cao trong file CSS của nó */}
+      <div className="app-viewport protected-bg">
         <Header />
-        
-        {/* QUAN TRỌNG: 
-          - marginTop: 110px giúp đẩy nội dung xuống dưới Header cố định.
-          - paddingBottom: 60px tạo khoảng cách với Footer.
-        */}
-        <main style={{ flex: '1 0 auto', marginTop: '110px', paddingBottom: '60px' }}>
+        <main className="main-content">
           <div className="container">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -69,7 +60,6 @@ function App() {
             </Routes>
           </div>
         </main>
-        
         <Footer />
       </div>
     );

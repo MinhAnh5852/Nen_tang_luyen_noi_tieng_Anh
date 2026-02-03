@@ -1,50 +1,166 @@
 /* src/pages/Learner/Dashboard.css */
-.welcome-banner {
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-    color: white;
-    padding: 60px 40px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-    position: relative;
-    overflow: hidden;
-    margin-top: 20px;
-    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+
+.learner-dashboard-wrapper {
+    /* Nhít nội dung lên cao sát Header hệ thống */
+    padding: 10px 20px 40px 20px;
+    background-color: #f8fafc; /* Màu nền nhẹ giúp các thẻ trắng nổi bật hơn */
+    min-height: 100vh;
 }
 
-.welcome-banner::before {
+/* Banner chào mừng: Sửa class cho khớp với file .tsx (welcome-banner-aesp) */
+.welcome-banner-aesp {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: white;
+    padding: 40px;
+    border-radius: 24px;
+    margin-bottom: 40px; /* Tạo khoảng cách an toàn với các thẻ stat-cards bên dưới */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(67, 97, 238, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.welcome-banner-aesp::before {
     content: '';
     position: absolute;
     top: -50%;
-    right: -50%;
-    width: 300px;
-    height: 300px;
+    right: -10%;
+    width: 350px;
+    height: 350px;
     background: rgba(255,255,255,0.1);
     border-radius: 50%;
+    pointer-events: none;
 }
 
-.welcome-banner h1 {
-    font-size: 2.5rem;
-    margin: 0 0 10px 0;
+.welcome-banner-aesp h1 {
+    font-size: 2.2rem;
+    margin: 0 0 12px 0;
     font-weight: 700;
+    z-index: 1;
 }
 
-.dashboard-stats {
+.welcome-banner-aesp p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-bottom: 5px;
+    z-index: 1;
+}
+
+/* Nút Bắt đầu luyện tập: Đảm bảo không đè lên thành phần khác */
+.btn-action-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px; /* Tạo khoảng cách rõ ràng với text bên trên */
+    background: white !important; /* Force màu trắng */
+    color: #4361ee !important;
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.btn-action-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    background: #f1f5f9 !important;
+}
+
+/* Lưới các thẻ chỉ số: Giãn cách thưa ra chuyên nghiệp */
+.stats-cards-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 25px;
+    gap: 25px; 
+    margin-bottom: 40px;
 }
 
-.stat-card {
+.stat-box-card {
     background: white;
     padding: 25px;
-    border-radius: 18px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
 }
 
-.stat-card:hover {
+.stat-box-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.icon-circle.blue { background: #eef2ff; color: #4361ee; }
+.icon-circle.green { background: #f0fdf4; color: #22c55e; }
+.icon-circle.orange { background: #fff7ed; color: #f59e0b; }
+.icon-circle.red { background: #fef2f2; color: #ef4444; }
+
+.box-val h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.box-val p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Box biểu đồ */
+.activity-chart-box {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    border: 1px solid #f1f5f9;
+}
+
+.activity-chart-box h3 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Sửa lỗi biểu đồ (Chart height/width <= 0) */
+.chart-container-fixed {
+    width: 100%;
+    height: 320px; /* Tăng nhẹ chiều cao để biểu đồ thoáng hơn */
+    margin-top: 10px;
+    position: relative;
+}
+
+/* CSS cho phần "Chưa có dữ liệu" */
+.no-data-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 2px dashed #e2e8f0;
 }

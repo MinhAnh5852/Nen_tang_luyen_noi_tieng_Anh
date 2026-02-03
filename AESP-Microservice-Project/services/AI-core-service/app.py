@@ -3,6 +3,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import time
+import pika  # Thêm thư viện để kết nối RabbitMQ
+import json  # Thêm thư viện để xử lý dữ liệu gửi đi
 
 # Import các service và database
 from services.ai_analysis import analyze_speech
@@ -27,6 +29,31 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # 3. Khởi tạo Database
 db.init_app(app)
+
+# --- PHẦN THÊM MỚI 1: HÀM GỬI SỰ KIỆN QUA RABBITMQ ---
+def send_practice_event(data):
+    """Gửi thông tin luyện tập sang Analytics Service qua RabbitMQ"""
+    try:
+        # Lấy URL RabbitMQ từ .env (đã được cấu hình trong Docker)
+        rabbitmq_url = os.environ.get('RABBITMQ_URL', 'amqp://admin:admin123@app-rabbitmq:5672/')
+        params = pika.URLParameters(rabbitmq_url)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        
+        # Khai báo hàng đợi để lưu tin nhắn
+        channel.queue_declare(queue='practice_events', durable=True)
+        
+        # Gửi dữ liệu dưới dạng chuỗi JSON
+        channel.basic_publish(
+            exchange='',
+            routing_key='practice_events',
+            body=json.dumps(data),
+            properties=pika.BasicProperties(delivery_mode=2) # Đảm bảo tin nhắn không mất khi restart RabbitMQ
+        )
+        connection.close()
+        print(f" [MQ] Đã gửi sự kiện luyện tập cho User {data['user_id']}")
+    except Exception as e:
+        print(f" [MQ Error] Không thể gửi message: {e}")
 
 # Tự động tạo bảng với cơ chế chờ đợi Database sẵn sàng
 with app.app_context():
@@ -53,11 +80,8 @@ def chat():
         user_text = data.get("text", "")
         topic = data.get("topic", "General English")
         
-        # Ép kiểu user_id sang int để khớp với Model
-        try:
-            user_id = int(data.get("user_id", 1))
-        except (ValueError, TypeError):
-            user_id = 1
+        # Lấy user_id dưới dạng UUID/String từ Frontend
+        user_id = data.get("user_id", "1")
 
         if not user_text:
             return jsonify({"error": "No text provided"}), 400
@@ -89,6 +113,17 @@ def chat():
         
         # Lưu tất cả thay đổi vào MySQL
         db.session.commit()
+
+        # --- PHẦN THÊM MỚI 2: GỬI SỰ KIỆN SANG ANALYTICS SERVICE ---
+        # Ngay sau khi lưu DB thành công, gửi tin nhắn đi để đồng bộ Dashboard
+        send_practice_event({
+            "event": "PRACTICE_COMPLETED",
+            "user_id": user_id,
+            "accuracy": float(accuracy),
+            "topic": topic,
+            "duration": 60, # Giả định mỗi lượt chat là 1 phút để tính total_time
+            "timestamp": time.time()
+        })
             
         return jsonify(result), 200
         
@@ -123,9 +158,8 @@ def transcribe():
     except Exception as e:
         print(f"Transcribe error: {e}")
         return jsonify({"error": str(e)}), 500
-# AI-core-service/app.py
 
-@app.route("/api/ai/history/<int:user_id>", methods=["GET"])
+@app.route("/api/ai/history/<string:user_id>", methods=["GET"])
 def get_history(user_id):
     try:
         # Lấy tối đa 30 tin nhắn gần nhất của đúng user_id
@@ -145,4 +179,3 @@ def get_history(user_id):
 if __name__ == "__main__":
     # Chạy trên port 5005 để Gateway điều hướng tới
     app.run(host="0.0.0.0", port=5005)
-

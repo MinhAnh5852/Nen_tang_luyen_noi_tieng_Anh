@@ -1,13 +1,15 @@
-/* Container chính của Header */
+/* Header.css */
+
 .main-header {
     position: fixed;
     width: 100%;
     top: 0;
     left: 0;
-    z-index: 1000;
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Shadow nhẹ hơn cho sang */
-    height: 80px; /* Chiều cao cố định để dễ tính toán marginTop */
+    z-index: 1100;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    height: 80px;
     display: flex;
     align-items: center;
 }
@@ -16,13 +18,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 40px; /* Tăng lề hai bên */
+    padding: 0 40px;
     width: 100%;
-    max-width: 1400px; /* Mở rộng chiều ngang tối đa */
+    max-width: 1400px;
     margin: 0 auto;
 }
 
-/* Logo */
 .logo {
     cursor: pointer;
     display: flex;
@@ -32,59 +33,124 @@
 
 .logo-icon {
     color: #4361ee;
-    font-size: 32px; /* Tăng kích thước icon robot */
+    font-size: 32px;
 }
 
 .logo-text {
-    font-size: 28px; /* Tăng size chữ AESP */
+    font-size: 28px;
     font-weight: 800;
     background: linear-gradient(to right, #4361ee, #3a0ca3);
     -webkit-background-clip: text;
     color: transparent;
+    letter-spacing: 1px;
 }
 
-/* Menu điều hướng */
 .nav-links {
     display: flex;
-    gap: 40px; /* Tăng khoảng cách giữa các chữ */
+    gap: 35px;
 }
 
 .nav-links a {
     text-decoration: none;
     color: #475569;
-    font-weight: 500;
-    font-size: 16px; /* Tăng size chữ menu */
+    font-weight: 600;
+    font-size: 15px;
     transition: all 0.3s ease;
-    padding: 10px 0;
-    border-bottom: 3px solid transparent;
+    padding: 8px 0;
+    position: relative;
 }
 
-.nav-links a.active, .nav-links a:hover {
+.nav-links a.active, 
+.nav-links a:hover {
     color: #4361ee;
-    border-bottom-color: #4361ee; /* Gạch chân dày hơn cho rõ ràng */
 }
 
-/* User Menu */
+.nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #4361ee;
+    border-radius: 10px;
+}
+
 .user-menu {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 15px; /* Giảm gap một chút để đủ chỗ cho tên */
 }
 
-/* Nút Đăng xuất theo phong cách mới */
-.btn-logout {
-    padding: 10px 20px;
-    border-radius: 50px; /* Bo tròn hoàn toàn */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #4361ee, #4cc9f0);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0; /* Không cho avatar bị bóp méo */
+}
+
+.user-name {
     font-weight: 600;
+    color: #1e293b;
+    font-size: 14px;
+    /* Giới hạn độ dài tên để không đẩy nút Logout ra ngoài */
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
     border: 1.5px solid #ef4444;
     color: #ef4444;
-    background: white;
+    background: transparent;
     transition: all 0.3s ease;
 }
 
 .btn-logout:hover {
     background-color: #ef4444;
     color: white;
-    transform: translateY(-2px);
+}
+
+/* Responsive tinh chỉnh */
+@media (max-width: 1100px) {
+    .nav-links {
+        gap: 15px;
+    }
+    .header-content {
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Mobile ẩn menu chính, hiện Avatar và Logout */
+    }
+    .user-name {
+        display: inline-block; /* Đảm bảo Mobile vẫn hiện tên */
+    }
 }

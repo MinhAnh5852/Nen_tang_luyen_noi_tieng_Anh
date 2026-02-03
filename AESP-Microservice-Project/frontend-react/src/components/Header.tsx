@@ -6,8 +6,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("Học viên");
 
-  useEffect(() => {
-    // Lấy thông tin từ user_info (Object) thay vì username (String) lẻ để đồng bộ dữ liệu thật
+  const loadUserInfo = () => {
     const userInfoStr = localStorage.getItem('user_info');
     if (userInfoStr) {
       try {
@@ -16,14 +15,20 @@ const Header: React.FC = () => {
           setUsername(userInfo.username);
         }
       } catch (error) {
-        console.error("Lỗi parse user_info trong Header:", error);
+        console.error("Lỗi parse user_info:", error);
       }
     }
+  };
+
+  useEffect(() => {
+    loadUserInfo();
+    // Lắng nghe sự kiện nếu trang Profile cập nhật lại tên
+    window.addEventListener('storage', loadUserInfo);
+    return () => window.removeEventListener('storage', loadUserInfo);
   }, []);
 
   const handleLogout = () => {
-    if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
-      // Xóa toàn bộ session để bảo mật thông tin
+    if (window.confirm("Bạn có chắc muốn đăng xuất khỏi AESP?")) {
       localStorage.clear();
       navigate('/login');
     }
@@ -32,30 +37,24 @@ const Header: React.FC = () => {
   return (
     <header className="main-header">
       <div className="container header-content">
-        {/* Logo - Click để về Dashboard */}
-        <div className="logo" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
+        <div className="logo" onClick={() => navigate('/dashboard')}>
           <i className="fas fa-robot logo-icon"></i>
           <span className="logo-text">AESP</span>
         </div>
 
-        {/* Thanh điều hướng chính cho Learner */}
         <nav className="nav-links">
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? "active" : ""}>Bảng điều khiển</NavLink>
           <NavLink to="/practice" className={({ isActive }) => isActive ? "active" : ""}>Luyện tập AI</NavLink>
-          
-          {/* MỚI: Liên kết Bảng xếp hạng để học viên thi đua */}
           <NavLink to="/leaderboard" className={({ isActive }) => isActive ? "active" : ""}>Bảng xếp hạng</NavLink>
-          
           <NavLink to="/progress" className={({ isActive }) => isActive ? "active" : ""}>Tiến độ</NavLink>
           <NavLink to="/subscription" className={({ isActive }) => isActive ? "active" : ""}>Gói dịch vụ</NavLink>
           <NavLink to="/profile" className={({ isActive }) => isActive ? "active" : ""}>Hồ sơ</NavLink>
         </nav>
 
-        {/* Menu người dùng bên phải */}
         <div className="user-menu">
           <div className="user-info">
             <div className="user-avatar">
-              {username.charAt(0).toUpperCase()}
+              {username ? username.charAt(0).toUpperCase() : "H"}
             </div>
             <span className="user-name">{username}</span>
           </div>

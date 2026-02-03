@@ -1,4 +1,5 @@
 flask
+pika
 flask-cors
 flask-sqlalchemy
 pymysql

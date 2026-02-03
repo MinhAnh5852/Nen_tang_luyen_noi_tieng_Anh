@@ -1,5 +1,7 @@
+// Dashboard.tsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import './Dashboard.css';
 
 interface ProgressData {
@@ -8,95 +10,109 @@ interface ProgressData {
   lessons_completed: number;
   streak: number;
   ai_suggestion: string;
+  weekly_activity: { day: string; hours: number }[];
 }
 
 const Dashboard: React.FC = () => {
   const [username, setUsername] = useState("Học viên");
   const [data, setData] = useState<ProgressData>({
-    total_time: "--h --m",
+    total_time: "0h 0m",
     accuracy: null,
     lessons_completed: 0,
     streak: 0,
-    ai_suggestion: "Hôm nay bạn đã sẵn sàng để luyện tập chưa? Hãy bắt đầu ngay nhé!"
+    ai_suggestion: "Hôm nay bạn đã sẵn sàng để luyện tập chưa? Hãy bắt đầu ngay nhé!",
+    weekly_activity: []
   });
 
   useEffect(() => {
-    const storedName = localStorage.getItem('username');
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    if (userInfo.username) setUsername(userInfo.username);
+    
     const token = localStorage.getItem('token');
-    if (storedName) setUsername(storedName);
+    const userId = userInfo.id || localStorage.getItem('user_id');
 
-    const fetchProgress = async () => {
-      if (!token) return;
+    const fetchDashboardData = async () => {
+      if (!token || !userId) return;
+      
       try {
-        const response = await fetch('/api/analytics/my-progress', {
+        const response = await fetch(`/api/analytics/summary/${userId}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
-        if (response.ok) {
+        if (!response.ok) {
+           console.error(`Lỗi hệ thống: ${response.status}`);
+           return;
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           const result = await response.json();
-          setData(prevData => ({
-            ...prevData,
-            total_time: result.total_time || "0h 0m",
-            accuracy: result.accuracy,
-            lessons_completed: result.lessons_completed || 0,
-            streak: result.streak || 0,
-            ai_suggestion: result.ai_suggestion || prevData.ai_suggestion
+          setData(prev => ({
+            ...prev,
+            ...result,
+            total_time: result.total_time || "0h 0m"
           }));
         }
       } catch (error) {
-        console.error("Lỗi nạp dữ liệu:", error);
+        console.error("Lỗi nạp dữ liệu Dashboard:", error);
       }
     };
 
-    fetchProgress();
+    fetchDashboardData();
   }, []);
 
   return (
-    <div className="container">
-      <div className="welcome-banner">
-        <h1>Chào mừng trở lại, {username}!</h1>
-        <p>{data.ai_suggestion}</p>
-        <div style={{ marginTop: '25px' }}>
-          {/* Sửa textDecoration: 'none' ở dưới đây */}
-          <Link to="/practice" className="btn btn-primary" style={{ background: 'white', color: '#4361ee', fontWeight: 700, textDecoration: 'none', padding: '15px 30px', borderRadius: '12px', display: 'inline-block', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-            <i className="fas fa-microphone" style={{ marginRight: '8px' }}></i> Bắt đầu luyện tập ngay
+    <div className="learner-dashboard-wrapper">
+      <div className="welcome-banner-aesp">
+        <div className="banner-text">
+          <h1>Chào mừng trở lại, {username}!</h1>
+          <p>{data.ai_suggestion}</p>
+          <Link to="/practice" className="btn-action-primary">
+            <i className="fas fa-microphone"></i> Bắt đầu luyện tập
           </Link>
         </div>
       </div>
       
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <div className="stat-icon primary"><i className="fas fa-clock"></i></div>
-          <div className="stat-info">
-            <h3>{data.total_time}</h3>
-            <p>Tổng thời gian</p>
+      <div className="stats-cards-row">
+        {[
+          { label: 'Thời gian', val: data.total_time, icon: 'fa-clock', color: 'blue' },
+          { label: 'Chính xác', val: (data.accuracy || 0) + '%', icon: 'fa-bullseye', color: 'green' },
+          { label: 'Bài học', val: data.lessons_completed, icon: 'fa-book', color: 'orange' },
+          { label: 'Streak', val: data.streak, icon: 'fa-fire', color: 'red' }
+        ].map((item, idx) => (
+          <div key={idx} className="stat-box-card">
+            <div className={`icon-circle ${item.color}`}><i className={`fas ${item.icon}`}></i></div>
+            <div className="box-val">
+              <h3>{item.val}</h3>
+              <p>{item.label}</p>
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="stat-card">
-          <div className="stat-icon success"><i className="fas fa-chart-line"></i></div>
-          <div className="stat-info">
-            <h3>{data.accuracy !== null ? data.accuracy + "%" : "0%"}</h3>
-            <p>Độ chính xác</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon warning"><i className="fas fa-trophy"></i></div>
-          <div className="stat-info">
-            <h3>{data.lessons_completed}</h3>
-            <p>Bài học</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon accent"><i className="fas fa-fire"></i></div>
-          <div className="stat-info">
-            <h3>{data.streak}</h3>
-            <p>Ngày liên tiếp</p>
+      <div className="dashboard-main-row">
+        <div className="activity-chart-box">
+          <h3>Hoạt động tuần này</h3>
+          {/* Cố định chiều cao 300px để tránh lỗi ResponsiveContainer width/height <= 0 */}
+          <div className="chart-container-fixed" style={{ height: '300px', width: '100%', minHeight: '300px' }}>
+            {data.weekly_activity && data.weekly_activity.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.weekly_activity}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="hours" stroke="#4361ee" fill="#e0e7ff" strokeWidth={3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="no-data-placeholder" style={{ textAlign: 'center', paddingTop: '100px', color: '#64748b' }}>
+                Chưa có dữ liệu hoạt động tuần này
+              </div>
+            )}
           </div>
         </div>
       </div>

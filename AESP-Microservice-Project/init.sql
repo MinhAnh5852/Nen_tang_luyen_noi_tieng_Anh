@@ -221,7 +221,19 @@ CREATE TABLE IF NOT EXISTS system_feedbacks (
 ) ENGINE=InnoDB;
 
 INSERT IGNORE INTO system_stats (`key`, `value`) VALUES ('total_users', 1), ('active_mentors', 0), ('total_revenue', 0.0);
-
+-- Bảng nhận dữ liệu đồng bộ từ RabbitMQ để phục vụ Dashboard
+CREATE TABLE IF NOT EXISTS practice_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(100) NOT NULL, 
+    topic VARCHAR(100),
+    duration_seconds INT DEFAULT 0,
+    accuracy_score FLOAT DEFAULT 0.0,
+    grammar_score FLOAT DEFAULT 0.0,
+    vocabulary_score FLOAT DEFAULT 0.0,
+    ai_feedback TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (user_id) -- Giúp Dashboard tải dữ liệu nhanh hơn
+) ENGINE=InnoDB;
 -- ==========================================================
 -- 5. DATABASE: xdpm (Dành riêng cho AI-core-service)
 -- ==========================================================
