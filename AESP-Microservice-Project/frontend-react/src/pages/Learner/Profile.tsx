@@ -7,6 +7,8 @@ interface UserProfile {
   email: string;
   role: string;
   package_name: string;
+  user_level: string; // Thêm trường trình độ thật
+  total_learning_points: number; // Thêm trường điểm thật
   created_at: string;
 }
 
@@ -23,7 +25,7 @@ const Profile: React.FC = () => {
   
   const [user, setUser] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<LearningStats | null>(null);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [newUsername, setNewUsername] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,13 +39,14 @@ const Profile: React.FC = () => {
       try {
         setLoading(true);
         
-        // 1. Lấy thông tin cá nhân
+        // 1. Lấy thông tin cá nhân (bao gồm level và points)
         const userRes = await fetch(`http://localhost/api/users/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (userRes.ok) {
           const userData = await userRes.json();
           setUser(userData);
+          setNewUsername(userData.username);
         }
 
         // 2. Lấy thống kê từ Analytics Service
@@ -53,15 +56,6 @@ const Profile: React.FC = () => {
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setStats(statsData);
-        }
-
-        // 3. Đồng bộ gói qua API Verify
-        const subRes = await fetch(`http://localhost/api/verify`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (subRes.ok) {
-          const subData = await subRes.json();
-          setSubscription(subData);
         }
       } catch (error) {
         console.error("Lỗi đồng bộ dữ liệu:", error);
@@ -74,25 +68,57 @@ const Profile: React.FC = () => {
 
   const handleSavePersonalInfo = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thông tin cá nhân đã được đồng bộ tới User Service!');
-    setIsEditing(false);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost/api/users/profile/update`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: newUsername })
+      });
+      if (res.ok) {
+        alert('Cập nhật thông tin thành công!');
+        setIsEditing(false);
+        window.location.reload(); // Reload để đồng bộ Header
+      }
+    } catch (error) {
+      alert('Lỗi khi cập nhật thông tin.');
+    }
   };
 
-  const handleExport = (format: string) => {
-    alert(`Đang xuất dữ liệu học tập ở định dạng ${format.toUpperCase()}...`);
+  // Logic hiển thị huy hiệu dựa trên thành tích thật
+  const renderAchievements = () => {
+    const achievements = [];
+    if ((user?.total_learning_points || 0) > 1000) achievements.push({ icon: '🏆', title: 'Học giả chăm chỉ', desc: 'Đạt trên 1,000 điểm' });
+    if ((stats?.accuracy_avg || 0) > 80) achievements.push({ icon: '🎯', title: 'Phát âm chuẩn', desc: 'Độ chính xác trung bình > 80%' });
+    if ((stats?.streak_days || 0) >= 7) achievements.push({ icon: '🔥', title: 'Chiến binh bền bỉ', desc: 'Duy trì chuỗi 7 ngày' });
+
+    return achievements.length > 0 ? (
+      <div className="achievements-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        {achievements.map((a, i) => (
+          <div key={i} className="achievement-card" style={{ padding: '15px', background: '#f0f4ff', borderRadius: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem' }}>{a.icon}</div>
+            <h4 style={{ margin: '10px 0 5px' }}>{a.title}</h4>
+            <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{a.desc}</p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p style={{ textAlign: 'center', color: '#64748b' }}>Bạn chưa đạt được huy hiệu nào. Hãy luyện tập thêm!</p>
+    );
   };
 
-  if (loading) return <div className="loading" style={{marginTop: '100px', textAlign: 'center'}}>Đang tải dữ liệu hệ thống AESP...</div>;
+  if (loading) return <div className="loading" style={{marginTop: '100px', textAlign: 'center'}}>Đang tải hồ sơ AESP...</div>;
 
   return (
     <main className="container" style={{ marginTop: '100px' }}>
       <div className="profile-header">
         <h1>Hồ sơ học tập</h1>
-        <div>
-          <button className="btn btn-outline" onClick={() => setActiveTab('security')}>
-            <i className="fas fa-download"></i> Xuất dữ liệu
-          </button>
-        </div>
+        <button className="btn btn-outline" onClick={() => alert('Đang tạo báo cáo học tập...')}>
+          <i className="fas fa-download"></i> Xuất dữ liệu
+        </button>
       </div>
       
       <div className="profile-container">
@@ -103,16 +129,10 @@ const Profile: React.FC = () => {
           </div>
           <h2>{user?.username}</h2>
           <div className="profile-level">
-            {subscription?.package_name || user?.package_name || "Học viên Miễn phí"}
+            {user?.user_level || "A1 (Beginner)"}
           </div>
-          <p style={{ color: 'var(--gray-color)', marginBottom: '20px' }}>
-            Tham gia từ: {user?.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN') : '06/01/2026'}
-          </p>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <button className="btn btn-primary" style={{ width: '100%', marginBottom: '10px' }} onClick={() => { setActiveTab('personal'); setIsEditing(true); }}>
-              <i className="fas fa-edit"></i> Chỉnh sửa hồ sơ
-            </button>
+          <div className="profile-points" style={{ color: '#4361ee', fontWeight: 'bold', margin: '10px 0' }}>
+            <i className="fas fa-star"></i> {user?.total_learning_points?.toLocaleString() || 0} Điểm
           </div>
           
           <div className="profile-stats">
@@ -130,23 +150,15 @@ const Profile: React.FC = () => {
         {/* Main Content */}
         <div className="profile-content">
           <div className="tab-navigation">
-            <div className={`profile-tab ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>Thông tin cá nhân</div>
-            <div className={`profile-tab ${activeTab === 'learning' ? 'active' : ''}`} onClick={() => setActiveTab('learning')}>Tùy chỉnh học tập</div>
+            <div className={`profile-tab ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>Thông tin</div>
             <div className={`profile-tab ${activeTab === 'achievements' ? 'active' : ''}`} onClick={() => setActiveTab('achievements')}>Thành tích</div>
             <div className={`profile-tab ${activeTab === 'security' ? 'active' : ''}`} onClick={() => setActiveTab('security')}>Bảo mật</div>
           </div>
           
-          {/* Tab Content: Personal */}
           {activeTab === 'personal' && (
             <div className="tab-panel active">
               <div className="profile-section">
-                <div className="section-header">
-                  <h3>Thông tin cá nhân</h3>
-                  <button className="edit-button" onClick={() => setIsEditing(!isEditing)}>
-                    <i className="fas fa-edit"></i> {isEditing ? 'Hủy' : 'Chỉnh sửa'}
-                  </button>
-                </div>
-                
+                <h3>Thông tin cá nhân</h3>
                 {!isEditing ? (
                   <div className="info-grid">
                     <div className="info-item">
@@ -157,62 +169,41 @@ const Profile: React.FC = () => {
                       <div className="info-label">Email</div>
                       <div className="info-value">{user?.email}</div>
                     </div>
+                    <button className="btn btn-primary" onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
                   </div>
                 ) : (
-                  <form className="edit-form active" onSubmit={handleSavePersonalInfo}>
+                  <form onSubmit={handleSavePersonalInfo}>
                     <div className="form-group">
-                      <label>Họ và tên mới</label>
-                      <input type="text" className="form-control" defaultValue={user?.username} />
+                      <label>Tên mới</label>
+                      <input type="text" className="form-control" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
                     </div>
-                    <button type="submit" className="btn btn-primary">Lưu thay đổi</button>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                       <button type="submit" className="btn btn-primary">Lưu</button>
+                       <button type="button" className="btn btn-outline" onClick={() => setIsEditing(false)}>Hủy</button>
+                    </div>
                   </form>
                 )}
               </div>
             </div>
           )}
 
-          {/* Tab Content: Learning */}
-          {activeTab === 'learning' && (
+          {activeTab === 'achievements' && (
             <div className="tab-panel active">
               <div className="profile-section">
-                <h3>Phong cách học tập ưa thích</h3>
-                <div className="learning-preferences">
-                  <div className="preference-card selected">
-                    <div className="preference-icon"><i className="fas fa-microphone"></i></div>
-                    <h4>Luyện nói</h4>
-                    <p style={{ color: 'var(--gray-color)', fontSize: '0.9rem' }}>Tập trung phát âm AI</p>
-                  </div>
-                  <div className="preference-card">
-                    <div className="preference-icon"><i className="fas fa-comments"></i></div>
-                    <h4>Hội thoại</h4>
-                    <p style={{ color: 'var(--gray-color)', fontSize: '0.9rem' }}>Thực hành đối thoại</p>
-                  </div>
-                </div>
+                <h3>Huy hiệu vinh danh</h3>
+                {renderAchievements()}
               </div>
             </div>
           )}
 
-          {/* Tab Content: Security & Danger Zone */}
           {activeTab === 'security' && (
             <div className="tab-panel active">
               <div className="profile-section">
-                <h3>Bảo mật và Dữ liệu</h3>
-                <p>ID tài khoản: <code>{user?.id}</code></p>
-                
-                <div className="export-options" style={{marginTop: '20px'}}>
-                  <div className="export-card" onClick={() => handleExport('pdf')}>
-                    <div className="export-icon"><i className="fas fa-file-pdf"></i></div>
-                    <h4>PDF Report</h4>
-                  </div>
-                  <div className="export-card" onClick={() => handleExport('json')}>
-                    <div className="export-icon"><i className="fas fa-file-code"></i></div>
-                    <h4>JSON Data</h4>
-                  </div>
-                </div>
-
-                <div className="danger-zone" style={{marginTop: '40px', padding: '20px', background: '#fff5f5', border: '1px solid #fed7d7', borderRadius: '12px'}}>
-                  <h3 style={{color: '#c53030'}}><i className="fas fa-exclamation-triangle"></i> Vùng nguy hiểm</h3>
-                  <button className="btn btn-outline" style={{color: '#c53030', borderColor: '#c53030'}} onClick={() => confirm('Xóa tài khoản?')}>
+                <h3>Quản lý tài khoản</h3>
+                <p>Mã định danh: <code>{user?.id}</code></p>
+                <div className="danger-zone" style={{ marginTop: '20px', padding: '15px', background: '#fff5f5', border: '1px solid #fed7d7', borderRadius: '8px' }}>
+                  <h4 style={{ color: '#c53030' }}>Vùng nguy hiểm</h4>
+                  <button className="btn btn-outline" style={{ color: '#c53030', borderColor: '#c53030', marginTop: '10px' }}>
                     Xóa tài khoản vĩnh viễn
                   </button>
                 </div>

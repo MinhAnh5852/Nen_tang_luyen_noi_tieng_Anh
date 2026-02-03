@@ -1,0 +1,103 @@
+/* src/pages/Learner/Assessment.css */
+
+.assessment-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+    background-color: #f1f5f9; /* Khớp màu nền hệ thống */
+}
+
+.assessment-card {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.assessment-card h2 {
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+}
+
+.progress-text {
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 30px;
+    display: block;
+}
+
+.sentence-box {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sentence-box p {
+    font-size: 1.25rem;
+    color: #4361ee;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.mic-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #4361ee;
+    color: white;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.mic-btn:hover {
+    transform: scale(1.05);
+    background: #3a0ca3;
+}
+
+.mic-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Hiệu ứng sóng khi đang ghi âm */
+.mic-btn.active {
+    background: #ef4444;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.loading-text {
+    color: #4361ee;
+    font-weight: 500;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}

@@ -23,7 +23,7 @@ from models import SystemStat, ActivityLog, PracticeSession
 # ---------------------------------------------------------
 # API 1: DÀNH CHO ADMIN DASHBOARD (Fix lỗi 500)
 # ---------------------------------------------------------
-@app.route("/summary", methods=["GET"])
+@app.route("/api/analytics/summary", methods=["GET"])
 def get_summary():
     try:
         # 1. Lấy tất cả stats. Nếu bảng trống, stats sẽ là danh sách rỗng

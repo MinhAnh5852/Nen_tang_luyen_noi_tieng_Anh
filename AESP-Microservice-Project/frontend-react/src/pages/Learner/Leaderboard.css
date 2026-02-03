@@ -1,0 +1,75 @@
+/* src/pages/Learner/Leaderboard.css */
+
+.leaderboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+}
+
+.leaderboard-header p {
+    color: var(--gray-color);
+    font-size: 1.1rem;
+}
+
+/* Card chứa bảng */
+.leaderboard-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    overflow: hidden; /* Bo góc cho bảng bên trong */
+    animation: slideUp 0.5s ease;
+}
+
+/* Hiệu ứng dòng cho Top 3 */
+.leaderboard-card tr:nth-child(1) { background-color: #fff9db; } /* Vàng */
+.leaderboard-card tr:nth-child(2) { background-color: #f1f5f9; } /* Bạc */
+.leaderboard-card tr:nth-child(3) { background-color: #fff4e6; } /* Đồng */
+
+.leaderboard-card tr:hover {
+    filter: brightness(0.98);
+    transition: 0.2s;
+}
+
+/* Tùy chỉnh cột hạng */
+.leaderboard-card td:first-child {
+    font-size: 1.2rem;
+    width: 80px;
+    text-align: center;
+}
+
+/* Badge trình độ trong bảng */
+.status-badge.status-active {
+    background: #e0e7ff;
+    color: #4361ee;
+    padding: 6px 12px;
+    font-weight: 600;
+}
+
+/* Hiệu ứng xuất hiện */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive cho thiết bị di động */
+@media (max-width: 768px) {
+    .leaderboard-card {
+        padding: 15px;
+    }
+    
+    .leaderboard-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    /* Ẩn bớt cột trình độ trên mobile để tránh tràn trang */
+    .data-table th:nth-child(3), 
+    .data-table td:nth-child(3) {
+        display: none;
+    }
+}

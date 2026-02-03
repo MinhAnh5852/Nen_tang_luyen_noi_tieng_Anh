@@ -31,7 +31,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
 
 # 4. Đăng ký API Blueprint
-app.register_blueprint(mentor_bp)
+app.register_blueprint(mentor_bp, url_prefix='/api/mentors')
 
 # 5. Route kiểm tra nhanh (Ping)
 @app.route('/')

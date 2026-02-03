@@ -39,7 +39,8 @@ with app.app_context():
             print(f"Waiting for database... ({i+1}/5). Error: {e}")
             time.sleep(3)
 
-@app.route("/chat", methods=["POST"])
+# ✅ SỬA ĐỔI QUAN TRỌNG: Thêm tiền tố /api/ai để khớp với Nginx Gateway
+@app.route("/api/ai/chat", methods=["POST"])
 def chat():
     """
     Endpoint xử lý hội thoại văn bản và lưu lịch sử.
@@ -96,7 +97,8 @@ def chat():
         print(f"Chat error: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route("/transcribe", methods=["POST"])
+# ✅ SỬA ĐỔI QUAN TRỌNG: Thêm tiền tố /api/ai để khớp với Nginx Gateway
+@app.route("/api/ai/transcribe", methods=["POST"])
 def transcribe():
     """
     Endpoint nhận file âm thanh và chuyển thành văn bản qua Whisper.
@@ -121,7 +123,26 @@ def transcribe():
     except Exception as e:
         print(f"Transcribe error: {e}")
         return jsonify({"error": str(e)}), 500
+# AI-core-service/app.py
 
+@app.route("/api/ai/history/<int:user_id>", methods=["GET"])
+def get_history(user_id):
+    try:
+        # Lấy tối đa 30 tin nhắn gần nhất của đúng user_id
+        history = ChatHistory.query.filter_by(user_id=user_id)\
+            .order_by(ChatHistory.created_at.asc())\
+            .limit(30).all()
+            
+        results = [
+            {"sender": h.role, "text": h.message} 
+            for h in history
+        ]
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
 if __name__ == "__main__":
     # Chạy trên port 5005 để Gateway điều hướng tới
     app.run(host="0.0.0.0", port=5005)
+
