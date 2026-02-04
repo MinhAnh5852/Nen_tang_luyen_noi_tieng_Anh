@@ -1,0 +1,127 @@
+<link rel="stylesheet" href="css/learners.css">
+<div class="page-container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 class="page-title">Quản lý Học viên</h1>
+        <button class="btn btn-primary" onclick="init_learners()">
+            <i class="fa-solid fa-sync" id="reload-icon"></i> Tải lại dữ liệu
+        </button>
+    </div>
+
+    <div class="filter-bar">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="mentorSearchInput" onkeyup="filterLearnerTable()" placeholder="Tìm theo email hoặc tên..." class="form-input">
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Thông tin học viên</th>
+                    <th>Trình độ</th>
+                    <th>Trạng thái</th>
+                    <th class="text-right">Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="learner-tbody">
+                <tr>
+                    <td colspan="5" style="text-align:center; padding: 40px; color: var(--text-light);">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang nạp dữ liệu từ hệ thống...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let learnersData = [];
+
+    // Gắn hàm vào window để mentor.html có thể gọi khi chuyển tab
+    window.init_learners = async function() {
+        const tableBody = document.getElementById('learner-tbody');
+        const icon = document.getElementById('reload-icon');
+        const token = localStorage.getItem('token');
+        
+        if (icon) icon.classList.add('fa-spin-custom');
+
+        try {
+            // Lấy dữ liệu từ User Service qua API Gateway
+            const response = await fetch('/api/users/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!response.ok) throw new Error("Unauthorized");
+
+            const data = await response.json();
+            // Lọc chỉ lấy những người dùng có vai trò là learner
+            learnersData = data.filter(u => (u.role || '').toLowerCase() === 'learner');
+            renderLearnerTable(learnersData);
+        } catch (error) {
+            console.error(error);
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Không thể tải danh sách (Lỗi Gateway hoặc Token)</td></tr>`;
+        } finally {
+            if (icon) setTimeout(() => icon.classList.remove('fa-spin-custom'), 500);
+        }
+    }
+
+    function renderLearnerTable(data) {
+        const tableBody = document.getElementById('learner-tbody');
+        tableBody.innerHTML = '';
+
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">📭 Chưa có học viên nào.</td></tr>';
+            return;
+        }
+
+        data.forEach(user => {
+            const email = user.email || "N/A";
+            const status = (user.status || 'active').toLowerCase();
+            const level = user.user_level || 'A1';
+            
+            // Sử dụng các class CSS từ admin/css/users.css
+            tableBody.innerHTML += `
+                <tr>
+                    <td class="text-light">#${user.id ? user.id.substring(0, 6) : '---'}</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="avatar-circle avatar-blue" style="width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                                ${email.substring(0,2).toUpperCase()}
+                            </div>
+                            <div class="user-text">
+                                <h4 style="margin:0; font-size:14px;">${user.username || email.split('@')[0]}</h4>
+                                <span style="font-size:12px; color:var(--text-light);">${email}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-purple-border">${level.toUpperCase()}</span></td>
+                    <td>
+                        <label class="switch">
+                            <input type="checkbox" ${status === 'active' ? 'checked' : ''} disabled>
+                            <span class="slider round"></span>
+                        </label>
+                    </td>
+                    <td class="text-right">
+                        <button class="btn btn-primary btn-sm" onclick="window.parent.openModal('gradingModal')" style="padding: 5px 12px; font-size:11px;">
+                            <i class="fa-solid fa-medal"></i> Chấm điểm
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function filterLearnerTable() {
+        const keyword = document.getElementById("mentorSearchInput").value.toLowerCase();
+        const filtered = learnersData.filter(u => 
+            u.email.toLowerCase().includes(keyword) || 
+            (u.username && u.username.toLowerCase().includes(keyword))
+        );
+        renderLearnerTable(filtered);
+    }
+
+    // Khởi chạy ngay khi nạp file
+    init_learners();
+</script>

@@ -1,4 +1,3 @@
-# controllers/mentor_controller.py
 from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import create_engine, text
 import json
@@ -9,49 +8,47 @@ mentor_bp = Blueprint('mentor', __name__)
 # --- HÀM HỖ TRỢ: KẾT NỐI DATABASE ---
 def get_db_connection():
     db_url = current_app.config.get('SQLALCHEMY_DATABASE_URI', '')
-    # Ép buộc sử dụng user_db để đồng bộ dữ liệu giữa các service
     if 'mentor_management_db' in db_url:
         db_url = db_url.replace('mentor_management_db', 'user_db')
-    
     if not db_url:
-        # Cấu hình dự phòng chạy trong Docker network
         db_url = 'mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4'
-        
     return create_engine(db_url)
 
 # ==================================================
-# 1. API Đăng ký Mentor
+# 1. API Đăng ký Mentor (Profile chi tiết)
 # ==================================================
 @mentor_bp.route('/', methods=['POST'])
 def create_mentor():
     try:
         data = request.json
-        if not data.get('user_id'): return jsonify({'error': 'Thieu user_id'}), 400
+        uid = data.get('user_id')
+        if not uid: return jsonify({'error': 'Thieu user_id'}), 400
 
-        skills_str = json.dumps(data.get('skills', [])) if isinstance(data.get('skills'), list) else data.get('skills', '[]')
+        skills_val = ",".join(data.get('skills', [])) if isinstance(data.get('skills'), list) else data.get('skills', '')
         
         engine = get_db_connection()
         with engine.connect() as conn:
-            check = conn.execute(text("SELECT id FROM mentors WHERE user_id = :uid"), {"uid": data['user_id']}).fetchone()
-            if check:
-                return jsonify({'error': 'User nay da la Mentor'}), 409
+            check = conn.execute(text("SELECT id FROM mentors WHERE user_id = :uid"), {"uid": uid}).fetchone()
+            if check: return jsonify({'error': 'User nay da la Mentor'}), 409
             
             query = text("""
-                INSERT INTO mentors (user_id, full_name, bio, skills_json, status) 
-                VALUES (:uid, :name, :bio, :skills, 'PENDING')
+                INSERT INTO mentors (user_id, username, email, full_name, bio, skills, status) 
+                VALUES (:uid, :uname, :email, :fname, :bio, :skills, 'pending')
             """)
             conn.execute(query, {
-                "uid": data['user_id'],
-                "name": data.get('full_name', ''),
+                "uid": uid,
+                "uname": data.get('username', ''),
+                "email": data.get('email', ''),
+                "fname": data.get('full_name', ''),
                 "bio": data.get('bio', ''),
-                "skills": skills_str
+                "skills": skills_val
             })
             conn.commit()
         return jsonify({'message': 'Dang ky thanh cong'}), 201
     except Exception as e: return jsonify({'error': str(e)}), 500
 
 # ==================================================
-# 2. API Lấy danh sách Mentor (Khớp: GET /api/mentors/profiles)
+# 2. API Lấy danh sách (QUÉT CẢ BẢNG USERS ĐỂ HIỆN PENDING)
 # ==================================================
 @mentor_bp.route('/profiles', methods=['GET'])
 def get_mentors():
@@ -59,39 +56,55 @@ def get_mentors():
         engine = get_db_connection()
         mentors = []
         with engine.connect() as conn:
-            # Join với bảng users để lấy email cho Admin
+            # JOIN users và mentors để lấy cả những ông mới đăng ký (chỉ có bên users)
             result = conn.execute(text("""
-                SELECT m.*, u.email, u.username 
-                FROM mentors m 
-                JOIN users u ON m.user_id = u.id 
-                ORDER BY m.status DESC, m.created_at DESC
+                SELECT u.id as user_id, u.username, u.email, u.status, m.skills 
+                FROM users u
+                LEFT JOIN mentors m ON u.id = m.user_id
+                WHERE u.role = 'mentor'
+                ORDER BY CASE WHEN u.status = 'pending' THEN 0 ELSE 1 END, u.created_at DESC
             """))
+            
             for row in result:
+                skills_list = []
+                if row.skills:
+                    skills_list = [s.strip() for s in str(row.skills).split(',')]
+                else:
+                    skills_list = ["Chờ cập nhật"]
+
                 mentors.append({
-                    'id': row.user_id, # Đổi thành 'id' để khớp JS frontend
-                    'username': row.username or row.full_name,
-                    'email': row.email,
-                    'bio': row.bio,
-                    'skills': json.loads(row.skills_json) if row.skills_json else [], 
-                    'status': row.status.lower() # Trả về chữ thường để khớp CSS
+                    'id': row.user_id, 
+                    'username': row.username or "Unknown",
+                    'email': row.email or "N/A",
+                    'skills': skills_list,
+                    'status': (row.status or 'pending').lower()
                 })
         return jsonify(mentors), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
 
 # ==================================================
-# 3. API Duyệt Mentor (Khớp: POST /api/mentors/verify/<id>)
+# 3. API Duyệt Mentor (Cập nhật cả 2 bảng)
 # ==================================================
 @mentor_bp.route('/verify/<string:user_id>', methods=['POST'])
 def verify_mentor(user_id):
     try:
         data = request.json
-        # Khớp logic handleAction trong quanlimentor.html
-        new_status = 'APPROVED' if data.get('action') == 'approve' else 'REJECTED'
+        action = data.get('action')
+        new_status = 'active' if action == 'approve' else 'rejected'
         
         engine = get_db_connection()
         with engine.connect() as conn:
-            conn.execute(text("UPDATE mentors SET status = :st WHERE user_id = :uid"), 
+            # 1. Cập nhật bảng users (Quan trọng để Login)
+            conn.execute(text("UPDATE users SET status = :st WHERE id = :uid"), 
                          {"st": new_status, "uid": user_id})
+            
+            # 2. Cập nhật hoặc tạo profile bên bảng mentors
+            if action == 'approve':
+                conn.execute(text("""
+                    INSERT INTO mentors (user_id, status, skills) 
+                    VALUES (:uid, 'active', 'Chưa cập nhật')
+                    ON DUPLICATE KEY UPDATE status = 'active'
+                """), {"uid": user_id})
             conn.commit()
         return jsonify({'message': f'Da cap nhat thanh cong sang {new_status}'}), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
@@ -169,15 +182,12 @@ def get_learner_progress(learner_id):
             history = [{"date": s.created_at.strftime('%d/%m/%Y'), "lesson": s.lesson_name, "score": s.score} for s in sessions[:5]]
             
             return jsonify({
-                "completed_lessons": len(sessions),
-                "total_lessons": total_tasks,
-                "average_score": avg,
-                "recent_history": history
+                "completed_lessons": len(sessions), "total_lessons": total_tasks, "average_score": avg, "recent_history": history
             }), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
 
 # ==================================================
-# 8. API Lấy Phản hồi (Khớp: ai_comment)
+# 8. API Lấy Phản hồi
 # ==================================================
 @mentor_bp.route('/learner-feedback/<string:learner_id>', methods=['GET'])
 def get_learner_feedback(learner_id):
@@ -185,13 +195,10 @@ def get_learner_feedback(learner_id):
         engine = get_db_connection()
         feedbacks = []
         with engine.connect() as conn:
-            # Query đúng cột ai_comment thay vì content
-            result = conn.execute(text("SELECT * FROM feedbacks WHERE learner_id = :lid ORDER BY created_at DESC"), {"lid": learner_id}).fetchall()
+            result = conn.execute(text("SELECT * FROM feedbacks WHERE user_id = :lid ORDER BY created_at DESC"), {"lid": learner_id}).fetchall()
             for row in result: 
                 feedbacks.append({
-                    'comment': row.ai_comment, 
-                    'sentiment': row.sentiment, 
-                    'date': row.created_at.strftime('%d/%m/%Y %H:%M')
+                    'comment': row.ai_comment, 'sentiment': row.sentiment, 'date': row.created_at.strftime('%d/%m/%Y %H:%M')
                 })
         return jsonify(feedbacks), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
@@ -276,121 +283,6 @@ def get_resources():
     except Exception as e: return jsonify({'error': str(e)}), 500
 
 # ==================================================
-# 14. API Tạo Chủ Đề
-# ==================================================
-@mentor_bp.route('/topics', methods=['POST'])
-def create_topic():
-    try:
-        data = request.json
-        engine = get_db_connection()
-        with engine.connect() as conn:
-            conn.execute(text("INSERT INTO topics (topic_name, level, description) VALUES (:name, :lvl, :desc)"), {"name": data['topic_name'], "lvl": data['level'], "desc": data['description']}); conn.commit()
-        return jsonify({'message': 'Tao chu de thanh cong'}), 201
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 15. API Lấy Chủ Đề
-# ==================================================
-@mentor_bp.route('/topics', methods=['GET'])
-def get_topics():
-    try:
-        engine = get_db_connection()
-        topics = []
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT * FROM topics ORDER BY created_at DESC"))
-            for row in result: topics.append({'id': row.id, 'topic_name': row.topic_name, 'level': row.level})
-        return jsonify(topics), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 16. API Giao Chủ Đề
-# ==================================================
-@mentor_bp.route('/assign-topic', methods=['POST'])
-def assign_topic():
-    try:
-        data = request.json
-        engine = get_db_connection()
-        with engine.connect() as conn:
-            conn.execute(text("INSERT INTO topic_assignments (learner_id, learner_name, topic_name) VALUES (:lid, :lname, :tname)"), {"lid": data['learner_id'], "lname": data['learner_name'], "tname": data['topic_name']})
-            conn.commit()
-        return jsonify({'message': 'Giao chu de thanh cong'}), 201
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 17. API Lịch sử giao chủ đề
-# ==================================================
-@mentor_bp.route('/assigned-topics', methods=['GET'])
-def get_assigned_topics():
-    try:
-        engine = get_db_connection()
-        assignments = []
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT * FROM topic_assignments ORDER BY assigned_at DESC"))
-            for row in result: assignments.append({'learner_name': row.learner_name, 'topic_name': row.topic_name, 'date': row.assigned_at.strftime('%d/%m/%Y %H:%M')})
-        return jsonify(assignments), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 18. API Lấy Danh Sách Bài Nộp
-# ==================================================
-@mentor_bp.route('/submissions', methods=['GET'])
-def get_submissions():
-    try:
-        engine = get_db_connection()
-        submissions = []
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT * FROM submissions ORDER BY submitted_at DESC"))
-            for row in result:
-                submissions.append({
-                    'id': row.id, 'learner_name': row.learner_name, 'task_title': row.task_title, 'audio_link': row.audio_link, 'status': row.status
-                })
-        return jsonify(submissions), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 19. API CHẤM ĐIỂM
-# ==================================================
-@mentor_bp.route('/submissions/<int:sub_id>/grade', methods=['PUT'])
-def grade_submission(sub_id):
-    try:
-        data = request.json
-        engine = get_db_connection()
-        with engine.connect() as conn:
-            conn.execute(text("UPDATE submissions SET score = :s, feedback = :f, status = 'Graded' WHERE id = :sid"), {"s": data['score'], "f": data['feedback'], "sid": sub_id})
-            conn.commit()
-        return jsonify({'message': 'Cham diem thanh cong'}), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 20. API Lấy Cài Đặt
-# ==================================================
-@mentor_bp.route('/settings/<string:user_id>', methods=['GET'])
-def get_settings(user_id):
-    try:
-        engine = get_db_connection()
-        with engine.connect() as conn:
-            row = conn.execute(text("SELECT * FROM mentor_settings WHERE user_id = :uid"), {"uid": user_id}).fetchone()
-            if row: return jsonify({'theme': row.theme, 'reminder_enabled': bool(row.reminder_enabled), 'reminder_time': row.reminder_time}), 200
-            return jsonify({'theme': 'Light', 'reminder_enabled': False, 'reminder_time': '08:00'}), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
-# 21. API Lưu Cài Đặt
-# ==================================================
-@mentor_bp.route('/settings', methods=['POST'])
-def save_settings():
-    try:
-        data = request.json
-        engine = get_db_connection()
-        uid = data.get('user_id', 'current_mentor') 
-        with engine.connect() as conn:
-            conn.execute(text("REPLACE INTO mentor_settings (user_id, theme, reminder_enabled, reminder_time) VALUES (:uid, :th, :re, :rt)"), 
-                         { "uid": uid, "th": data.get('theme', 'Light'), "re": 1 if data.get('reminder_enabled') else 0, "rt": data.get('reminder_time', '08:00') })
-            conn.commit()
-        return jsonify({'message': 'Luu thanh cong'}), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
-
-# ==================================================
 # 22. API Lấy Profile Mentor
 # ==================================================
 @mentor_bp.route('/mentor-profile/<string:user_id>', methods=['GET'])
@@ -399,12 +291,18 @@ def get_mentor_profile(user_id):
         engine = get_db_connection()
         with engine.connect() as conn:
             u = conn.execute(text("SELECT username, email FROM users WHERE id = :uid"), {"uid": user_id}).fetchone()
-            m = conn.execute(text("SELECT bio, skills_json FROM mentors WHERE user_id = :uid"), {"uid": user_id}).fetchone()
+            m = conn.execute(text("SELECT bio, skills FROM mentors WHERE user_id = :uid"), {"uid": user_id}).fetchone()
+            
+            # Xử lý skills an toàn
+            skills_list = []
+            if m and m.skills:
+                skills_list = [s.strip() for s in str(m.skills).split(',')]
+
             return jsonify({
                 'full_name': u.username if u else "Mentor", 
                 'email': u.email if u else '', 
                 'bio': m.bio if m else '', 
-                'skills': json.loads(m.skills_json) if (m and m.skills_json) else []
+                'skills': skills_list
             }), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
 
@@ -416,11 +314,70 @@ def update_mentor_profile():
     try:
         data = request.json
         uid = data.get('user_id')
+        if not uid: return jsonify({'error': 'Thieu ID'}), 400
+
         engine = get_db_connection()
         with engine.connect() as conn:
-            skills = json.dumps(data['skills'].split(',')) if isinstance(data['skills'], str) else json.dumps(data['skills'])
-            conn.execute(text("UPDATE mentors SET full_name = :n, bio = :b, skills_json = :s WHERE user_id = :uid"), 
-                         {"n": data['full_name'], "b": data['bio'], "s": skills, "uid": uid})
+            # Update bảng users
+            conn.execute(text("UPDATE users SET username = :n WHERE id = :uid"), {"n": data['full_name'], "uid": uid})
+            # Update bảng mentors
+            conn.execute(text("UPDATE mentors SET full_name = :n, bio = :b, skills = :s WHERE user_id = :uid"), 
+                         {"n": data['full_name'], "b": data['bio'], "s": data['skills'], "uid": uid})
             conn.commit()
-        return jsonify({'message': 'Cap nhat thanh cong'}), 200
+        return jsonify({'message': 'Cap nhat ho so thanh cong'}), 200
     except Exception as e: return jsonify({'error': str(e)}), 500
+# ==================================================
+# 14. API Quản lý Chủ đề (Topics) - FIX 405/404
+# ==================================================
+@mentor_bp.route('/topics', methods=['GET', 'POST', 'OPTIONS'])
+def manage_topics():
+    # Khi nhận lệnh OPTIONS từ trình duyệt, trả về 200 OK ngay để tránh lỗi 405
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    try:
+        engine = get_db_connection()
+        
+        # Lấy danh sách
+        if request.method == 'GET':
+            topics = []
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT * FROM topics ORDER BY created_at DESC"))
+                for row in result:
+                    topics.append({
+                        'id': row.id,
+                        'topic_name': row.topic_name,
+                        'level': row.level,
+                        'description': row.description
+                    })
+            return jsonify(topics), 200
+
+        # Thêm mới
+        if request.method == 'POST':
+            data = request.json
+            with engine.connect() as conn:
+                conn.execute(text("""
+                    INSERT INTO topics (topic_name, level, description) 
+                    VALUES (:name, :lvl, :desc)
+                """), {
+                    "name": data['topic_name'],
+                    "lvl": data['level'],
+                    "desc": data['description']
+                })
+                conn.commit()
+            return jsonify({'message': 'Thêm thành công'}), 201
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@mentor_bp.route('/topics/<int:topic_id>', methods=['DELETE', 'OPTIONS'])
+def delete_topic_api(topic_id):
+    if request.method == 'OPTIONS': return '', 200
+    try:
+        engine = get_db_connection()
+        with engine.connect() as conn:
+            conn.execute(text("DELETE FROM topics WHERE id = :tid"), {"tid": topic_id})
+            conn.commit()
+        return jsonify({'message': 'Đã xóa'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

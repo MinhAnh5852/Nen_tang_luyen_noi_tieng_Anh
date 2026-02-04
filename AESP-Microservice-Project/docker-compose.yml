@@ -100,7 +100,6 @@ services:
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
-    command: sh -c "python mq_worker.py & python app.py"
     depends_on:
       user-db:
         condition: service_healthy
@@ -119,7 +118,6 @@ services:
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/analytics_db?charset=utf8mb4
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
-    command: sh -c "python mq_worker.py & python app.py"
     depends_on:
       user-db:
         condition: service_healthy

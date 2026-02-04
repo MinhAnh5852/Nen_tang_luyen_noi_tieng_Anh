@@ -1,30 +1,39 @@
 from database import db
+from datetime import datetime
+import json
 import uuid
 
 class MentorProfile(db.Model):
-    __tablename__ = 'mentor_profiles'
-    
-    # ID của hồ sơ mentor (UUID)
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    # ID của user bên bảng users (để liên kết)
-    user_id = db.Column(db.String(36), unique=True, nullable=False)
+    __tablename__ = 'mentors' # Dùng đúng tên bảng trong init.sql
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(100))
     email = db.Column(db.String(100))
-    # Thông tin chuyên môn
-    skills = db.Column(db.String(255), default="IELTS, Speaking")
+    full_name = db.Column(db.String(100), nullable=True)
     bio = db.Column(db.Text, nullable=True)
-    # Trạng thái duyệt: pending (chờ), active (đã duyệt), rejected (từ chối)
-    status = db.Column(db.String(20), default='pending')
+    skills = db.Column(db.Text, nullable=True) 
+    status = db.Column(db.String(20), default='pending') 
     rating = db.Column(db.Float, default=5.0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
+        # Xử lý skills an toàn để Frontend không bị lỗi map()
+        skills_list = []
+        if self.skills:
+            if '[' in str(self.skills): 
+                try: skills_list = json.loads(self.skills)
+                except: skills_list = [s.strip() for s in str(self.skills).split(',')]
+            else:
+                skills_list = [s.strip() for s in str(self.skills).split(',')]
+
         return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "username": self.username,
-            "email": self.email,
-            "skills": self.skills.split(',') if self.skills else [],
-            "status": self.status,
-            "rating": self.rating,
-            "bio": self.bio
+            'id': self.user_id, # Frontend dùng user_id để định danh khi Duyệt
+            'username': self.username or "N/A",
+            'email': self.email or "N/A",
+            'full_name': self.full_name or self.username,
+            'bio': self.bio,
+            'skills': skills_list,
+            'status': self.status.lower() if self.status else 'pending',
+            'rating': self.rating
         }

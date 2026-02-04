@@ -18,9 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255),
     `role` VARCHAR(20) DEFAULT 'learner',
     status VARCHAR(20) DEFAULT 'active',
-    -- Tên gói hiển thị trên giao diện
     package_name VARCHAR(50) DEFAULT 'Gói Miễn Phí', 
-    -- ID gói dùng để React so sánh logic (Khớp với subscription_db.subscription_plans.id)
     package_id VARCHAR(50) DEFAULT 'free-id-001',   
     user_level VARCHAR(50) DEFAULT 'A1 (Beginner)',
     current_streak INT DEFAULT 0,
@@ -35,20 +33,22 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT IGNORE INTO users (id, username, email, password, `role`, status, package_name, package_id) 
 VALUES ('admin-001', 'Admin Hệ Thống', 'admin@gmail.com', '123456', 'admin', 'active', 'Gói Pro AI', 'pro-id-002');
 
--- Bảng Mentors: Hồ sơ chuyên sâu của cố vấn
+-- Bảng Mentors: ĐÃ SỬA ĐỂ KHỚP WORKER (Thêm username, email)
 CREATE TABLE IF NOT EXISTS mentors (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) UNIQUE NOT NULL,
+    username VARCHAR(100), -- Cột mới để đồng bộ
+    email VARCHAR(100),    -- Cột mới để đồng bộ
     full_name VARCHAR(100),
     bio TEXT,
-    skills_json TEXT, 
-    status VARCHAR(20) DEFAULT 'PENDING',
+    skills TEXT, -- Đổi từ skills_json sang skills cho dễ xử lý
+    status VARCHAR(20) DEFAULT 'pending',
     rating FLOAT DEFAULT 5.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Bảng learning_sessions: Lưu tiến độ học tập
+-- Bảng learning_sessions
 CREATE TABLE IF NOT EXISTS learning_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     learner_id VARCHAR(100) NOT NULL,
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS mentor_settings (
 ) ENGINE=InnoDB;
 
 -- ==========================================================
--- 2. DATABASE: payment_db (Dùng cho Payment-Service)
+-- 2. DATABASE: payment_db
 -- ==========================================================
 CREATE DATABASE IF NOT EXISTS payment_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE payment_db;
@@ -157,9 +157,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL, 
     amount FLOAT NOT NULL,
-    -- Tên gói hiển thị (Gói Cơ Bản, Gói Pro AI)
     package_name VARCHAR(50) NOT NULL,
-    -- BỔ SUNG: ID gói để khớp với logic React và User-Service (free-id-001, pro-id-002)
     package_id VARCHAR(50) NOT NULL, 
     payment_method VARCHAR(20) NOT NULL, 
     status VARCHAR(20) DEFAULT 'PENDING', 
@@ -185,7 +183,6 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     is_active BOOLEAN DEFAULT TRUE
 ) ENGINE=InnoDB;
 
--- Khởi tạo các gói dịch vụ (ID phải khớp với package_id trong user_db và transactions)
 INSERT IGNORE INTO subscription_plans (id, name, price, duration_days, badge_text, features) 
 VALUES 
 ('free-id-001', 'Gói Miễn Phí', 0, 9999, 'Bản miễn phí', 'Cơ bản, Giới hạn AI'),
@@ -221,7 +218,7 @@ CREATE TABLE IF NOT EXISTS system_feedbacks (
 ) ENGINE=InnoDB;
 
 INSERT IGNORE INTO system_stats (`key`, `value`) VALUES ('total_users', 1), ('active_mentors', 0), ('total_revenue', 0.0);
--- Bảng nhận dữ liệu đồng bộ từ RabbitMQ để phục vụ Dashboard
+
 CREATE TABLE IF NOT EXISTS practice_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL, 
@@ -232,8 +229,9 @@ CREATE TABLE IF NOT EXISTS practice_sessions (
     vocabulary_score FLOAT DEFAULT 0.0,
     ai_feedback TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (user_id) -- Giúp Dashboard tải dữ liệu nhanh hơn
+    INDEX (user_id)
 ) ENGINE=InnoDB;
+
 -- ==========================================================
 -- 5. DATABASE: xdpm (Dành riêng cho AI-core-service)
 -- ==========================================================
@@ -248,16 +246,15 @@ CREATE TABLE IF NOT EXISTS chat_histories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Bảng kết quả luyện tập AI (Dùng cho Learner Dashboard)
 CREATE TABLE IF NOT EXISTS practice_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL,
     topic VARCHAR(100),
-    duration_seconds INT DEFAULT 0,    -- Thời gian luyện tập
+    duration_seconds INT DEFAULT 0,
     accuracy_score FLOAT DEFAULT 0.0,
-    grammar_score FLOAT DEFAULT 0.0,   -- Điểm ngữ pháp
-    vocabulary_score FLOAT DEFAULT 0.0, -- Điểm từ vựng
-    ai_feedback TEXT,                  -- Nhận xét chi tiết từ AI
+    grammar_score FLOAT DEFAULT 0.0,
+    vocabulary_score FLOAT DEFAULT 0.0,
+    ai_feedback TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

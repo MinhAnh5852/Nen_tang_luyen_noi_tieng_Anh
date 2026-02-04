@@ -1,0 +1,54 @@
+/* submissions.css */
+
+/* Badge trạng thái chấm bài */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.status-active { 
+    background: rgba(16, 185, 129, 0.1); 
+    color: #10b981; 
+}
+
+.status-pending { 
+    background: rgba(245, 158, 11, 0.1); 
+    color: #f59e0b; 
+}
+
+/* Nút thao tác chấm bài */
+.btn-grade-action {
+    background: #f8fafc;
+    color: var(--primary);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-grade-action:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.avatar-orange {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    color: #ea580c;
+}
+
+/* Tùy chỉnh dòng bảng */
+tr:hover td {
+    background-color: #f8fafc;
+}

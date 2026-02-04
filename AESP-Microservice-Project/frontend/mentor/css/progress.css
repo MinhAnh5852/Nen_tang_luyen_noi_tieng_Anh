@@ -1,0 +1,117 @@
+/* css/progress.css */
+
+/* Container chính cho trang tiến độ */
+.page-container {
+    padding: 20px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Các thẻ thống kê nhanh (Stats Cards) */
+.table-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.table-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Kiểu dáng cho tiêu đề và số liệu trong thẻ stats */
+.table-card p {
+    color: #64748b;
+    letter-spacing: 0.025em;
+    margin-bottom: 8px;
+}
+
+.table-card h3 {
+    color: #1e293b;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+/* Biểu đồ kỹ năng (Skill Progress Bars) */
+.progress-bar-container {
+    background: #f1f5f9;
+    height: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1.5s cubic-bezier(0.1, 0.5, 0.1, 1); /* Hiệu ứng chạy thanh khi nạp dữ liệu */
+}
+
+/* Màu sắc đặc trưng cho từng kỹ năng */
+#b-speaking {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+#b-listening {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+#b-vocabulary {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+/* Bảng nhật ký luyện tập */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+tbody td {
+    padding: 14px 20px;
+    font-size: 0.875rem;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Huy hiệu điểm số (Badge) */
+.badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    display: inline-block;
+}
+
+/* Hiệu ứng nạp trang */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive cho thiết bị di động */
+@media (max-width: 768px) {
+    .progress-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

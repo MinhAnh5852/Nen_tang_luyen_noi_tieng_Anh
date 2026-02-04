@@ -1,0 +1,94 @@
+/* mentor/css/ranking.css */
+
+/* 1. Header Bảng xếp hạng */
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.leaderboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--text); /* Sử dụng biến màu hệ thống */
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.leaderboard-header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* 2. Card chứa bảng dữ liệu */
+.leaderboard-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+    animation: slideUpRanking 0.5s ease;
+}
+
+/* 3. Hiệu ứng dòng cho Top 3 */
+/* Top 1 - Vàng */
+.leaderboard-card tr:nth-child(1) { background-color: #fff9db !important; }
+/* Top 2 - Bạc */
+.leaderboard-card tr:nth-child(2) { background-color: #f1f5f9 !important; }
+/* Top 3 - Đồng */
+.leaderboard-card tr:nth-child(3) { background-color: #fff4e6 !important; }
+
+.leaderboard-card tr:hover {
+    filter: brightness(0.98);
+    transition: 0.2s;
+}
+
+/* 4. Tùy chỉnh các cột */
+.leaderboard-card td:first-child {
+    font-size: 1.3rem;
+    width: 80px;
+    text-align: center;
+    font-weight: 900;
+}
+
+/* Badge trình độ */
+.status-badge.status-active {
+    background: #e0e7ff;
+    color: #4361ee;
+    padding: 6px 14px;
+    font-weight: 800;
+    border-radius: 99px;
+    font-size: 12px;
+}
+
+/* Biểu tượng ngọn lửa cho Streak */
+.fa-fire {
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.3));
+}
+
+/* 5. Hiệu ứng xuất hiện */
+@keyframes slideUpRanking {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 6. Responsive cho di động */
+@media (max-width: 768px) {
+    .leaderboard-card {
+        padding: 10px;
+    }
+    
+    .leaderboard-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    /* Ẩn cột trình độ trên mobile để không bị tràn màn hình */
+    .data-table th:nth-child(3), 
+    .data-table td:nth-child(3) {
+        display: none;
+    }
+}

@@ -85,6 +85,43 @@ def get_learner_summary(user_id):
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+@app.route("/api/analytics/learner/<string:user_id>", methods=["GET"])
+@jwt_required()
+def get_mentor_learner_stats(user_id):
+    try:
+        # Lấy tất cả bài tập của học viên đó
+        sessions = PracticeSession.query.filter_by(user_id=user_id).order_by(PracticeSession.created_at.desc()).all()
+        
+        if not sessions:
+            return jsonify({
+                "average_score": 0, "completed_lessons": 0, "total_lessons": 30,
+                "last_active": "Chưa có dữ liệu",
+                "skills": {"speaking": 0, "listening": 0, "vocabulary": 0},
+                "recent_history": []
+            }), 200
 
+        # Tính toán điểm trung bình để vẽ biểu đồ
+        avg_acc = sum(s.accuracy_score for s in sessions) / len(sessions)
+        avg_gram = sum(s.grammar_score for s in sessions) / len(sessions)
+        avg_vocab = sum(s.vocabulary_score for s in sessions) / len(sessions)
+
+        return jsonify({
+            "average_score": round(avg_acc / 10, 1), # Chuyển thang 100 về thang 10
+            "completed_lessons": len(sessions),
+            "total_lessons": 30,
+            "last_active": sessions[0].created_at.strftime("%d/%m/%Y"),
+            "skills": {
+                "speaking": round(avg_acc, 0),
+                "listening": round(avg_gram, 0),
+                "vocabulary": round(avg_vocab, 0)
+            },
+            "recent_history": [
+                {"date": s.created_at.strftime("%d/%m/%Y"), "lesson": s.topic, "score": s.accuracy_score} 
+                for s in sessions[:5]
+            ]
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5003)

@@ -1,0 +1,177 @@
+/* frontend/mentor/css/learners.css */
+
+/* =========================================
+   1. LAYOUT & ANIMATION
+   ========================================= */
+.page-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInPage 0.4s ease-out;
+}
+
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+/* =========================================
+   2. FILTER BAR (Tinh chỉnh mềm mại hơn)
+   ========================================= */
+.filter-bar {
+    background: var(--white);
+    padding: 16px 20px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.search-wrapper { position: relative; flex: 1; max-width: 400px; }
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+.form-input:focus {
+    background-color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* =========================================
+   3. TABLE CARD & DATA (Nâng cấp UI)
+   ========================================= */
+.table-card {
+    background: var(--white);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    background-color: #f8fafc;
+    padding: 18px 24px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    transition: background 0.2s;
+}
+
+tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* =========================================
+   4. USER INFO & COMPONENTS
+   ========================================= */
+.user-info { display: flex; align-items: center; gap: 14px; }
+
+.avatar-circle {
+    width: 42px; height: 42px;
+    border-radius: 12px; /* Chuyển sang bo góc vuông (Squircle) cho hiện đại */
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.avatar-blue { 
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white; 
+}
+
+.user-text h4 { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
+.user-text span { font-size: 12px; color: var(--text-light); font-weight: 500; }
+
+/* Badge Level (Cách điệu Mentor) */
+.badge-level {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+/* Action Button: Chấm điểm */
+.btn-grade {
+    background: white;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-grade:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Spinner quay đều */
+.fa-spin-custom {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

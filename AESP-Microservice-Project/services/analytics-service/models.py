@@ -61,6 +61,8 @@ class PracticeSession(db.Model):
             "topic": self.topic,
             "duration": self.duration_seconds,
             "accuracy": self.accuracy_score,
+            "grammar": round(self.grammar_score, 1),
+            "vocabulary": round(self.vocabulary_score, 1),
             "feedback": self.ai_feedback,
-            "date": self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            "date": self.created_at.strftime("%d/%m/%Y %H:%M")
         }

@@ -1,630 +1,135 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Mentor Dashboard • AESP</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESP Mentor System • Professional</title>
+    <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/main.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* CSS CƠ BẢN */
-        .btn, button, .btn-sm, .btn-primary, .btn-outline { 
-            border-radius: 12px !important; 
-            padding: 12px 32px !important; 
-            font-weight: 700 !important;
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s ease; 
-            cursor: pointer; 
-            border: none;
-        }
-        .content-card, .mini-card, .alert-card, .sidebar, .topbar, .dd-menu, .modal { 
-            border-radius: 16px !important; 
-        }
-        .sb-link { 
-            border-radius: 12px !important; 
-            margin: 6px 12px !important; 
-            padding: 12px 16px !important; 
-        }
-        input, select, textarea { 
-            border-radius: 10px !important; 
-            padding: 10px !important; 
-            border: 1px solid #d1d5db; 
-        }
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15); 
-            filter: brightness(1.1); 
-        }
-        /* DARK MODE STYLES */
-        body.dark-mode { background-color: #111827; color: #f3f4f6; }
-        body.dark-mode .sidebar { background-color: #1f2937; color: #fff; }
-        body.dark-mode .content-card, body.dark-mode .topbar, body.dark-mode .modal-content, body.dark-mode .mentor-info-area { 
-            background-color: #1f2937; color: #f3f4f6; border-color: #374151; 
-        }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4 { color: #f9fafb !important; }
-        body.dark-mode .sb-link:hover, body.dark-mode .sb-link.active { background-color: #374151; }
-        
-        /* CSS MENTOR TEST AREA */
-        .mentor-info-area { 
-            background-color: #fff; 
-            border: 1px solid #e2e8f0; 
-            padding: 25px; 
-            margin-bottom: 30px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
-        }
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .form-control { flex: 1; padding: 12px; font-size: 0.95rem; }
-        
-        .mentor-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
-            margin-top: 20px; 
-        }
-        .mentor-item { 
-            background: #fff; 
-            border: 1px solid #e2e8f0; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-            transition: transform 0.2s; 
-        }
-        .mentor-item:hover { transform: translateY(-3px); border-color: #3b82f6; }
-        .mentor-skill-tag { 
-            background: #eff6ff; 
-            color: #1d4ed8; 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-            font-weight: 600; 
-            display: inline-block; 
-            margin-right: 5px; 
-            margin-bottom: 5px; 
-        }
-
-        /* CSS MODAL */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); z-index: 9999;
-            display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content {
-            background: white; width: 500px; max-width: 90%;
-            border-radius: 20px; padding: 30px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            transform: scale(0.9); transition: transform 0.3s ease; position: relative;
-        }
-        .modal-overlay.show .modal-content { transform: scale(1); }
-        .close-modal {
-            position: absolute; top: 20px; right: 20px;
-            background: #f1f5f9; border: none; width: 32px; height: 32px;
-            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: #64748b; transition: 0.2s;
-        }
-        .close-modal:hover { background: #e2e8f0; color: #ef4444; }
-        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-        .modal-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px; display: block; border: 4px solid #f8fafc; }
+        .full-iframe { width: 100%; height: 100%; border: none; display: block; background: #f6f8fc; }
+        .main-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #content-area { flex: 1; width: 100%; }
     </style>
 </head>
-
 <body>
-<div class="app">
-    <aside class="sidebar">
-        <div class="sb-brand">
-            <div class="sb-logo"><i class="fa-solid fa-robot"></i></div>
-            <div><h3>AESP</h3><p>Mentor</p></div>
-        </div>
-        <div class="sb-group-title">DASHBOARD</div>
-        <a class="sb-link active" href="#" data-section="learners"><i class="fa-solid fa-user-group"></i> <span>Học viên</span></a>
-        
-        <div class="sb-group-title">QUẢN LÝ</div>
-        <a class="sb-link" href="#" data-section="progress"><i class="fa-solid fa-chart-line"></i> <span>Tiến độ</span></a>
-        <a class="sb-link" href="#" data-section="feedback"><i class="fa-regular fa-comment-dots"></i> <span>Phản hồi</span></a>
-        <a class="sb-link" href="#" data-section="tasks"><i class="fa-solid fa-list-check"></i> <span>Giao bài</span></a>
-        <a class="sb-link" href="#" data-section="ranking"><i class="fa-solid fa-ranking-star"></i> <span>Xếp hạng</span></a>
-        
-        <a class="sb-link" href="#" data-section="resources"><i class="fa-regular fa-folder-open"></i> <span>Tài liệu</span></a>
-        <a class="sb-link" href="#" data-section="topics"><i class="fa-regular fa-comments"></i> <span>Chủ đề</span></a>
-        <a class="sb-link" href="#" data-section="submissions"><i class="fa-regular fa-file-lines"></i> <span>Bài nộp</span></a>
-        
-        <a class="sb-link" href="#" data-section="settings"><i class="fa-solid fa-gear"></i> <span>Cài đặt</span></a>
-    </aside>
-
-    <div class="main">
-        <div class="topbar">
-            <div class="topbar-inner">
-                <h1 class="topbar-title" id="pageTitle">Mentor Dashboard</h1>
-                <div class="topbar-right">
-                    <button class="btn btn-primary btn-sm" onclick="openProfileModal()">Hồ Sơ Mentor ▼</button>
-                </div>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <span>AESP Mentor</span>
             </div>
-        </div>
-
-        <main class="container">
-            <div class="content-card alert-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary-color);">
-                <strong>Thông báo:</strong> Hệ thống Mentor đã sẵn sàng làm việc.
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-label">QUẢN LÝ</li>
+                    <li><a href="learners.html" target="content-frame" class="nav-link active"><i class="fa-solid fa-users"></i> Học viên</a></li>
+                    <li><a href="submissions.html" target="content-frame" class="nav-link"><i class="fa-solid fa-microphone-lines"></i> Chấm điểm</a></li>
+                    <li><a href="tasks.html" target="content-frame" class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Giao bài tập</a></li>
+                    
+                    <li class="nav-label">CHUYÊN MÔN</li>
+                    <li><a href="topics.html" target="content-frame" class="nav-link"><i class="fa-solid fa-comments"></i> Chủ đề thực tế</a></li>
+                    <li><a href="resources.html" target="content-frame" class="nav-link"><i class="fa-solid fa-book"></i> Kho tài liệu</a></li>
+                    <li><a href="ranking.html" target="content-frame" class="nav-link"><i class="fa-solid fa-crown"></i> Xếp hạng</a></li>
+                    <li><a href="progress.html" target="content-frame" class="nav-link"><i class="fa-solid fa-chart-line"></i> Tiến độ</a></li>
+                    <li><a href="feedback.html" target="content-frame" class="nav-link"><i class="fa-solid fa-comment-dots"></i> Phản hồi AI</a></li>
+                    
+                    <li class="nav-label">CÁ NHÂN</li>
+                    <li>
+                        <a href="profile-edit.html" target="content-frame" class="nav-link">
+                            <i class="fa-solid fa-user-pen"></i> Hồ sơ Chuyên gia
+                        </a>
+                    </li>
+                    
+                    <li class="nav-label">HỆ THỐNG</li>
+                    <li><a href="settings.html" target="content-frame" class="nav-link"><i class="fa-solid fa-gears"></i> Cài đặt</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</div>
             </div>
-            
-            <div class="mentor-info-area">
-                <h3 style="margin-top:0; margin-bottom: 20px; color: #1e293b; font-size: 1.25rem;">
-                    <i class="fa-solid fa-user-pen" style="color: var(--primary-color); margin-right: 8px;"></i> 
-                    Điền thông tin của Mentor
-                </h3>
-                <div style="margin-bottom: 30px;">
-                    <div class="form-row">
-                        <input type="text" id="new-name" class="form-control" placeholder="Họ tên Mentor (Ví dụ: Nguyễn Văn A)">
-                        <input type="text" id="new-skills" class="form-control" placeholder="Kỹ năng">
-                    </div>
-                    <div class="form-row">
-                        <input type="text" id="new-bio" class="form-control" placeholder="Giới thiệu" style="flex: 3;">
-                        <button class="btn btn-primary" onclick="registerMentorTest()" style="flex: 1; background: #2563eb;">
-                            <i class="fa-solid fa-check-circle" style="margin-right: 8px;"></i> Xác nhận
-                        </button>
+        </aside>
+
+        <main class="main-wrapper">
+            <header class="top-nav">
+                <div class="header-left"><span>Hệ thống Cố vấn hỗ trợ luyện nói AI</span></div>
+                <div class="header-right">
+                    <div class="user-profile" id="profile-trigger" style="cursor:pointer">
+                        <div class="user-info">
+                            <p class="user-name" id="display-name">Đang tải...</p>
+                            <p class="user-role">PROFESSIONAL</p>
+                        </div>
+                        <div class="user-avatar" id="display-avatar">M</div>
                     </div>
                 </div>
-                <div style="border-top: 1px solid #e2e8f0; margin: 20px 0;"></div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h4 style="margin: 0; font-weight: bold; color: #334155;">Danh sách Mentor hiện có</h4>
-                    <button class="btn btn-outline" style="background:#fff; border:1px solid #ccc; color:#333; padding: 8px 16px !important; font-size: 0.9rem;" onclick="loadMentorsFromAPI()">
-                        <i class="fa-solid fa-rotate"></i> Tải lại
-                    </button>
-                </div>
-                <div id="api-mentor-list" class="mentor-grid">
-                    <p style="color: #64748b; font-style: italic;">Đang tải dữ liệu...</p>
-                </div>
+            </header>
+            <div id="content-area">
+                <iframe name="content-frame" src="learners.html" class="full-iframe" id="main-iframe"></iframe>
             </div>
-            
-            <div id="sectionHost"></div>
         </main>
     </div>
-</div>
 
-<div class="modal-overlay" id="learnerModal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeLearnerModal()"><i class="fa-solid fa-xmark"></i></button>
-        <img src="" id="m-avatar" class="modal-avatar">
-        <h2 id="m-name" style="text-align: center; margin: 0 0 5px 0; color: #1e293b;"></h2>
-        <p id="m-email" style="text-align: center; color: #64748b; margin-bottom: 25px; font-size: 0.9rem;"></p>
-        <div class="detail-row"><span style="color:#64748b">ID Học viên</span><span style="font-weight:600" id="m-id"></span></div>
-        <div class="detail-row"><span style="color:#64748b">Trình độ</span><span style="font-weight:600" id="m-level"></span></div>
-        <div class="detail-row"><span style="color:#64748b">Trạng thái</span><span style="font-weight:600" id="m-status"></span></div>
-        <div class="detail-row"><span style="color:#64748b">Tham gia ngày</span><span style="color: #64748b; font-weight: normal;">28/01/2026</span></div>
-        <div style="margin-top: 25px; display: flex;">
-            <button class="btn btn-outline" style="width: 100%; border: 1px solid #ddd;" onclick="closeLearnerModal()">Đóng</button>
-        </div>
-    </div>
-</div>
+    <script>
+        const AUTH_TOKEN = localStorage.getItem('token');
+        const API_BASE = '/api/mentors';
 
-<div class="modal-overlay" id="taskModal">
-    <div class="modal-content" style="width: 600px;">
-        <button class="close-modal" onclick="closeTaskModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h3 style="margin-top:0; color:#1e293b;">📋 Giao Bài Tập Mới</h3>
-        <div style="margin-bottom: 15px;">
-            <label style="display:block; margin-bottom:5px; font-weight:600;">Học viên nhận bài:</label>
-            <select id="task-learner" class="form-control" style="width:100%; padding:12px;">
-                <option value="">-- Chọn học viên --</option>
-            </select>
-        </div>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Tiêu đề bài tập:</label><input type="text" id="task-title" class="form-control" style="width:100%;" placeholder="Ví dụ: Luyện nói chủ đề Family"></div>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Hạn nộp (Deadline):</label><input type="date" id="task-deadline" class="form-control" style="width:100%;"></div>
-        <div style="margin-bottom: 20px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Nội dung/Yêu cầu:</label><textarea id="task-desc" class="form-control" rows="4" style="width:100%;" placeholder="Nhập hướng dẫn chi tiết..."></textarea></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="submitTask()"><i class="fa-solid fa-paper-plane"></i> Gửi Bài Tập</button>
-    </div>
-</div>
+        // 1. Quản lý Sidebar Active
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
 
-<div class="modal-overlay" id="resourceModal">
-    <div class="modal-content" style="width: 500px;">
-        <button class="close-modal" onclick="closeResourceModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h3 style="margin-top:0; color:#1e293b;">📂 Thêm Tài Liệu Mới</h3>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Tên tài liệu:</label><input type="text" id="res-title" class="form-control" style="width:100%;"></div>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Link (URL):</label><input type="text" id="res-link" class="form-control" style="width:100%;"></div>
-        <div style="margin-bottom: 15px;">
-            <label style="display:block; margin-bottom:5px; font-weight:600;">Kỹ năng:</label>
-            <select id="res-skill" class="form-control" style="width:100%;">
-                <option value="Speaking">Speaking</option><option value="Listening">Listening</option><option value="Reading">Reading</option>
-                <option value="Writing">Writing</option><option value="Vocabulary">Vocabulary</option><option value="Grammar">Grammar</option><option value="General">General</option>
-            </select>
-        </div>
-        <div style="margin-bottom: 20px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Mô tả:</label><textarea id="res-desc" class="form-control" rows="3" style="width:100%;"></textarea></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="submitResource()"><i class="fa-solid fa-check"></i> Lưu Tài Liệu</button>
-    </div>
-</div>
+        // 2. Tải thông tin Profile để hiển thị tên trên Topbar
+        async function fetchTopbarInfo() {
+            const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+            const uid = userInfo.id || userInfo.user_id;
 
-<div class="modal-overlay" id="createTopicModal">
-    <div class="modal-content" style="width: 500px;">
-        <button class="close-modal" onclick="closeCreateTopicModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h3 style="margin-top:0; color:#1e293b;">Thêm Chủ Đề Mới</h3>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Tên chủ đề:</label><input type="text" id="new-topic-name" class="form-control" style="width:100%;"></div>
-        <div style="margin-bottom: 15px;">
-            <label style="display:block; margin-bottom:5px; font-weight:600;">Trình độ:</label>
-            <select id="new-topic-level" class="form-control" style="width:100%;">
-                <option value="A1-A2">A1-A2 (Beginner)</option><option value="B1-B2">B1-B2 (Intermediate)</option><option value="C1-C2">C1-C2 (Advanced)</option>
-            </select>
-        </div>
-        <div style="margin-bottom: 20px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Mô tả / Gợi ý:</label><textarea id="new-topic-desc" class="form-control" rows="3" style="width:100%;"></textarea></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="submitNewTopic()"><i class="fa-solid fa-save"></i> Lưu vào thư viện</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="gradingModal">
-    <div class="modal-content" style="width: 500px;">
-        <button class="close-modal" onclick="closeGradingModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h3 style="margin-top:0; color:#1e293b;">✍️ Chấm Điểm</h3>
-        <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
-            <p style="margin:0 0 10px 0; font-weight:600; color:#334155;">Nghe bài làm:</p>
-            <audio id="audio-player" controls style="width: 100%;"></audio>
-        </div>
-        <div style="margin-bottom: 15px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Điểm số (0 - 10):</label><input type="number" id="grade-score" class="form-control" style="width:100%;" min="0" max="10" step="0.5"></div>
-        <div style="margin-bottom: 20px;"><label style="display:block; margin-bottom:5px; font-weight:600;">Nhận xét:</label><textarea id="grade-feedback" class="form-control" rows="4" style="width:100%;"></textarea></div>
-        <input type="hidden" id="current-submission-id">
-        <button class="btn btn-primary" style="width:100%;" onclick="submitGrade()"><i class="fa-solid fa-check-circle"></i> Hoàn Tất Chấm Điểm</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="profileModal">
-    <div class="modal-content" style="width: 500px;">
-        <button class="close-modal" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h3 style="margin-top:0; color:#1e293b; text-align:center;">Hồ Sơ Mentor</h3>
-        <div style="text-align:center; margin-bottom:20px;">
-            <div style="width:100px; height:100px; background:#e2e8f0; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:40px; color:#64748b;"><i class="fa-solid fa-user"></i></div>
-            <p style="color:#64748b; font-size:0.9rem;">ID: <span id="my-profile-id"></span></p>
-        </div>
-        <div style="margin-bottom: 15px;"><label style="font-weight:600;">Họ tên hiển thị:</label><input type="text" id="my-profile-name" class="form-control" style="width:100%;"></div>
-        <div style="margin-bottom: 15px;"><label style="font-weight:600;">Email liên hệ:</label><input type="text" id="my-profile-email" class="form-control" style="width:100%;" readonly style="background:#f1f5f9;"></div>
-        <div style="margin-bottom: 15px;"><label style="font-weight:600;">Kỹ năng (cách nhau dấu phẩy):</label><input type="text" id="my-profile-skills" class="form-control" style="width:100%;" placeholder="IELTS, TOEIC, Speaking..."></div>
-        <div style="margin-bottom: 25px;"><label style="font-weight:600;">Giới thiệu bản thân:</label><textarea id="my-profile-bio" class="form-control" rows="3" style="width:100%;"></textarea></div>
-        <button class="btn btn-primary" style="width:100%; margin-bottom: 10px;" onclick="updateMyProfile()"><i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi</button>
-        <button class="btn btn-outline" style="width:100%; border:1px solid #fee2e2; background:#fef2f2; color:#dc2626;" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
-    </div>
-</div>
-
-<script>
-    // --- LẤY ID THẬT TỪ STORAGE (Sửa logic lấy ID) ---
-    // Tìm trong localStorage, sessionStorage, nếu không có thì mới dùng current_mentor
-    const storedUser = localStorage.getItem('user_id') || sessionStorage.getItem('user_id') || 'current_mentor';
-    window.CURRENT_MENTOR_ID = storedUser;
-    
-    // Nếu chưa đăng nhập (ID là current_mentor), cảnh báo ngay
-    if(window.CURRENT_MENTOR_ID === 'current_mentor') {
-        console.warn("⚠️ Cảnh báo: Chưa tìm thấy User ID trong bộ nhớ trình duyệt.");
-        // Bạn có thể bỏ comment dòng dưới nếu muốn bắt buộc đăng nhập
-        // alert("Bạn chưa đăng nhập! Đang dùng chế độ Test."); 
-    } else {
-        console.log("✅ Đã đăng nhập với ID:", window.CURRENT_MENTOR_ID);
-    }
-
-    window.LEARNERS_API_URL = 'http://127.0.0.1:5002/api/learners-list';
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        const sectionHost = document.getElementById('sectionHost');
-        const sidebarLinks = document.querySelectorAll('.sb-link');
-        const pageTitle = document.getElementById('pageTitle');
-        const profileBtn = document.getElementById('profileBtn');
-        const dropdown = document.getElementById('dropdown');
-
-        async function loadSection(name) {
-            sectionHost.innerHTML = '<div style="padding:20px; text-align:center;">Đang tải...</div>';
             try {
-                if(name === 'settings') {
-                    // CẬP NHẬT: Đã bỏ phần ngôn ngữ
-                    sectionHost.innerHTML = `
-                    <div class="content-card">
-                        <h2 style="margin-top:0; color:#1e293b; margin-bottom: 5px;">Cài Đặt</h2>
-                        <p style="color:#64748b; margin-bottom: 25px;">Tuỳ chỉnh giao diện và nhắc nhở.</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
-                                <h4 style="margin:0 0 10px 0; color:#334155;">Đổi theme</h4>
-                                <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">Chọn giao diện sáng/tối cho Dashboard.</p>
-                                <select id="set-theme" class="form-control" style="width:100%; margin-bottom:15px;"><option value="Light">Light (Sáng)</option><option value="Dark">Dark (Tối)</option></select>
-                                <button class="btn btn-primary" style="width:100%;" onclick="saveSettings()">Lưu theme</button>
-                            </div>
-                            <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px;">
-                                <h4 style="margin:0 0 10px 0; color:#334155;">Bật/tắt nhắc nhở</h4>
-                                <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">Gửi email/thông báo khi học viên nộp bài.</p>
-                                <div style="margin-bottom:15px;"><input type="checkbox" id="set-remind-check"> <label for="set-remind-check">Bật nhắc nhở</label></div>
-                                <div style="margin-bottom:15px;"><label style="font-size:0.9rem;">Giờ nhắc:</label><input type="time" id="set-remind-time" class="form-control" style="width:100%;"></div>
-                                <button class="btn btn-primary" style="width:100%;" onclick="saveSettings()">Lưu nhắc nhở</button>
-                            </div>
-                        </div>
-                    </div>`;
-                    pageTitle.innerText = 'Cài đặt hệ thống';
-                    initSettingsPage();
-                    return;
-                }
+                const res = await fetch(`${API_BASE}/mentor-profile/${uid}`, {
+                    headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+                });
+                const data = await res.json();
 
-                const res = await fetch(`./sections/${name}.html?t=` + Date.now());
-                if(!res.ok) throw new Error("File không tồn tại");
-                sectionHost.innerHTML = await res.text();
-                const titles = { 'learners': 'Danh sách học viên', 'progress': 'Tiến độ học tập', 'feedback': 'Phản hồi học viên', 'tasks': 'Quản lý bài tập', 'ranking': 'Bảng Xếp Hạng', 'resources': 'Tài Liệu Hỗ Trợ', 'topics': 'Quản lý Chủ đề', 'submissions': 'Bài Nộp Của Học Viên' };
-                pageTitle.innerText = titles[name] || 'Dashboard';
-            } catch(e) { sectionHost.innerHTML = 'Lỗi: ' + e.message; }
+                if (res.ok) {
+                    const finalName = data.full_name || userInfo.username || 'Mentor';
+                    document.getElementById('display-name').innerText = finalName;
+                    document.getElementById('display-avatar').innerText = finalName.charAt(0).toUpperCase();
+                    
+                    // Cập nhật lại cache để đảm bảo tên mới nhất
+                    userInfo.username = finalName;
+                    localStorage.setItem('user_info', JSON.stringify(userInfo));
+                }
+            } catch (e) {
+                console.error("Lỗi đồng bộ Topbar:", e);
+                // Nếu lỗi thì hiện tên từ localStorage tạm thời
+                document.getElementById('display-name').innerText = userInfo.username || 'Mentor';
+            }
         }
 
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebarLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                loadSection(link.getAttribute('data-section'));
-            });
+        // 3. Click vào Avatar thì nạp trang hồ sơ vào iframe
+        document.getElementById('profile-trigger').onclick = () => {
+            document.getElementById('main-iframe').src = 'profile-edit.html';
+            // Bỏ active các menu khác
+            navLinks.forEach(l => l.classList.remove('active'));
+        };
+
+        function logout() { 
+            if(confirm("Bạn có chắc muốn đăng xuất?")) {
+                localStorage.clear();
+                window.location.href = '../login.html';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if(!AUTH_TOKEN) {
+                window.location.href = '../login.html';
+            } else {
+                fetchTopbarInfo();
+            }
         });
-
-        loadSection('learners');
-        loadMentorsFromAPI();
-        applySettings(); 
-    });
-
-    // 2. MODAL FUNCTIONS
-    window.openLearnerModal = function(id) {
-        const l = window.allLearnersData.find(x => x.id == id); if(!l) return;
-        document.getElementById('m-name').innerText = l.full_name;
-        document.getElementById('m-email').innerText = l.email;
-        document.getElementById('m-id').innerText = l.id;
-        document.getElementById('m-level').innerText = l.level;
-        document.getElementById('m-status').innerText = l.status;
-        document.getElementById('m-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(l.full_name)}&background=random&size=128`;
-        const m = document.getElementById('learnerModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10);
-    }
-    window.closeLearnerModal = function() { document.getElementById('learnerModal').style.display = 'none'; }
-    window.openTaskModal = function() { const m = document.getElementById('taskModal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10); }
-    window.closeTaskModal = function() { document.getElementById('taskModal').style.display='none'; }
-    window.openResourceModal = function() { const m = document.getElementById('resourceModal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10); }
-    window.closeResourceModal = function() { document.getElementById('resourceModal').style.display='none'; }
-    window.openCreateTopicModal = function() { const m = document.getElementById('createTopicModal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10); }
-    window.closeCreateTopicModal = function() { document.getElementById('createTopicModal').style.display='none'; }
-    window.openGradingModal = function(id, audio, score, feedback) {
-        document.getElementById('current-submission-id').value = id;
-        document.getElementById('audio-player').src = audio;
-        document.getElementById('grade-score').value = score || '';
-        document.getElementById('grade-feedback').value = feedback || '';
-        const m = document.getElementById('gradingModal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
-    }
-    window.closeGradingModal = function() { document.getElementById('gradingModal').style.display='none'; document.getElementById('audio-player').pause(); }
-
-    window.openProfileModal = async function() {
-        try {
-            const res = await fetch(`http://127.0.0.1:5002/api/mentor-profile/${window.CURRENT_MENTOR_ID}`);
-            const data = await res.json();
-            document.getElementById('my-profile-id').innerText = window.CURRENT_MENTOR_ID;
-            document.getElementById('my-profile-name').value = data.full_name;
-            document.getElementById('my-profile-email').value = data.email;
-            document.getElementById('my-profile-bio').value = data.bio;
-            document.getElementById('my-profile-skills').value = Array.isArray(data.skills) ? data.skills.join(', ') : data.skills;
-            const m = document.getElementById('profileModal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
-        } catch(e) { alert("Lỗi tải hồ sơ: " + e.message); }
-    }
-    window.closeProfileModal = function() { document.getElementById('profileModal').style.display='none'; }
-    window.updateMyProfile = async function() {
-        const name = document.getElementById('my-profile-name').value;
-        const bio = document.getElementById('my-profile-bio').value;
-        const skills = document.getElementById('my-profile-skills').value;
-        try {
-            const res = await fetch('http://127.0.0.1:5002/api/mentor-profile', {
-                method: 'PUT', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ user_id: window.CURRENT_MENTOR_ID, full_name: name, bio: bio, skills: skills })
-            });
-            if(res.ok) { alert("✅ Đã cập nhật hồ sơ!"); closeProfileModal(); } else { alert("Lỗi cập nhật"); }
-        } catch(e) { alert("Lỗi kết nối"); }
-    }
-    window.logout = function() { 
-        if(confirm("Bạn có chắc chắn muốn đăng xuất?")) { 
-            localStorage.removeItem('user_id');
-            sessionStorage.removeItem('user_id');
-            // Chuyển hướng về trang đăng nhập
-            // Giả sử file đăng nhập tên là index.html hoặc login.html ở thư mục cha
-            window.location.href = '../login.html'; 
-        } 
-    }
-
-    // 3. LOGIC FUNCTIONS
-    window.loadLearnersFromDB = async function() {
-        const tbody = document.getElementById('learner-table-body'); if(!tbody) return; tbody.innerHTML='';
-        try {
-            const res = await fetch(window.LEARNERS_API_URL + '?t=' + Date.now());
-            const data = await res.json(); window.allLearnersData = data;
-            data.forEach(l => {
-                const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(l.full_name)}&background=random&size=32`;
-                const badge = l.status === 'active' ? `<span style="background:#dcfce7; color:#166534; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:bold;">Active</span>` : `<span>${l.status}</span>`;
-                tbody.innerHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding:15px; display:flex; gap:10px; align-items:center;"><img src="${avatar}" style="width:36px; height:36px; border-radius:50%"><div><div style="font-weight:600">${l.full_name}</div><div style="font-size:11px; color:#94a3b8">ID: ${l.id}</div></div></td><td style="padding:15px; color:#475569">${l.email}</td><td style="padding:15px"><span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-size:12px">${l.level}</span></td><td style="padding:15px">${badge}</td><td style="padding:15px"><button class="btn btn-sm btn-outline" style="padding:6px 12px; border:1px solid #ddd; background:white" onclick="openLearnerModal('${l.id}')">Chi tiết</button></td></tr>`;
-            });
-        } catch(e) {}
-    }
-    window.initProgressPage = async function() {
-        const select = document.getElementById('prog-student-select'); if(!select) return;
-        try { const res = await fetch(window.LEARNERS_API_URL); const data = await res.json(); select.innerHTML = '<option value="">-- Chọn học viên --</option>'; data.forEach(l => { select.innerHTML += `<option value="${l.id}">${l.full_name} (${l.email})</option>`; }); } catch(e) {}
-    }
-    window.loadLearnerStats = async function(learnerId) {
-        if(!learnerId) { document.getElementById('progress-container').style.display='none'; return; }
-        try {
-            const res = await fetch(`http://127.0.0.1:5002/api/learner-progress/${learnerId}`); const data = await res.json();
-            document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('p-score').innerText = data.average_score;
-            document.getElementById('p-completed').innerText = `${data.completed_lessons}/${data.total_lessons}`;
-            document.getElementById('p-active').innerText = data.last_active;
-            document.getElementById('b-speaking').style.width = data.skills.speaking + '%'; 
-            document.getElementById('b-listening').style.width = data.skills.listening + '%'; 
-            document.getElementById('b-vocabulary').style.width = data.skills.vocabulary + '%'; 
-            const tbody = document.getElementById('p-history-body'); tbody.innerHTML = '';
-            data.recent_history.forEach(h => { tbody.innerHTML += `<tr><td style="padding:10px; border-bottom:1px solid #eee">${h.date}</td><td style="padding:10px; border-bottom:1px solid #eee">${h.lesson}</td><td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; color:#2563eb">${h.score}</td></tr>`; });
-        } catch(e) { alert("Lỗi tải dữ liệu tiến độ"); }
-    }
-    window.initFeedbackPage = async function() {
-        const select = document.getElementById('feedback-student-select'); if(!select) return;
-        try { const res = await fetch(window.LEARNERS_API_URL); const data = await res.json(); select.innerHTML = '<option value="">-- Chọn học viên --</option>'; data.forEach(l => { select.innerHTML += `<option value="${l.id}">${l.full_name}</option>`; }); } catch(e) {}
-    }
-    window.loadFeedbackData = async function(learnerId) {
-        const container = document.getElementById('feedback-list'); if(!learnerId) { container.innerHTML = '<p style="text-align:center; color:#999">Chọn học viên để xem.</p>'; return; }
-        try {
-            const res = await fetch(`http://127.0.0.1:5002/api/learner-feedback/${learnerId}`); const data = await res.json();
-            if(data.length === 0) { container.innerHTML = '<div class="alert-card">Học viên này chưa có phản hồi nào từ AI.</div>'; return; }
-            container.innerHTML = '';
-            data.forEach(item => {
-                let color = '#3b82f6'; let bg = '#eff6ff'; let icon = '<i class="fa-solid fa-thumbs-up"></i>';
-                if(item.sentiment === 'Neutral') { color = '#d97706'; bg = '#fffbeb'; icon = '<i class="fa-solid fa-scale-balanced"></i>'; }
-                if(item.sentiment === 'Negative') { color = '#dc2626'; bg = '#fef2f2'; icon = '<i class="fa-solid fa-triangle-exclamation"></i>'; }
-                container.innerHTML += `<div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid ${color}; display: flex; gap: 15px;"><div style="background:${bg}; color:${color}; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">${icon}</div><div><div style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">${item.date} • <strong>${item.sentiment}</strong></div><div style="color: #334155; line-height: 1.5;">${item.comment}</div></div></div>`;
-            });
-        } catch(e) {}
-    }
-    window.initTaskPage = async function() { await loadLearnersForTask(); await loadTasksFromDB(); }
-    async function loadLearnersForTask() {
-        const select = document.getElementById('task-learner'); if(!select) return;
-        try { const res = await fetch(window.LEARNERS_API_URL); const data = await res.json(); select.innerHTML = '<option value="">-- Chọn học viên --</option>'; data.forEach(l => { select.innerHTML += `<option value="${l.id}" data-name="${l.full_name}">${l.full_name} (${l.email})</option>`; }); } catch(e) {}
-    }
-    async function loadTasksFromDB() {
-        const container = document.getElementById('task-list-container'); if(!container) return;
-        try {
-            const res = await fetch('http://127.0.0.1:5002/api/tasks'); const tasks = await res.json();
-            if(tasks.length === 0) { container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8; background:#f8fafc; border-radius:12px;">Chưa có bài tập nào được giao.</div>`; return; }
-            container.innerHTML = '';
-            tasks.forEach(t => {
-                const statusColor = t.status === 'Pending' ? '#d97706' : '#16a34a'; const statusBg = t.status === 'Pending' ? '#fffbeb' : '#dcfce7';
-                container.innerHTML += `<div style="background:white; border:1px solid #e2e8f0; padding:20px; border-radius:12px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-weight:bold; font-size:1.1rem; color:#334155; margin-bottom:5px;">${t.title}</div><div style="color:#64748b; font-size:0.9rem;"><i class="fa-solid fa-user"></i> ${t.learner_name} &nbsp;|&nbsp; <i class="fa-regular fa-clock"></i> Deadline: ${t.deadline}</div></div><span style="background:${statusBg}; color:${statusColor}; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem;">${t.status}</span></div>`;
-            });
-        } catch(e) {}
-    }
-    window.submitTask = async function() {
-        const learnerSelect = document.getElementById('task-learner'); const learnerId = learnerSelect.value;
-        const learnerName = learnerSelect.options[learnerSelect.selectedIndex].getAttribute('data-name');
-        const title = document.getElementById('task-title').value; const deadline = document.getElementById('task-deadline').value; const desc = document.getElementById('task-desc').value;
-        if(!learnerId || !title || !deadline) { alert("Vui lòng nhập đủ thông tin!"); return; }
-        try { const res = await fetch('http://127.0.0.1:5002/api/tasks', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ learner_id: learnerId, learner_name: learnerName, title: title, description: desc, deadline: deadline }) }); if(res.ok) { alert("✅ Giao bài thành công!"); closeTaskModal(); loadTasksFromDB(); } else { alert("❌ Lỗi khi giao bài"); } } catch(e) { alert("Lỗi: " + e.message); }
-    }
-    window.goToAssignTask = async function(learnerId) {
-        document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
-        document.querySelector('[data-section="tasks"]').classList.add('active');
-        const sectionHost = document.getElementById('sectionHost');
-        sectionHost.innerHTML = '<div style="padding:20px; text-align:center;">Đang tải...</div>';
-        try {
-            const res = await fetch(`./sections/tasks.html?t=` + Date.now()); if(!res.ok) throw new Error("File không tồn tại");
-            sectionHost.innerHTML = await res.text(); document.getElementById('pageTitle').innerText = 'Quản lý bài tập';
-            await loadLearnersForTask(); await loadTasksFromDB();
-            openTaskModal(); const select = document.getElementById('task-learner'); if(select) select.value = learnerId;
-        } catch(e) { sectionHost.innerHTML = 'Lỗi: ' + e.message; }
-    }
-    window.initRankingPage = async function() {
-        const topList = document.getElementById('top-students-list'); const warnList = document.getElementById('warning-students-list'); if(!topList) return;
-        try {
-            const res = await fetch('http://127.0.0.1:5002/api/rankings'); const data = await res.json();
-            if(data.length === 0) { topList.innerHTML = '<p>Chưa có dữ liệu.</p>'; return; }
-            topList.innerHTML = ''; warnList.innerHTML = ''; let hasWarning = false;
-            data.forEach((student, index) => {
-                let medal = ''; let rankStyle = 'background:white; border:1px solid #e2e8f0; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;';
-                if(index === 0) { medal = '🥇'; rankStyle += ' border-left: 5px solid #eab308; background: #fefce8;'; } else if(index === 1) { medal = '🥈'; rankStyle += ' border-left: 5px solid #94a3b8;'; } else if(index === 2) { medal = '🥉'; rankStyle += ' border-left: 5px solid #b45309;'; } else { medal = `<span style="font-weight:bold; color:#64748b; width:20px; text-align:center;">#${index + 1}</span>`; }
-                topList.innerHTML += `<div style="${rankStyle}"><div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openLearnerModal('${student.id}')"><div style="font-size:1.5rem;">${medal}</div><div><div style="font-weight:bold; color:#334155; text-decoration:underline;">${student.name}</div><div style="font-size:0.85rem; color:#64748b;">Đã học: ${student.total_lessons} bài</div></div></div><div style="font-weight:bold; font-size:1.2rem; color:#2563eb;">${student.avg_score}</div></div>`;
-                if(student.avg_score < 6.0) { hasWarning = true; warnList.innerHTML += `<div style="background:#fef2f2; border:1px solid #fee2e2; padding:15px; border-radius:12px; margin-bottom:10px;"><div style="font-weight:bold; color:#991b1b; cursor:pointer;" onclick="openLearnerModal('${student.id}')">${student.name}</div><div style="display:flex; justify-content:space-between; margin-top:5px;"><span style="font-size:0.9rem; color:#b91c1c;">Điểm TB: <strong>${student.avg_score}</strong></span><button class="btn btn-sm btn-outline" style="padding:4px 10px; font-size:0.8rem; background:white;" onclick="goToAssignTask('${student.id}')">Giao bài</button></div></div>`; }
-            });
-            if(!hasWarning) { warnList.innerHTML = '<div class="alert-card" style="background:#f0fdf4; color:#166534; border:1px solid #dcfce7;">✅ Tất cả học viên đều đạt thành tích tốt!</div>'; }
-        } catch(e) { topList.innerHTML = 'Lỗi tải xếp hạng.'; }
-    }
-    window.initResourcesPage = async function() {
-        const tbody = document.getElementById('resource-table-body'); if(!tbody) return; tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Đang tải...</td></tr>';
-        try { const res = await fetch('http://127.0.0.1:5002/api/resources'); const data = await res.json(); window.allResources = data; renderResources(data); } catch(e) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Lỗi tải dữ liệu</td></tr>'; }
-    }
-    window.renderResources = function(list) {
-        const tbody = document.getElementById('resource-table-body'); if(list.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Chưa có tài liệu nào.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        list.forEach(item => {
-            let skillColor = '#64748b'; let skillBg = '#f1f5f9';
-            if(item.skill_type === 'Speaking') { skillColor = '#d97706'; skillBg = '#fffbeb'; }
-            if(item.skill_type === 'Listening') { skillColor = '#059669'; skillBg = '#d1fae5'; }
-            if(item.skill_type === 'Vocabulary') { skillColor = '#7c3aed'; skillBg = '#ede9fe'; }
-            tbody.innerHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding:15px;"><span style="background:${skillBg}; color:${skillColor}; padding:4px 10px; border-radius:20px; font-weight:bold; font-size:0.8rem;">${item.skill_type}</span></td><td style="padding:15px; font-weight:600; color:#334155;">${item.title}</td><td style="padding:15px; color:#64748b;">${item.description}</td><td style="padding:15px; text-align:right;"><a href="${item.link}" target="_blank" class="btn btn-sm btn-outline" style="background:#fff; color:#2563eb; border:1px solid #bfdbfe;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Mở</a></td></tr>`;
-        });
-    }
-    window.filterResources = function(skill) {
-        if(!window.allResources) return;
-        if(skill === 'All') renderResources(window.allResources); else renderResources(window.allResources.filter(r => r.skill_type === skill));
-    }
-    window.submitResource = async function() {
-        const title = document.getElementById('res-title').value; const link = document.getElementById('res-link').value; const skill = document.getElementById('res-skill').value; const desc = document.getElementById('res-desc').value;
-        if(!title || !link) { alert("Vui lòng nhập Tên và Link!"); return; }
-        try { const res = await fetch('http://127.0.0.1:5002/api/resources', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ title: title, link: link, skill_type: skill, description: desc }) }); if(res.ok) { alert("✅ Thêm tài liệu thành công!"); closeResourceModal(); initResourcesPage(); } else { alert("❌ Lỗi khi thêm"); } } catch(e) { alert("Lỗi: " + e.message); }
-    }
-    window.initTopicsPage = async function() { await loadLearnersForTopic(); await loadTopicsLibrary(); await loadAssignedTopicsHistory(); }
-    async function loadLearnersForTopic() {
-        const select = document.getElementById('topic-learner-select'); if(!select) return;
-        try { const res = await fetch(window.LEARNERS_API_URL); const data = await res.json(); select.innerHTML = '<option value="">-- Chọn học viên --</option>'; data.forEach(l => { select.innerHTML += `<option value="${l.id}" data-name="${l.full_name}">${l.full_name}</option>`; }); } catch(e) {}
-    }
-    async function loadTopicsLibrary() {
-        const list = document.getElementById('topics-library-list'); const select = document.getElementById('topic-select'); if(!list) return;
-        try { const res = await fetch('http://127.0.0.1:5002/api/topics'); const data = await res.json(); list.innerHTML = ''; select.innerHTML = '<option value="">-- Chọn chủ đề trong thư viện --</option>'; if(data.length === 0) { list.innerHTML = '<p>Thư viện trống.</p>'; return; } data.forEach(t => { select.innerHTML += `<option value="${t.topic_name}">${t.topic_name}</option>`; list.innerHTML += `<div style="background:white; padding:15px; border:1px solid #e2e8f0; border-radius:12px;"><div style="font-weight:bold; color:#334155; margin-bottom:5px;">${t.topic_name}</div><div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;"><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px;">${t.level}</span></div><div style="font-size:0.9rem; color:#475569;">${t.description}</div></div>`; }); } catch(e) { list.innerHTML = 'Lỗi tải thư viện.'; }
-    }
-    async function loadAssignedTopicsHistory() {
-        const tbody = document.getElementById('assigned-topics-body'); if(!tbody) return;
-        try { const res = await fetch('http://127.0.0.1:5002/api/assigned-topics'); const data = await res.json(); tbody.innerHTML = ''; if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:#94a3b8;">Chưa giao chủ đề nào.</td></tr>'; return; } data.forEach(a => { tbody.innerHTML += `<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px; color:#64748b;">${a.date}</td><td style="padding:10px; font-weight:600;">${a.learner_name}</td><td style="padding:10px; color:#2563eb;">${a.topic_name}</td></tr>`; }); } catch(e) {}
-    }
-    window.assignTopicToLearner = async function() {
-        const lSelect = document.getElementById('topic-learner-select'); const tSelect = document.getElementById('topic-select'); const lId = lSelect.value; const lName = lSelect.options[lSelect.selectedIndex].getAttribute('data-name'); const tName = tSelect.value;
-        if(!lId || !tName) { alert("Vui lòng chọn học viên và chủ đề!"); return; }
-        try { const res = await fetch('http://127.0.0.1:5002/api/assign-topic', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ learner_id: lId, learner_name: lName, topic_name: tName }) }); if(res.ok) { alert("✅ Giao chủ đề thành công!"); loadAssignedTopicsHistory(); } else { alert("❌ Lỗi khi giao"); } } catch(e) { alert("Lỗi: " + e.message); }
-    }
-    window.submitNewTopic = async function() {
-        const name = document.getElementById('new-topic-name').value; const level = document.getElementById('new-topic-level').value; const desc = document.getElementById('new-topic-desc').value;
-        if(!name) { alert("Nhập tên chủ đề!"); return; }
-        try { const res = await fetch('http://127.0.0.1:5002/api/topics', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ topic_name: name, level: level, description: desc }) }); if(res.ok) { alert("✅ Tạo chủ đề thành công!"); closeCreateTopicModal(); loadTopicsLibrary(); } else { alert("❌ Lỗi khi tạo"); } } catch(e) { alert("Lỗi: " + e.message); }
-    }
-    window.initSubmissionsPage = async function() {
-        const tbody = document.getElementById('submissions-table-body'); if(!tbody) return; tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải...</td></tr>';
-        try {
-            const res = await fetch('http://127.0.0.1:5002/api/submissions'); const data = await res.json();
-            if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Chưa có bài nộp nào.</td></tr>'; return; }
-            tbody.innerHTML = '';
-            data.forEach(sub => {
-                let statusBadge = sub.status === 'Pending' ? `<span style="background:#fffbeb; color:#d97706; padding:4px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">Chưa chấm</span>` : `<span style="background:#dcfce7; color:#16a34a; padding:4px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">Đã chấm (${sub.score})</span>`;
-                tbody.innerHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding:15px; font-weight:600;">${sub.learner_name}</td><td style="padding:15px;">${sub.task_title}</td><td style="padding:15px; color:#64748b;">${sub.date}</td><td style="padding:15px;">${statusBadge}</td><td style="padding:15px; text-align:right;"><button class="btn btn-sm btn-outline" style="background:#fff; color:#2563eb; border:1px solid #bfdbfe;" onclick="openGradingModal('${sub.id}', '${sub.audio_link}', '${sub.score}', '${sub.feedback || ''}')"><i class="fa-solid fa-pen-to-square"></i> Chấm</button></td></tr>`;
-            });
-        } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Lỗi tải dữ liệu</td></tr>'; }
-    }
-    window.submitGrade = async function() {
-        const id = document.getElementById('current-submission-id').value; const score = document.getElementById('grade-score').value; const feedback = document.getElementById('grade-feedback').value;
-        if(!score) { alert("Vui lòng nhập điểm số!"); return; }
-        try { const res = await fetch(`http://127.0.0.1:5002/api/submissions/${id}/grade`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ score: score, feedback: feedback }) }); if(res.ok) { alert("✅ Chấm điểm thành công!"); closeGradingModal(); initSubmissionsPage(); } else { alert("❌ Lỗi khi lưu"); } } catch(e) { alert("Lỗi kết nối: " + e.message); }
-    }
-    window.initSettingsPage = async function() {
-        try {
-            const res = await fetch(`http://127.0.0.1:5002/api/settings/${window.CURRENT_MENTOR_ID}`); const data = await res.json();
-            if(data.theme) document.getElementById('set-theme').value = data.theme;
-            if(data.reminder_enabled) document.getElementById('set-remind-check').checked = true;
-            if(data.reminder_time) document.getElementById('set-remind-time').value = data.reminder_time;
-        } catch(e) { console.error("Lỗi tải cài đặt"); }
-    }
-    window.saveSettings = async function() {
-        const theme = document.getElementById('set-theme').value; const remind = document.getElementById('set-remind-check').checked; const time = document.getElementById('set-remind-time').value;
-        try { await fetch('http://127.0.0.1:5002/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user_id: window.CURRENT_MENTOR_ID, theme: theme, reminder_enabled: remind, reminder_time: time }) }); alert("✅ Đã lưu cài đặt!"); applySettings(); } catch(e) { alert("Lỗi lưu cài đặt"); }
-    }
-    window.applySettings = async function() {
-        try { const res = await fetch(`http://127.0.0.1:5002/api/settings/${window.CURRENT_MENTOR_ID}`); const data = await res.json(); if(data.theme === 'Dark') document.body.classList.add('dark-mode'); else document.body.classList.remove('dark-mode'); } catch(e) {}
-    }
-    async function loadMentorsFromAPI() {
-        const listContainer = document.getElementById('api-mentor-list'); listContainer.innerHTML = '<p style="color:#666;">Đang cập nhật...</p>';
-        try {
-            const response = await fetch('http://127.0.0.1:5002/api/mentors'); const mentors = await response.json(); listContainer.innerHTML = '';
-            if (mentors.length === 0) { listContainer.innerHTML = '<p>Chưa có dữ liệu.</p>'; return; }
-            mentors.forEach(mentor => {
-                let skills = []; try { skills = (typeof mentor.skills === 'string') ? JSON.parse(mentor.skills) : mentor.skills; } catch(e) { skills = [mentor.skills]; } if (!Array.isArray(skills)) skills = [];
-                const skillsHTML = skills.map(s => `<span class="mentor-skill-tag">${s}</span>`).join('');
-                const statusColor = mentor.status === 'APPROVED' ? '#16a34a' : '#d97706'; const statusBg = mentor.status === 'APPROVED' ? '#dcfce7' : '#fffebf';
-                listContainer.innerHTML += `<div class="mentor-item"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><div style="font-weight:bold;">${mentor.full_name}</div><small style="color:${statusColor}; background:${statusBg}; padding: 2px 8px; border-radius: 4px; font-weight:bold;">${mentor.status || 'PENDING'}</small></div><div style="margin-bottom:10px;">${skillsHTML}</div><p style="color:#64748b; font-size:0.9rem;">${mentor.bio || 'Chưa có giới thiệu'}</p><div style="font-size:0.8rem; color:#94a3b8;">ID: ${mentor.user_id}</div></div>`;
-            });
-        } catch (error) { listContainer.innerHTML = `<p style="color:red;">❌ Lỗi kết nối API.</p>`; }
-    }
-    async function registerMentorTest() {
-        const name = document.getElementById('new-name').value; const skills = document.getElementById('new-skills').value; const bio = document.getElementById('new-bio').value;
-        if (!name) { alert("Vui lòng nhập tên!"); return; }
-        try {
-            const response = await fetch('http://127.0.0.1:5002/api/mentors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: "user_" + Math.floor(Math.random() * 99999), full_name: name, bio: bio || "Chưa có giới thiệu", skills: skills ? skills.split(',') : ["General"] }) });
-            if (response.ok) { alert("✅ Cập nhật thông tin thành công!"); loadMentorsFromAPI(); } else { alert("❌ Lỗi lưu dữ liệu"); }
-        } catch (error) { alert("❌ Lỗi kết nối: " + error.message); }
-    }
-</script>
+    </script>
 </body>
 </html>

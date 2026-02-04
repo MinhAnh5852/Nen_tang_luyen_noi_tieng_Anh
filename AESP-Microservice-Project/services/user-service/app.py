@@ -36,7 +36,8 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
     jwt = JWTManager(app)
 
-    # 3. ĐĂNG KÝ CÁC BLUEPRINT (Đã khớp với Gateway /api/users/)
+    # 3. ĐĂNG KÝ CÁC BLUEPRINT (QUAN TRỌNG: Phải khớp với Frontend gọi API)
+    # Frontend gọi /api/users/auth/register -> Sẽ khớp với Blueprint này
     app.register_blueprint(auth_bp, url_prefix='/api/users/auth') 
     app.register_blueprint(user_bp, url_prefix='/api/users') 
     app.register_blueprint(internal_bp, url_prefix='/api/users/internal')
@@ -47,7 +48,6 @@ def create_app():
     def health():
         return jsonify({"status": "ok", "service": "user-service"}), 200
 
-    # ✅ SỬA: Đổi từ /api/users/admin/all thành /api/users/all để khớp với Frontend Admin
     @app.get("/api/users/all")
     def get_all_users_direct():
         try:
@@ -59,7 +59,6 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    # ✅ SỬA: Đổi từ /api/users/admin/feedbacks/all thành /api/users/feedbacks/all
     @app.get("/api/users/feedbacks/all")
     def get_all_feedbacks():
         try:
@@ -91,7 +90,6 @@ def create_app():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    # ✅ SỬA: Bỏ chữ /admin/ trong đường dẫn đánh dấu đã đọc
     @app.put("/api/users/feedbacks/<int:fb_id>/read")
     def mark_feedback_read(fb_id):
         try:
@@ -106,7 +104,6 @@ def create_app():
             db.session.rollback()
             return jsonify({"error": str(e)}), 500
 
-    # ✅ SỬA: Bỏ chữ /admin/ trong đường dẫn xóa phản hồi
     @app.delete("/api/users/feedbacks/<int:fb_id>")
     def delete_feedback(fb_id):
         try:
@@ -121,7 +118,6 @@ def create_app():
             db.session.rollback()
             return jsonify({"error": str(e)}), 500
 
-    # ✅ SỬA: Bỏ chữ /admin/ trong đường dẫn trả lời phản hồi
     @app.post("/api/users/feedbacks/reply")
     def reply_feedback():
         data = request.json
@@ -130,7 +126,9 @@ def create_app():
 
     return app
 
+# ĐƯA BIẾN APP RA NGOÀI ĐỂ GUNICORN (DOCKER) CÓ THỂ NHÌN THẤY
 app = create_app()
 
 if __name__ == "__main__":
+    # Chỉ chạy khi debug local
     app.run(host="0.0.0.0", port=5000, debug=True)

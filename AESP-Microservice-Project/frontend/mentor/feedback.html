@@ -1,0 +1,137 @@
+<link rel="stylesheet" href="css/feedback.css">
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size: 24px; font-weight: 900; color: var(--text);">Phản Hồi Từ AI</h1>
+        <p style="color: var(--muted); margin-top: 4px; font-size: 13px;">Xem các nhận xét và phân tích cảm xúc tự động từ hệ thống AI cho từng học viên.</p>
+    </div>
+    <button class="btn btn-primary" onclick="init_feedback()">
+        <i class="fa-solid fa-sync"></i> Làm mới danh sách
+    </button>
+</div>
+
+<div class="table-card" style="padding: 20px; margin-bottom: 24px; border-radius: 16px;">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <label style="display:block; margin-bottom: 8px; font-weight: 900; color: var(--text); font-size: 13px;">
+                <i class="fa-solid fa-magnifying-glass" style="margin-right: 5px;"></i> Chọn học viên cần xem:
+            </label>
+            <select id="feedback-student-select" class="form-input" style="width: 100%; height: 45px;" onchange="loadFeedbackData(this.value)">
+                <option value="">-- Đang tải danh sách học viên... --</option>
+            </select>
+        </div>
+        <div style="flex: 2; min-width: 300px; background: rgba(37, 99, 235, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.1);">
+            <p style="margin: 0; font-size: 13px; color: var(--primary); line-height: 1.5; font-weight: 600;">
+                <i class="fa-solid fa-robot"></i> 
+                <strong>AI Insights:</strong> Hệ thống sử dụng phân tích cảm xúc (Sentiment Analysis) để phân loại phản hồi thành Tích cực, Trung lập hoặc Cần chú ý.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="feedback-list">
+    <div style="text-align: center; color: var(--muted); padding: 100px 20px; background: white; border-radius: 16px; border: 1px dashed var(--border);">
+        <i class="fa-solid fa-comments-question" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+        <p style="font-size: 15px; font-weight: 700;">Vui lòng chọn một học viên phía trên để nạp dữ liệu phản hồi từ AI.</p>
+    </div>
+</div>
+
+<script>
+    // 1. Khởi tạo nạp danh sách học viên (Dùng AUTH_TOKEN từ localStorage)
+    window.init_feedback = async function() {
+        const select = document.getElementById('feedback-student-select');
+        const token = localStorage.getItem('token');
+        
+        try {
+            const res = await fetch('/api/users/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            const learners = data.filter(u => u.role === 'learner');
+            
+            select.innerHTML = '<option value="">-- Click để chọn học viên --</option>';
+            learners.forEach(l => {
+                // Lưu ID nhưng hiển thị Email để loadFeedbackData dễ lọc
+                select.innerHTML += `<option value="${l.id}">${l.username} (${l.email})</option>`;
+            });
+        } catch(e) { 
+            select.innerHTML = '<option value="">Lỗi nạp dữ liệu</option>'; 
+            console.error("Gateway Error:", e);
+        }
+    }
+
+    // 2. Nạp dữ liệu phản hồi AI chi tiết
+    window.loadFeedbackData = async function(learnerId) {
+        const container = document.getElementById('feedback-list');
+        const token = localStorage.getItem('token');
+
+        if(!learnerId) {
+            container.innerHTML = '<div style="text-align:center; padding:50px; color:var(--muted); font-weight:700;">Vui lòng chọn học viên.</div>';
+            return;
+        }
+
+        container.innerHTML = '<div style="text-align:center; padding:50px; color:var(--primary); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích dữ liệu AI...</div>';
+
+        try {
+            const res = await fetch(`/api/users/feedbacks/all`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const allFeedbacks = await res.json();
+            
+            // Lấy email từ text của option đã chọn để lọc chính xác
+            const selectElement = document.getElementById('feedback-student-select');
+            const selectedText = selectElement.options[selectElement.selectedIndex].text;
+            const emailMatch = selectedText.match(/\(([^)]+)\)/);
+            const learnerEmail = emailMatch ? emailMatch[1] : "";
+
+            const data = allFeedbacks.filter(fb => fb.email === learnerEmail);
+
+            if(data.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:60px; background:white; border-radius:16px; border: 1px solid var(--border);">
+                        <i class="fa-solid fa-folder-open" style="font-size:30px; color:var(--muted); margin-bottom:10px;"></i>
+                        <p style="color:var(--muted); font-weight:700;">Học viên này chưa có phản hồi nào từ AI.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            data.forEach(item => {
+                // Cấu hình hiển thị theo tâm trạng AI đánh giá
+                let statusColor = '#3b82f6'; // Mặc định: Blue
+                let statusBg = 'rgba(59, 130, 246, 0.1)';
+                let icon = 'fa-face-smile';
+                
+                if(item.sentiment === 'Negative') { 
+                    statusColor = '#ef4444'; statusBg = 'rgba(239, 68, 68, 0.1)'; icon = 'fa-face-frown-slight'; 
+                } else if(item.sentiment === 'Neutral') { 
+                    statusColor = '#f59e0b'; statusBg = 'rgba(245, 158, 11, 0.1)'; icon = 'fa-face-meh'; 
+                }
+
+                container.innerHTML += `
+                    <div class="table-card" style="padding: 24px; margin-bottom: 16px; border-left: 6px solid ${statusColor}; display: flex; gap: 20px; border-radius:12px;">
+                        <div style="background:${statusBg}; color:${statusColor}; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; border: 1px solid ${statusColor}33;">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <span style="font-weight: 900; color: ${statusColor}; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; background:${statusBg}; padding:4px 10px; border-radius:6px;">${item.sentiment}</span>
+                                    <span style="color: var(--muted); font-size: 12px; margin-left: 10px; font-weight:700;">• ${item.date || 'Gần đây'}</span>
+                                </div>
+                                <div style="color: #f59e0b; font-size: 13px;">
+                                    ${'<i class="fa-solid fa-star"></i>'.repeat(item.rating || 5)}
+                                </div>
+                            </div>
+                            <h4 style="margin: 0 0 8px 0; color: var(--text); font-size: 15px; font-weight: 900;">Phân tích: ${item.target || 'Luyện nói tổng quát'}</h4>
+                            <p style="color: var(--muted); line-height: 1.6; margin: 0; font-weight:500;">${item.content}</p>
+                        </div>
+                    </div>`;
+            });
+        } catch(e) { 
+            container.innerHTML = '<div style="color:red; text-align:center; font-weight:900; padding:20px;">⚠️ Lỗi kết nối hệ thống. Vui lòng kiểm tra lại.</div>'; 
+        }
+    }
+
+    // Tự động chạy khi Mentor vào trang này
+    init_feedback();
+</script>

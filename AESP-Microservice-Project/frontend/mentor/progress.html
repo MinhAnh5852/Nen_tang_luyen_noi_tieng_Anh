@@ -1,0 +1,174 @@
+<link rel="stylesheet" href="css/progress.css">
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size: 24px; font-weight: 900; color: var(--text);">Theo dõi Tiến độ</h1>
+        <p style="color: var(--muted); margin-top: 4px; font-size: 13px;">Phân tích chi tiết năng lực và lịch sử luyện tập của học viên.</p>
+    </div>
+    <button class="btn btn-primary" onclick="init_progress()">
+        <i class="fa-solid fa-rotate"></i> Làm mới danh sách
+    </button>
+</div>
+
+<div class="content-card" style="margin-bottom: 24px; border-radius: 16px; background: white; padding: 20px; border: 1px solid var(--border);">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <label style="display:block; margin-bottom: 8px; font-weight: 900; color: var(--text); font-size: 13px;">
+                <i class="fa-solid fa-user-graduate" style="margin-right: 5px;"></i> Chọn học viên:
+            </label>
+            <select id="prog-student-select" class="form-control" style="width: 100%; height: 45px;" onchange="loadLearnerStats(this.value)">
+                <option value="">-- Đang tải danh sách học viên... --</option>
+            </select>
+        </div>
+        <div style="flex: 2; min-width: 300px; background: rgba(16, 185, 129, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.1);">
+            <p style="margin: 0; font-size: 13px; color: #166534; line-height: 1.5; font-weight: 600;">
+                <i class="fa-solid fa-circle-info"></i> 
+                Hệ thống tự động tổng hợp điểm số từ AI Core và các bài chấm điểm của Mentor để đưa ra đánh giá kỹ năng chi tiết.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="progress-container" style="display: none;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <div class="table-card" style="text-align: center; padding: 20px; border-top: 4px solid #3b82f6; background: white; border-radius: 12px;">
+            <p style="margin:0; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase;">Điểm Trung Bình</p>
+            <h3 id="p-score" style="margin:10px 0 0; font-size: 32px; color: #2563eb; font-weight: 900;">--</h3>
+        </div>
+        <div class="table-card" style="text-align: center; padding: 20px; border-top: 4px solid #10b981; background: white; border-radius: 12px;">
+            <p style="margin:0; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase;">Bài đã hoàn thành</p>
+            <h3 id="p-completed" style="margin:10px 0 0; font-size: 32px; color: #16a34a; font-weight: 900;">--/30</h3>
+        </div>
+        <div class="table-card" style="text-align: center; padding: 20px; border-top: 4px solid #f59e0b; background: white; border-radius: 12px;">
+            <p style="margin:0; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase;">Ngày học gần nhất</p>
+            <h3 id="p-active" style="margin:10px 0 0; font-size: 16px; color: #ca8a04; height: 38px; display: flex; align-items: center; justify-content: center; font-weight: 900;">--</h3>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;">
+        <div class="table-card" style="padding: 24px; background: white; border-radius: 12px;">
+            <h3 style="margin: 0 0 20px 0; font-size: 16px; color: var(--text); font-weight: 900;">📊 Biểu đồ kỹ năng</h3>
+            <div style="margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-weight:800;">Speaking</span><span id="v-speaking" style="color: #3b82f6; font-weight:900;">0%</span></div>
+                <div style="background:#f1f5f9; height:12px; border-radius:10px;"><div id="b-speaking" style="width:0%; height:100%; background:linear-gradient(90deg, #3b82f6, #60a5fa); border-radius:10px; transition: 1.5s ease-out;"></div></div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-weight:800;">Listening (Grammar)</span><span id="v-listening" style="color: #10b981; font-weight:900;">0%</span></div>
+                <div style="background:#f1f5f9; height:12px; border-radius:10px;"><div id="b-listening" style="width:0%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:10px; transition: 1.5s 0.2s ease-out;"></div></div>
+            </div>
+            <div style="margin-bottom: 5px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-weight:800;">Vocabulary</span><span id="v-vocabulary" style="color: #f59e0b; font-weight:900;">0%</span></div>
+                <div style="background:#f1f5f9; height:12px; border-radius:10px;"><div id="b-vocabulary" style="width:0%; height:100%; background:linear-gradient(90deg, #f59e0b, #fbbf24); border-radius:10px; transition: 1.5s 0.4s ease-out;"></div></div>
+            </div>
+        </div>
+
+        <div class="table-card" style="background: white; border-radius: 12px; overflow: hidden;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); background: #f8fafc;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 900;">🕒 Nhật ký luyện tập gần đây</h3>
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                        <tr>
+                            <th style="text-align: left; padding: 12px 20px; font-size: 12px;">Ngày</th>
+                            <th style="text-align: left; padding: 12px 20px; font-size: 12px;">Chủ đề</th>
+                            <th style="text-align: right; padding: 12px 20px; font-size: 12px;">Điểm số</th>
+                        </tr>
+                    </thead>
+                    <tbody id="p-history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    // 1. Khởi tạo nạp danh sách học viên từ user-service
+    window.init_progress = async function() {
+        const select = document.getElementById('prog-student-select');
+        try {
+            const res = await fetch('/api/users/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            // Chỉ lấy người dùng có quyền learner
+            const learners = data.filter(u => u.role === 'learner');
+            
+            select.innerHTML = '<option value="">-- Chọn học viên để xem --</option>';
+            learners.forEach(l => {
+                select.innerHTML += `<option value="${l.id}">${l.username || 'Học viên'} (${l.email})</option>`;
+            });
+        } catch(e) { 
+            console.error("Lỗi nạp danh sách:", e);
+            select.innerHTML = '<option value="">⚠️ Lỗi kết nối hệ thống</option>'; 
+        }
+    }
+
+    // 2. Nạp chi tiết tiến độ khi chọn học viên từ analytics-service
+    window.loadLearnerStats = async function(learnerId) {
+        if(!learnerId) {
+            document.getElementById('progress-container').style.display = 'none';
+            return;
+        }
+
+        try {
+            // Gọi route /api/analytics/learner/<id> đã được fix lỗi 404
+            const res = await fetch(`/api/analytics/learner/${learnerId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!res.ok) throw new Error("API Analytics trả về lỗi " + res.status);
+            const data = await res.json();
+
+            document.getElementById('progress-container').style.display = 'block';
+            
+            // Cập nhật thẻ tóm tắt
+            document.getElementById('p-score').innerText = data.average_score || '0.0';
+            document.getElementById('p-completed').innerText = `${data.completed_lessons || 0}/${data.total_lessons || 30}`;
+            document.getElementById('p-active').innerText = data.last_active || 'Chưa bắt đầu';
+
+            // Cập nhật hiệu ứng biểu đồ kỹ năng
+            setTimeout(() => {
+                const skills = data.skills || { speaking: 0, listening: 0, vocabulary: 0 };
+                
+                document.getElementById('b-speaking').style.width = skills.speaking + '%';
+                document.getElementById('v-speaking').innerText = skills.speaking + '%';
+                
+                document.getElementById('b-listening').style.width = skills.listening + '%';
+                document.getElementById('v-listening').innerText = skills.listening + '%';
+                
+                document.getElementById('b-vocabulary').style.width = skills.vocabulary + '%';
+                document.getElementById('v-vocabulary').innerText = skills.vocabulary + '%';
+            }, 100);
+
+            // Cập nhật bảng nhật ký luyện tập
+            const tbody = document.getElementById('p-history-body');
+            tbody.innerHTML = '';
+            
+            if(data.recent_history && data.recent_history.length > 0) {
+                data.recent_history.forEach(h => {
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px 20px; font-size: 13px; color: var(--muted);">${h.date}</td>
+                            <td style="padding: 12px 20px; font-size: 13px; font-weight: 800; color: var(--text);">${h.lesson || 'Luyện tập AI'}</td>
+                            <td style="padding: 12px 20px; text-align: right;">
+                                <span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 900;">
+                                    ${h.score} điểm
+                                </span>
+                            </td>
+                        </tr>`;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted); padding:40px;">Học viên này chưa có dữ liệu luyện tập.</td></tr>';
+            }
+        } catch(e) { 
+            console.error("Lỗi lấy tiến độ:", e);
+            alert("⚠️ Không thể kết nối API Analytics hoặc Token hết hạn."); 
+        }
+    }
+
+    // Khởi chạy khi nạp trang
+    init_progress();
+</script>

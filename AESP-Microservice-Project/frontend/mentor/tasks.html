@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/tasks.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-backdrop.show { display: flex; }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 5px; box-sizing: border-box; font-family: inherit; }
+        .form-row { margin-bottom: 15px; }
+        .modal-ft { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .badge-pending { background: #fff3e0; color: #ef6c00; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <h1 class="page-title">Quản Lý Bài Tập</h1>
+                <p class="page-subtitle">Giao các tình huống hội thoại thực tế cho học viên luyện tập.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openLocalModal()">
+                <i class="fa-solid fa-plus"></i> Tạo bài tập mới
+            </button>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tiêu đề bài tập</th>
+                        <th>Học viên</th>
+                        <th>Trạng thái</th>
+                        <th>Hạn nộp</th>
+                        <th class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="tasks-tbody">
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:40px; color: var(--muted);">
+                            <i class="fas fa-spinner fa-spin"></i> Đang nạp dữ liệu...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="createTaskModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-hd" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h3 style="margin:0;"><i class="fa-solid fa-pen-to-square"></i> Phát hành bài tập</h3>
+                <i class="fa-solid fa-xmark" onclick="closeLocalModal()" style="cursor:pointer; font-size: 20px; color: #999;"></i>
+            </div>
+            <div class="modal-bd" style="padding-top: 20px;">
+                <div class="form-row">
+                    <label style="font-weight: 700;">Tiêu đề bài tập:</label>
+                    <input type="text" id="task-title" class="form-control" placeholder="Ví dụ: Phỏng vấn xin việc tại Google">
+                </div>
+                
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-row">
+                        <label style="font-weight: 700;">Chủ đề:</label>
+                        <select id="task-topic" class="form-control">
+                            <option value="Work">Công việc</option>
+                            <option value="Travel">Du lịch</option>
+                            <option value="Daily Life">Đời sống</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label style="font-weight: 700;">Học viên mục tiêu:</label>
+                        <select id="task-learner" class="form-control">
+                            <option value="ALL">--- Tất cả học viên ---</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label style="font-weight: 700;">Mô tả yêu cầu chi tiết:</label>
+                    <textarea id="task-req" class="form-control" rows="3" placeholder="Gợi ý: Hãy sử dụng ít nhất 3 từ vựng chuyên ngành..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <label style="font-weight: 700;">Hạn hoàn thành:</label>
+                    <input type="date" id="task-deadline" class="form-control">
+                </div>
+            </div>
+            <div class="modal-ft">
+                <button class="btn btn-outline" onclick="closeLocalModal()">Hủy bỏ</button>
+                <button id="btn-submit-task" class="btn btn-primary" onclick="handleCreateTask()">
+                    <i class="fa-solid fa-paper-plane"></i> Giao bài tập
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/mentors';
+        const token = localStorage.getItem('token');
+        let learnersList = []; // Lưu trữ danh sách học viên để dùng khi giao cho "Tất cả"
+
+        function openLocalModal() { document.getElementById('createTaskModal').classList.add('show'); }
+        function closeLocalModal() { document.getElementById('createTaskModal').classList.remove('show'); }
+
+        // 1. Nạp danh sách học viên cho ô Select
+        async function loadLearnersForSelect() {
+            try {
+                const res = await fetch(`${API_BASE}/learners-list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                learnersList = await res.json();
+                const select = document.getElementById('task-learner');
+                learnersList.forEach(l => {
+                    select.innerHTML += `<option value="${l.id}">${l.full_name} (${l.email})</option>`;
+                });
+            } catch(e) { console.error("Lỗi nạp danh sách học viên:", e); }
+        }
+
+        // 2. Lấy danh sách bài tập từ Backend
+        window.init_tasks = async function() {
+            const tbody = document.getElementById('tasks-tbody');
+            try {
+                const res = await fetch(`${API_BASE}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted); font-weight:700;">📭 Hiện chưa có bài tập nào được giao.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(t => `
+                    <tr>
+                        <td><strong style="color:var(--text);">${t.title}</strong></td>
+                        <td>${t.learner_name || 'Chung'}</td>
+                        <td><span class="badge-pending">${t.status}</span></td>
+                        <td style="color:var(--muted); font-weight:600;">${t.deadline}</td>
+                        <td class="text-right">
+                            <button class="action-btn btn-delete" onclick="deleteTask('${t.id}')" style="color:#ef4444; border:none; background:none; cursor:pointer; font-size:16px;">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>`).join('');
+            } catch(e) {
+                console.error("Lỗi API:", e);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px; font-weight:900;">⚠️ Không thể kết nối tới Mentor Service.</td></tr>';
+            }
+        };
+
+        // 3. Hàm gửi bài tập (Xử lý lỗi Foreign Key "ALL")
+        async function handleCreateTask() {
+            const btn = document.getElementById('btn-submit-task');
+            const selectLearner = document.getElementById('task-learner');
+            const selectedValue = selectLearner.value;
+            
+            const basePayload = {
+                title: document.getElementById('task-title').value,
+                description: document.getElementById('task-req').value,
+                deadline: document.getElementById('task-deadline').value
+            };
+
+            if(!basePayload.title || !basePayload.deadline) return alert("Vui lòng nhập tiêu đề và chọn hạn nộp!");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+            try {
+                // Nếu chọn "Tất cả", hệ thống sẽ lặp qua danh sách học viên để tránh lỗi khóa ngoại
+                if (selectedValue === "ALL") {
+                    if (learnersList.length === 0) throw new Error("Không có học viên để giao bài.");
+                    
+                    for (let learner of learnersList) {
+                        await fetch(`${API_BASE}/tasks`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...basePayload, learner_id: learner.id, learner_name: learner.full_name })
+                        });
+                    }
+                } else {
+                    // Giao cho một người cụ thể
+                    const res = await fetch(`${API_BASE}/tasks`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            ...basePayload, 
+                            learner_id: selectedValue, 
+                            learner_name: selectLearner.options[selectLearner.selectedIndex].text 
+                        })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.error || "Lỗi server");
+                    }
+                }
+
+                alert("✅ Đã phát hành bài tập thành công!");
+                closeLocalModal();
+                init_tasks();
+            } catch (e) {
+                alert("❌ Lỗi: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Giao bài tập';
+            }
+        }
+
+        async function deleteTask(id) {
+            if(!confirm("Bạn có chắc chắn muốn xóa bài tập này?")) return;
+            alert("Tính năng xóa đang được đồng bộ với API!");
+        }
+
+        // Khởi tạo nạp dữ liệu
+        loadLearnersForSelect();
+        init_tasks();
+    </script>
+</body>
+</html>

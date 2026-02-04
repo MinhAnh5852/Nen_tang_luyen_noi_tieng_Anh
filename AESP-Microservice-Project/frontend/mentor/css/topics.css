@@ -1,0 +1,107 @@
+/* topics.css */
+
+.topics-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.topic-item-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.topic-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+    border-color: var(--primary);
+}
+
+.topic-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 1px solid #e2e8f0;
+}
+
+.topic-category-tag {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.topic-body-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.topic-body-info p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    height: 60px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.topic-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border);
+}
+
+.btn-icon-action {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-action:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: #f0f7ff;
+}
+
+.btn-icon-action.delete:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: #fef2f2;
+}

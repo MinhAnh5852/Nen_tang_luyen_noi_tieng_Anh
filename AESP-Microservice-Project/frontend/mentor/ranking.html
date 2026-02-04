@@ -1,0 +1,90 @@
+<link rel="stylesheet" href="css/ranking.css">
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 style="font-size: 24px; font-weight: 900; color: var(--text);">🏆 Bảng Xếp Hạng Học Viên</h1>
+        <p style="color: var(--muted); margin-top: 4px; font-size: 13px;">Vinh danh những nỗ lực luyện tập không ngừng nghỉ của học viên AESP.</p>
+    </div>
+    <button class="btn btn-primary" onclick="init_ranking()">
+        <i class="fa-solid fa-sync"></i> Tải lại dữ liệu
+    </button>
+</div>
+
+<div class="table-card" style="padding: 20px; border-radius: 16px; background: white;">
+    <table class="data-table">
+        <thead>
+            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                <th style="padding: 15px;">Hạng</th>
+                <th style="padding: 15px;">Học viên</th>
+                <th style="padding: 15px;">Trình độ</th>
+                <th style="padding: 15px;">Chuỗi ngày</th>
+                <th style="padding: 15px; text-align: right;">Tổng điểm</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-tbody">
+            <tr>
+                <td colspan="5" style="text-align:center; padding: 40px; color: var(--muted);">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải bảng vàng AESP...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 1. Hàm khởi tạo nạp dữ liệu xếp hạng
+    window.init_ranking = async function() {
+        const tbody = document.getElementById('leaderboard-tbody');
+        
+        try {
+            // Gọi đúng endpoint bảng xếp hạng của hệ thống
+            const res = await fetch('/api/users/leaderboard', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            
+            if (!res.ok) throw new Error("Không thể tải dữ liệu");
+            
+            const users = await res.json();
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">Chưa có học viên nào tham gia xếp hạng.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map((user) => {
+                // Xử lý icon hạng Top 3 giống Leaderboard.tsx
+                let rankDisplay = user.rank;
+                if(user.rank === 1) rankDisplay = '🥇';
+                else if(user.rank === 2) rankDisplay = '🥈';
+                else if(user.rank === 3) rankDisplay = '🥉';
+
+                // Nền vàng nhẹ cho Top 3
+                const rowStyle = user.rank <= 3 ? 'background-color: #fffbeb;' : '';
+
+                return `
+                <tr style="border-bottom: 1px solid #f9f9f9; ${rowStyle}">
+                    <td style="padding: 15px; font-weight: 900; font-size: 1.1rem;">${rankDisplay}</td>
+                    <td style="padding: 15px; font-weight: 700; color: var(--text);">${user.username}</td>
+                    <td style="padding: 15px;">
+                        <span class="badge" style="background:#e0e7ff; color:#4361ee; font-weight:700; padding:4px 12px; border-radius:99px;">
+                            ${user.level || 'A1'}
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">
+                        <i class="fas fa-fire" style="color: #ef4444; margin-right: 5px;"></i> 
+                        <strong>${user.streak || 0}</strong>
+                    </td>
+                    <td style="padding: 15px; font-weight: 900; color: #2563eb; text-align: right;">
+                        ${(user.points || 0).toLocaleString()}
+                    </td>
+                </tr>`;
+            }).join('');
+
+        } catch(e) { 
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Lỗi kết nối API Bảng xếp hạng.</td></tr>'; 
+        }
+    }
+
+    // Tự động chạy khi nạp trang
+    init_ranking();
+</script>

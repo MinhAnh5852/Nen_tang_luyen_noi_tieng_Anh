@@ -1,0 +1,100 @@
+<link rel="stylesheet" href="css/settings.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="page-header" style="margin-bottom: 24px;">
+    <h1 style="font-size: 24px; font-weight: 900; color: #1e293b;">Thiết lập Hỗ trợ Học viên (AESP)</h1>
+    <p style="color: #64748b; margin-top: 4px; font-size: 13px;">Cấu hình các thông báo và lịch trình để hỗ trợ học viên luyện nói hiệu quả nhất.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+    
+    <div class="table-card" style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+            <div style="background: rgba(234, 88, 12, 0.1); color: #ea580c; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800;">Thông báo chấm bài</h3>
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Nhận thông báo ngay khi học viên hoàn thành bài tập nói để Mentor kịp thời sửa lỗi phát âm và ngữ pháp.</p>
+        
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <input type="checkbox" id="set-remind-check" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="set-remind-check" style="font-weight: 700; cursor: pointer; font-size: 14px;">Bật thông báo đẩy (Real-time)</label>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-bottom: 5px;">Giờ nhắc nhở tổng hợp hàng ngày:</label>
+            <input type="time" id="set-remind-time" class="form-control">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; background: #ea580c; border: none;" onclick="saveSettings('reminder')">Lưu cấu hình thông báo</button>
+    </div>
+
+    <div class="table-card" style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+            <div style="background: rgba(37, 99, 235, 0.1); color: #2563eb; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800;">Lịch đánh giá trình độ</h3>
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Thiết lập khung giờ Mentor sẵn sàng để tổ chức kiểm tra trình độ (Assessment) cho học viên mới.</p>
+        
+        <select id="set-schedule" class="form-control" style="margin-bottom: 15px;">
+            <option value="Morning">Sáng (08:00 - 11:00)</option>
+            <option value="Afternoon">Chiều (14:00 - 17:00)</option>
+            <option value="Evening">Tối (19:00 - 22:00)</option>
+        </select>
+        <button class="btn btn-primary" style="width: 100%;" onclick="saveSettings('schedule')">Cập nhật lịch trống</button>
+    </div>
+</div>
+
+<script>
+    const AUTH_TOKEN = localStorage.getItem('token');
+    const USER_INFO = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const API_SETTINGS = '/api/mentors/settings';
+
+    async function init_settings() {
+        const uid = USER_INFO.id || USER_INFO.user_id;
+        if (!uid || !AUTH_TOKEN) return;
+
+        try {
+            const res = await fetch(`${API_SETTINGS}/${uid}`, {
+                headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('set-remind-check').checked = !!data.reminder_enabled;
+                document.getElementById('set-remind-time').value = data.reminder_time || '08:00';
+            }
+        } catch(e) { console.error("Lỗi nạp cấu hình"); }
+    }
+
+    async function saveSettings(type) {
+        const uid = USER_INFO.id || USER_INFO.user_id;
+        const payload = {
+            user_id: uid,
+            reminder_enabled: document.getElementById('set-remind-check').checked,
+            reminder_time: document.getElementById('set-remind-time').value,
+            schedule_pref: document.getElementById('set-schedule').value
+        };
+
+        try {
+            const res = await fetch(API_SETTINGS, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${AUTH_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert(`✅ AESP Mentor: Đã lưu thiết lập ${type === 'reminder' ? 'thông báo' : 'lịch trình'} thành công!`);
+            }
+        } catch (e) {
+            alert("❌ Lỗi kết nối server.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', init_settings);
+</script>

@@ -11,12 +11,12 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False) 
     role = db.Column(db.String(20), default="learner")
+    # Giữ default="active" cho learner, nhưng sẽ được ghi đè trong __init__ cho mentor
     status = db.Column(db.String(20), default="active")
-    user_level = db.Column(db.String(50), nullable=True)
     
     # --- CẬP NHẬT ĐỂ ĐỒNG BỘ GIAO DIỆN ---
     package_name = db.Column(db.String(50), default='Gói Miễn Phí')
-    package_id = db.Column(db.String(50), default='free-id-001') # ID dùng để React so sánh logic
+    package_id = db.Column(db.String(50), default='free-id-001') 
     
     user_level = db.Column(db.String(50), default='A1 (Beginner)')
     current_streak = db.Column(db.Integer, default=0)
@@ -25,6 +25,17 @@ class User(db.Model):
     total_learning_points = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+
+    # 🔥 HÀM QUAN TRỌNG: Tự động phân loại status khi khởi tạo
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        # Ép role về chữ thường để so sánh cho chuẩn
+        current_role = str(self.role).lower() if self.role else "learner"
+        
+        if current_role == 'mentor':
+            self.status = 'pending'
+        else:
+            self.status = 'active'
 
 class Feedback(db.Model):
     __tablename__ = 'feedbacks'
