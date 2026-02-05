@@ -21,6 +21,7 @@ interface Mentor {
 
 const Dashboard: React.FC = () => {
   const [username, setUsername] = useState("Học viên");
+  const [assessmentMsg, setAssessmentMsg] = useState<string | null>(null); // State cho thông báo bài test
   const [data, setData] = useState<ProgressData>({
     total_time: "0h 0m",
     accuracy: null,
@@ -38,13 +39,22 @@ const Dashboard: React.FC = () => {
     // 1. Lấy thông tin user từ localStorage
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
     const token = localStorage.getItem('token');
-    
-    // Đảm bảo lấy ID từ object user_info (Khớp với ảnh Application của bạn)
     const userId = userInfo.id; 
 
     if (userInfo.username) setUsername(userInfo.username);
     
-    // 2. Kiểm tra gói cước để mở khóa tính năng Mentor
+    // 2. KIỂM TRA ĐIỂM BÀI TEST (Chỉ hiện cho người vừa hoàn thành)
+    const savedScores = localStorage.getItem('assessment_scores');
+    if (savedScores) {
+      const allScores: number[] = JSON.parse(savedScores);
+      const avg = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+      setAssessmentMsg(`Chúc mừng! Bạn đã hoàn thành bài test đầu vào với điểm số trung bình là ${avg}%!`);
+      
+      // Xóa ngay để lần sau vào hoặc F5 sẽ không hiện lại nữa
+      localStorage.removeItem('assessment_scores');
+    }
+
+    // 3. Kiểm tra gói cước để mở khóa tính năng Mentor
     if (userInfo.package_id === 'pro-id-002') {
       setIsPro(true);
     }
@@ -74,7 +84,7 @@ const Dashboard: React.FC = () => {
         });
         if (resMyMentor.ok) {
           const mentorData = await resMyMentor.json();
-          setMyMentor(mentorData); // mentorData có thể là null nếu chưa chọn
+          setMyMentor(mentorData);
         }
 
       } catch (error) {
@@ -95,11 +105,6 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    if (!userId) {
-      alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
-      return;
-    }
-
     try {
       const res = await fetch('/api/users/mentors/select', {
         method: 'POST',
@@ -113,9 +118,6 @@ const Dashboard: React.FC = () => {
       if (res.ok) {
         alert("Kết nối với Cố vấn thành công!");
         window.location.reload();
-      } else {
-        const errData = await res.json();
-        alert("Lỗi: " + (errData.error || "Không thể chọn mentor"));
       }
     } catch (err) {
       alert("Đã xảy ra lỗi kết nối với máy chủ.");
@@ -124,6 +126,34 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="learner-dashboard-wrapper">
+      
+      {/* HIỂN THỊ THÔNG BÁO ĐIỂM TEST (Chỉ hiện 1 lần duy nhất) */}
+      {assessmentMsg && (
+        <div className="assessment-success-alert" style={{
+          backgroundColor: '#ecfdf5',
+          border: '1px solid #10b981',
+          color: '#064e3b',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          marginBottom: '20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <i className="fas fa-check-circle" style={{ color: '#10b981', fontSize: '20px' }}></i>
+            <span style={{ fontWeight: 600 }}>{assessmentMsg}</span>
+          </div>
+          <button 
+            onClick={() => setAssessmentMsg(null)} 
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#064e3b' }}
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       <div className="welcome-banner-aesp">
         <div className="banner-text">
           <h1>Chào mừng trở lại, {username}!</h1>

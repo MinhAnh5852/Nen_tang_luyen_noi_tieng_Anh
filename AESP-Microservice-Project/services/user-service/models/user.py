@@ -18,7 +18,7 @@ class User(db.Model):
     package_name = db.Column(db.String(50), default='Gói Miễn Phí')
     package_id = db.Column(db.String(50), default='free-id-001') 
     
-    user_level = db.Column(db.String(50), default='A1 (Beginner)')
+    user_level = db.Column(db.String(50), default='0') 
     current_streak = db.Column(db.Integer, default=0)
     last_practice_date = db.Column(db.Date, nullable=True)
     overall_accuracy = db.Column(db.Float, default=0.0)
