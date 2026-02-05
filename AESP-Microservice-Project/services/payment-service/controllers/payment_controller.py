@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.payment_service import PaymentService
 from sqlalchemy import text
 from database import db
+import requests
 
 payment_bp = Blueprint('payment_bp', __name__)
 
@@ -62,24 +63,26 @@ def create_payment():
 
 @payment_bp.route("/confirm/<int:tx_id>", methods=["POST"])
 def confirm_payment(tx_id):
-    """Xác nhận thanh toán và tự động gọi User Service nâng cấp gói"""
+    """Xác nhận thanh toán và gọi User Service nâng cấp gói"""
     payment, message = PaymentService.update_payment_status(
         payment_id=tx_id, 
         status="SUCCESS"
     )
 
-    if message == "NOT_FOUND":
-        return jsonify({"error": "Giao dịch không tồn tại"}), 404
-    
-    if message == "TERMINAL_LOCKED":
-        return jsonify({"error": "Giao dịch này đã được xử lý trước đó"}), 400
-
     if message == "UPDATED":
+        # GỌI SANG USER SERVICE ĐỂ NÂNG CẤP GÓI
+        try:
+            # Lưu ý: 'user-service' là tên container trong docker-compose
+            requests.post("http://user-service:5000/api/users/internal/upgrade-package", json={
+                "user_id": payment.user_id,
+                "package_name": payment.package_name
+            })
+        except Exception as e:
+            print(f"Lỗi gọi User Service: {e}")
+
         return jsonify({
             "message": f"Thành công! Tài khoản đã được nâng cấp lên {payment.package_name}",
-            "status": payment.status,
-            "package_id": payment.package_id,
-            "updated_at": payment.updated_at.strftime("%Y-%m-%d %H:%M:%S") if payment.updated_at else None
+            "status": payment.status
         }), 200
     
     return jsonify({"error": "Lỗi hệ thống khi xác nhận thanh toán"}), 500

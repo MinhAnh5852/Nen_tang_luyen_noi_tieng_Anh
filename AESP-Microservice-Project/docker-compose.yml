@@ -39,6 +39,8 @@ services:
   user-service:
     build: ./services/user-service
     container_name: user-service
+    ports:
+      - "5000:5000"
     environment:
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
@@ -57,6 +59,7 @@ services:
     environment:
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/payment_db?charset=utf8mb4
       - USER_SERVICE_URL=http://user-service:5000/internal/upgrade-package
+      - USER_SERVICE_URL=http://user-service:5000/api/users/internal/upgrade-package
     depends_on:
       user-db:
         condition: service_healthy
@@ -100,6 +103,8 @@ services:
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/user_db?charset=utf8mb4
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
+    volumes:
+      - ./services/mentor-management-service/static/uploads:/app/static/uploads
     depends_on:
       user-db:
         condition: service_healthy
@@ -137,6 +142,7 @@ services:
       - ./frontend-react/dist:/usr/share/nginx/html/dist:ro
       - ./frontend/admin:/usr/share/nginx/html/admin:ro
       - ./frontend/mentor:/usr/share/nginx/html/mentor:ro
+      - ./services/mentor-management-service/static/uploads:/usr/share/nginx/html/static/uploads:ro
     depends_on:
       user-service:
         condition: service_started
@@ -190,17 +196,21 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
-
+    networks:
+      - app-network
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
     environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-
+    networks:
+      - app-network
 volumes:
   user_db_data:
   nifi_conf:

@@ -1,11 +1,10 @@
--- Đảm bảo toàn bộ hệ thống dùng bảng mã tiếng Việt chuẩn utf8mb4
 SET NAMES 'utf8mb4';
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
 -- ==========================================================
--- 1. DATABASE: user_db (Dùng cho User-Service & Mentor-Service)
+-- 1. DATABASE: user_db (Dùng cho User, Mentor & Điều phối bài tập)
 -- ==========================================================
 CREATE DATABASE IF NOT EXISTS user_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE user_db;
@@ -33,22 +32,65 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT IGNORE INTO users (id, username, email, password, `role`, status, package_name, package_id) 
 VALUES ('admin-001', 'Admin Hệ Thống', 'admin@gmail.com', '123456', 'admin', 'active', 'Gói Pro AI', 'pro-id-002');
 
--- Bảng Mentors: ĐÃ SỬA ĐỂ KHỚP WORKER (Thêm username, email)
+-- Bảng Mentors: Lưu thông tin chuyên gia
 CREATE TABLE IF NOT EXISTS mentors (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) UNIQUE NOT NULL,
-    username VARCHAR(100), -- Cột mới để đồng bộ
-    email VARCHAR(100),    -- Cột mới để đồng bộ
+    username VARCHAR(100), 
+    email VARCHAR(100),    
     full_name VARCHAR(100),
     bio TEXT,
-    skills TEXT, -- Đổi từ skills_json sang skills cho dễ xử lý
+    skills TEXT, 
     status VARCHAR(20) DEFAULT 'pending',
     rating FLOAT DEFAULT 5.0,
+    max_learners INT DEFAULT 10,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Bảng learning_sessions
+-- ==========================================================
+-- BỔ SUNG: QUẢN LÝ CHỦ ĐỀ VÀ GIAO BÀI (TOPICS & ASSIGNMENTS)
+-- Đáp ứng yêu cầu: Mentor cung cấp chủ đề thực tế & gợi ý từ vựng
+-- ==========================================================
+
+-- 1. Bảng topics: Thư viện các tình huống hội thoại (Do Mentor hoặc Admin tạo)
+CREATE TABLE IF NOT EXISTS topics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mentor_id VARCHAR(100),               -- ID người tạo (NULL nếu là mặc định hệ thống)
+    topic_name VARCHAR(200) NOT NULL,
+    level VARCHAR(50),                    -- A1, A2, B1, B2...
+    description TEXT,                     -- Mô tả tình huống
+    suggested_vocabulary TEXT,            -- TỪ VỰNG GỢI Ý (AI hiển thị lên màn hình cho học viên)
+    scenario_context TEXT,                -- NGỮ CẢNH AI (Trang trọng, công sở, du lịch...)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- 2. Bảng topic_assignments: Quản lý việc Mentor giao bài cụ thể cho học viên
+CREATE TABLE IF NOT EXISTS topic_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mentor_id VARCHAR(100) NOT NULL,
+    learner_id VARCHAR(100) NOT NULL,
+    topic_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending', -- Pending (Chờ), In_Progress (Đang làm), Completed (Xong)
+    due_date DATETIME,                   -- Hạn chót
+    mentor_feedback TEXT,                -- Phản hồi riêng của Mentor sau khi học viên làm xong bài này
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Chèn dữ liệu mẫu cho Chủ đề để hệ thống có sẵn dữ liệu test
+INSERT IGNORE INTO topics (topic_name, level, description, suggested_vocabulary, scenario_context) 
+VALUES 
+('Job Interview', 'B2', 'Phỏng vấn xin việc vị trí Marketing Manager', 'Professional, candidate, experience, strengths', 'Business'),
+('Booking a Hotel', 'A2', 'Đặt phòng khách sạn qua điện thoại', 'Reservation, check-in, availability, double room', 'Travel'),
+('Daily Routine', 'A1', 'Kể về các hoạt động hàng ngày', 'Breakfast, shower, workplace, exercise', 'General');
+
+-- Các bảng bổ trợ khác
 CREATE TABLE IF NOT EXISTS learning_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     learner_id VARCHAR(100) NOT NULL,
@@ -60,7 +102,6 @@ CREATE TABLE IF NOT EXISTS learning_sessions (
     FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Bảng feedbacks
 CREATE TABLE IF NOT EXISTS feedbacks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL,
@@ -73,7 +114,6 @@ CREATE TABLE IF NOT EXISTS feedbacks (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Các bảng bổ trợ Mentor (Tasks, Submissions, Messages, Resources, Topics)
 CREATE TABLE IF NOT EXISTS tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mentor_id VARCHAR(100) DEFAULT 'Current_Mentor',
@@ -84,6 +124,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     deadline DATETIME,
     status VARCHAR(20) DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -112,28 +153,15 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE TABLE IF NOT EXISTS resources (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    mentor_id VARCHAR(100),
     title VARCHAR(200) NOT NULL,
-    link VARCHAR(500),
-    skill_type VARCHAR(50),
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS topics (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    topic_name VARCHAR(200) NOT NULL,
-    level VARCHAR(50),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS topic_assignments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    learner_id VARCHAR(100),
-    learner_name VARCHAR(100),
-    topic_name VARCHAR(200),
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE
+    link VARCHAR(500) NOT NULL,      -- Link tải file (Cloudinary/S3/Local)
+    file_type VARCHAR(20),           -- PDF, Video, Word...
+    skill_type VARCHAR(50),          -- Vocabulary, Grammar...
+    file_size VARCHAR(50),           -- Dung lượng file (VD: 2MB)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS mentor_settings (
@@ -145,6 +173,19 @@ CREATE TABLE IF NOT EXISTS mentor_settings (
     reminder_time VARCHAR(20) DEFAULT '08:00',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Bảng Mentor_Selections: Lưu vết việc Learner chọn Mentor nào để theo học
+CREATE TABLE IF NOT EXISTS mentor_selections (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    learner_id VARCHAR(100) NOT NULL,
+    mentor_id VARCHAR(100) NOT NULL,
+    status VARCHAR(20) DEFAULT 'active',
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_assignment (learner_id, mentor_id),
+    FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ==========================================================
@@ -228,8 +269,11 @@ CREATE TABLE IF NOT EXISTS practice_sessions (
     grammar_score FLOAT DEFAULT 0.0,
     vocabulary_score FLOAT DEFAULT 0.0,
     ai_feedback TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (user_id)
+    audio_url VARCHAR(500),              -- CỘT MỚI: Link để Mentor nghe lại bài nói
+    mentor_score FLOAT DEFAULT NULL,      -- CỘT MỚI: Điểm Mentor chấm
+    mentor_feedback TEXT DEFAULT NULL,   -- CỘT MỚI: Nhận xét của Mentor
+    status VARCHAR(20) DEFAULT 'Pending', -- CỘT MỚI: Trạng thái (Pending/Graded)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- ==========================================================
@@ -248,7 +292,7 @@ CREATE TABLE IF NOT EXISTS chat_histories (
 
 CREATE TABLE IF NOT EXISTS practice_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id VARCHAR(100) NOT NULL,
+    user_id VARCHAR(100) NOT NULL, 
     topic VARCHAR(100),
     duration_seconds INT DEFAULT 0,
     accuracy_score FLOAT DEFAULT 0.0,

@@ -1,100 +1,133 @@
+<link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/submissions.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-    <div>
-        <h1 class="page-title">Chấm Điểm Bài Nói</h1>
-        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">Đánh giá chi tiết các bài thực hành hội thoại AI của học viên.</p>
+<style>
+    body, html { height: auto; overflow-y: auto; background: #f8fafc; }
+    .page-container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    
+    .learner-group-card {
+        background: white; border-radius: 20px; border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 30px;
+        overflow: hidden; transition: 0.3s;
+    }
+    .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .status-graded { background: #dcfce7; color: #15803d; }
+    .status-waiting { background: #fef3c7; color: #92400e; }
+</style>
+
+<div class="page-container">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <div>
+            <h1 style="font-size: 24px; font-weight: 900; color: #1e293b;">Chấm Điểm Bài Nói</h1>
+            <p style="color: #64748b; font-size: 14px;">Xem transcript và nghe âm thanh để đánh giá học viên.</p>
+        </div>
+        <button class="btn btn-primary" onclick="init_submissions()">
+            <i class="fa-solid fa-sync"></i> Làm mới
+        </button>
     </div>
-    <button class="btn btn-primary" onclick="init_submissions()">
-        <i class="fa-solid fa-sync"></i> Làm mới danh sách
-    </button>
-</div>
 
-<div class="table-card">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Học viên</th>
-                <th>Chủ đề bài tập</th>
-                <th>Ngày nộp</th>
-                <th>Trạng thái</th>
-                <th style="text-align:right">Hành động</th>
-            </tr>
-        </thead>
-        <tbody id="sub-tbody">
-            <tr><td colspan="5" style="text-align:center; padding:40px; color: var(--muted);">
-                <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách bài nộp...
-            </td></tr>
-        </tbody>
-    </table>
+    <div id="submissions-list">
+        </div>
 </div>
 
 <script>
-    // 1. Hàm khởi tạo nạp dữ liệu bài nộp
-    window.init_submissions = async function() {
-        const tbody = document.getElementById('sub-tbody');
-        const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const mentorId = userInfo.id || userInfo.user_id;
 
+    let currentSubmissionsData = [];
+
+    window.init_submissions = async function() {
+        const container = document.getElementById('submissions-list');
         try {
-            // Giả lập lấy dữ liệu từ endpoint nộp bài của học viên
-            const res = await fetch('/api/ai/history/all', {
+            const res = await fetch(`/api/ai/submissions/for-mentor/${mentorId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await res.json();
+            const rawData = await res.json();
+            currentSubmissionsData = rawData;
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">📭 Hiện chưa có bài tập nào cần chấm.</td></tr>';
+            if (!rawData || rawData.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:50px;">📭 Chưa có bài nộp nào.</div>`;
                 return;
             }
 
-            tbody.innerHTML = data.map(s => {
-                // Xác định badge trạng thái
-                const isGraded = s.mentor_feedback !== undefined;
-                const statusBadge = isGraded 
-                    ? '<span class="status-badge status-active">Đã chấm</span>' 
-                    : '<span class="status-badge status-pending">Chờ chấm</span>';
+            const groupedData = rawData.reduce((groups, item, index) => {
+                const name = item.username || 'Học viên';
+                if (!groups[name]) groups[name] = [];
+                item.originalIndex = index;
+                groups[name].push(item);
+                return groups;
+            }, {});
 
-                return `
-                <tr>
-                    <td>
-                        <div class="user-info">
-                            <div class="avatar-circle avatar-orange" style="width:32px; height:32px; border-radius:10px; font-size:12px;">
-                                ${(s.username || 'H').substring(0,1).toUpperCase()}
-                            </div>
-                            <div class="user-text">
-                                <h4 style="margin:0; font-size:13px;">${s.username || 'Học viên'}</h4>
-                            </div>
-                        </div>
-                    </td>
-                    <td><strong style="color:var(--text-main); font-size:13px;">${s.topic || 'Hội thoại tự do'}</strong></td>
-                    <td style="color:var(--text-light); font-size:12px;">${s.date || 'Vừa xong'}</td>
-                    <td>${statusBadge}</td>
-                    <td style="text-align:right">
-                        <button class="btn-grade-action" onclick="openGradingModal('${s.id}', '${s.audio_url || ''}', '${s.text || ''}')">
-                            <i class="fa-solid fa-pen-nib"></i> ${isGraded ? 'Sửa điểm' : 'Chấm ngay'}
-                        </button>
-                    </td>
-                </tr>`;
-            }).join('');
-        } catch(e) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">⚠️ Lỗi kết nối hệ thống bài tập.</td></tr>';
-        }
+            let html = '';
+            for (const [learnerName, submissions] of Object.entries(groupedData)) {
+                html += `
+                <div class="learner-group-card">
+                    <div class="learner-header" style="padding:15px 25px; background:#f8fafc; display:flex; justify-content:space-between; border-bottom:1px solid #eee;">
+                        <strong style="font-size:16px;">${learnerName}</strong>
+                        <span>${submissions.length} bài tập</span>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:#fcfcfd; font-size:12px; color:#94a3b8; text-transform:uppercase;">
+                                <th style="padding:12px 25px; text-align:left;">Chủ đề</th>
+                                <th style="padding:12px 25px; text-align:left;">Trạng thái</th>
+                                <th style="padding:12px 25px; text-align:right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${submissions.map(s => {
+                                const isGraded = s.mentor_feedback !== null && s.status === 'Graded';
+                                return `
+                                <tr style="border-top:1px solid #f1f5f9;">
+                                    <td style="padding:12px 25px;"><strong>${s.topic || 'Hội thoại'}</strong></td>
+                                    <td style="padding:12px 25px;">
+                                        <span class="status-pill ${isGraded ? 'status-graded' : 'status-waiting'}">
+                                            ${isGraded ? 'Đã chấm' : 'Chờ chấm'}
+                                        </span>
+                                    </td>
+                                    <td style="padding:12px 25px; text-align:right;">
+                                        <button class="btn-action-sm" onclick="openGradingModal(${s.originalIndex})" style="background:#2563eb; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
+                                            Chấm ngay
+                                        </button>
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+            container.innerHTML = html;
+        } catch(e) { container.innerHTML = "Lỗi nạp dữ liệu."; }
     };
 
-    // 2. Mở Modal chấm điểm từ trang cha và truyền dữ liệu
-    window.openGradingModal = function(id, audioUrl, transcript) {
-        // Gắn thông tin bài nộp vào Modal trong mentor.html
-        const modal = window.parent.document.getElementById('gradingModal');
-        const audio = window.parent.document.getElementById('audio-player');
+    window.openGradingModal = function(index) {
+        const data = currentSubmissionsData[index];
+        const parentDoc = window.parent.document;
         
-        if (audioUrl) audio.src = audioUrl;
+        // Gán Transcript (Đây là phần bạn chưa thấy nút xem - nó sẽ hiện ngay trong Modal)
+        const transcriptDisplay = parentDoc.getElementById('display-transcript');
+        if (transcriptDisplay) {
+            // Hiển thị AI feedback hoặc nội dung bài học viên
+            transcriptDisplay.innerText = data.ai_feedback || data.transcript || "Không có nội dung văn bản.";
+        }
+
+        // Gán Audio
+        const audioPlayer = parentDoc.getElementById('audio-player');
+        if (audioPlayer) {
+            audioPlayer.src = data.audio_url || "";
+            audioPlayer.load();
+        }
         
-        // Lưu ID hiện tại để submit
-        window.parent.currentSubmissionId = id;
+        // Lưu ID cho trang cha
+        window.parent.currentSubmissionId = data.id;
+        window.parent.currentLearnerId = data.user_id;
+        window.parent.currentTopic = data.topic;
         
+        // Gọi lệnh mở Modal ở trang cha
         window.parent.openModal('gradingModal');
     };
 
-    // Tự động chạy khi nạp trang
     init_submissions();
 </script>

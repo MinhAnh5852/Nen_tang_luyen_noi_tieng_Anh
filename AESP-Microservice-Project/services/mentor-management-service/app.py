@@ -11,7 +11,8 @@ from mq_worker import start_worker  # ✅ Import worker để chạy ngầm
 load_dotenv()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static', static_folder='static')
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
     # --- CẤU HÌNH CORS ---
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

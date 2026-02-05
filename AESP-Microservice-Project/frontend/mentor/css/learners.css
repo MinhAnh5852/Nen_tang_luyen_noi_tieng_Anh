@@ -1,10 +1,22 @@
 /* frontend/mentor/css/learners.css */
 
 /* =========================================
-   1. LAYOUT & ANIMATION
+   1. BIẾN MÀU SẮC & CẤU HÌNH CHUNG
    ========================================= */
+:root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --white: #ffffff;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+}
+
 .page-container {
-    padding: 32px;
+    padding: 30px;
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeInPage 0.4s ease-out;
@@ -15,54 +27,54 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================================
+   2. HEADER & FILTER BAR
+   ========================================= */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 
 .page-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 26px;
+    font-weight: 900;
     color: var(--text-main);
     letter-spacing: -0.5px;
 }
 
-/* =========================================
-   2. FILTER BAR (Tinh chỉnh mềm mại hơn)
-   ========================================= */
 .filter-bar {
     background: var(--white);
-    padding: 16px 20px;
+    padding: 16px 24px;
     border-radius: 16px;
     border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
-.search-wrapper { position: relative; flex: 1; max-width: 400px; }
+.search-wrapper { position: relative; flex: 1; max-width: 450px; }
 
 .search-icon {
     position: absolute;
-    left: 14px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-light);
-    font-size: 14px;
+    color: var(--text-muted);
 }
 
 .form-input {
     width: 100%;
-    padding: 10px 16px 10px 42px;
-    border: 1px solid var(--border-color);
+    padding: 12px 16px 12px 45px;
+    border: 1.5px solid var(--border-color);
     border-radius: 12px;
     outline: none;
     font-size: 14px;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    transition: all 0.2s;
     background-color: #f8fafc;
 }
 
@@ -73,20 +85,19 @@
 }
 
 /* =========================================
-   3. TABLE CARD & DATA (Nâng cấp UI)
+   3. TABLE DATA UI
    ========================================= */
 .table-card {
     background: var(--white);
     border-radius: 20px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow);
     overflow: hidden;
 }
 
 table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
 }
 
 th {
@@ -95,78 +106,112 @@ th {
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    color: #64748b;
+    color: var(--text-muted);
     border-bottom: 1px solid var(--border-color);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    text-align: left;
 }
 
 td {
-    padding: 16px 24px;
+    padding: 20px 24px;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
-    transition: background 0.2s;
 }
 
+tr:last-child td { border-bottom: none; }
+
 tr:hover td {
-    background-color: #f8fafc;
+    background-color: #fcfdfe;
 }
 
 /* =========================================
-   4. USER INFO & COMPONENTS
+   4. USER INFO & AVATAR
    ========================================= */
 .user-info { display: flex; align-items: center; gap: 14px; }
 
 .avatar-circle {
-    width: 42px; height: 42px;
-    border-radius: 12px; /* Chuyển sang bo góc vuông (Squircle) cho hiện đại */
+    width: 44px; height: 44px;
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     font-weight: 800;
-    font-size: 15px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-}
-
-.avatar-blue { 
+    font-size: 16px;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white; 
+    color: white;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
-.user-text h4 { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
-.user-text span { font-size: 12px; color: var(--text-light); font-weight: 500; }
+.user-text h4 { 
+    margin: 0 0 2px 0; 
+    font-size: 15px; 
+    font-weight: 700; 
+    color: var(--text-main); 
+}
 
-/* Badge Level (Cách điệu Mentor) */
-.badge-level {
+.user-text span { 
+    font-size: 12px; 
+    color: var(--text-muted); 
+    font-weight: 500; 
+}
+
+/* =========================================
+   5. BADGES (Đẹp & Hiện đại)
+   ========================================= */
+.badge {
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    background: rgba(124, 58, 237, 0.08);
-    color: #7c3aed;
-    border: 1px solid rgba(124, 58, 237, 0.15);
+    display: inline-block;
 }
 
-/* Action Button: Chấm điểm */
-.btn-grade {
-    background: white;
-    color: var(--primary);
-    border: 1px solid var(--primary);
-    padding: 8px 16px;
+/* Badge Trình độ */
+.badge-level {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+}
+
+/* Badge Trạng thái */
+.badge-success {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
+}
+
+/* =========================================
+   6. BUTTONS
+   ========================================= */
+.btn {
+    padding: 10px 18px;
     border-radius: 10px;
     font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
     transition: all 0.2s;
+    border: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-.btn-grade:hover {
+.btn-primary {
     background: var(--primary);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-/* Spinner quay đều */
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25);
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+}
+
+/* Animation cho icon reload */
 .fa-spin-custom {
     animation: fa-spin 1s infinite linear;
 }
@@ -174,4 +219,11 @@ tr:hover td {
 @keyframes fa-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-container { padding: 15px; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .search-wrapper { max-width: 100%; }
 }

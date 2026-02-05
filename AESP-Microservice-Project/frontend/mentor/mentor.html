@@ -4,13 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AESP Mentor System • Professional</title>
-    <link rel="stylesheet" href="css/main.css">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
     <style>
+        /* Tối ưu Layout SPA */
         .full-iframe { width: 100%; height: 100%; border: none; display: block; background: #f6f8fc; }
         .main-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #content-area { flex: 1; width: 100%; }
+        #content-area { flex: 1; width: 100%; overflow: hidden; position: relative; }
+
+        /* MODAL CHẤM ĐIỂM CAO CẤP (BLUR EFFECT) */
+        .modal-backdrop { 
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); 
+            display: none; align-items: center; justify-content: center; z-index: 9999; 
+            backdrop-filter: blur(8px);
+        }
+        .modal { 
+            background: white; width: 650px; max-width: 95%; border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-hd { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .modal-hd h3 { margin: 0; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+        
+        .modal-bd { padding: 24px; max-height: 75vh; overflow-y: auto; }
+        .modal-ft { padding: 16px 24px; background: #f8fafc; text-align: right; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 12px; }
+
+        /* Vùng hiển thị Transcript */
+        .transcript-container { 
+            background: #f0f9ff; padding: 20px; border-radius: 16px; 
+            border-left: 6px solid #0284c7; margin-bottom: 24px; 
+        }
+        .transcript-container label { font-weight: 900; font-size: 11px; color: #0369a1; text-transform: uppercase; display: block; margin-bottom: 8px; }
+        
+        .form-row { margin-bottom: 20px; }
+        .form-row label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13px; color: #475569; }
+        .form-control { 
+            width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; 
+            border-radius: 12px; font-family: inherit; transition: 0.2s;
+        }
+        .form-control:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
     </style>
 </head>
 <body>
@@ -35,11 +72,7 @@
                     <li><a href="feedback.html" target="content-frame" class="nav-link"><i class="fa-solid fa-comment-dots"></i> Phản hồi AI</a></li>
                     
                     <li class="nav-label">CÁ NHÂN</li>
-                    <li>
-                        <a href="profile-edit.html" target="content-frame" class="nav-link">
-                            <i class="fa-solid fa-user-pen"></i> Hồ sơ Chuyên gia
-                        </a>
-                    </li>
+                    <li><a href="profile-edit.html" target="content-frame" class="nav-link"><i class="fa-solid fa-user-pen"></i> Hồ sơ Chuyên gia</a></li>
                     
                     <li class="nav-label">HỆ THỐNG</li>
                     <li><a href="settings.html" target="content-frame" class="nav-link"><i class="fa-solid fa-gears"></i> Cài đặt</a></li>
@@ -63,15 +96,55 @@
                     </div>
                 </div>
             </header>
+            
             <div id="content-area">
                 <iframe name="content-frame" src="learners.html" class="full-iframe" id="main-iframe"></iframe>
             </div>
         </main>
     </div>
 
+    <div id="gradingModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-hd">
+                <h3><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Chấm điểm bài thực hành</h3>
+                <i class="fa-solid fa-xmark" onclick="closeModal('gradingModal')" style="cursor:pointer"></i>
+            </div>
+            <div class="modal-bd">
+                <div class="transcript-container">
+                    <label>Nội dung học viên nói (Transcript):</label>
+                    <p id="display-transcript" style="margin:0; font-style:italic; line-height:1.6; color:#1e293b; font-size:15px; white-space: pre-wrap;">Đang tải dữ liệu...</p>
+                </div>
+
+                <div class="form-row">
+                    <label>Nghe lại bài nói:</label>
+                    <audio id="audio-player" controls style="width:100%"></audio>
+                </div>
+
+                <div class="form-row">
+                    <label>Điểm số Mentor (0-100):</label>
+                    <input type="number" id="grade-score" class="form-control" placeholder="Nhập điểm số...">
+                </div>
+
+                <div class="form-row">
+                    <label>Nhận xét chuyên môn:</label>
+                    <textarea id="grade-comment" class="form-control" rows="4" placeholder="Góp ý chi tiết cho học viên..."></textarea>
+                </div>
+            </div>
+            <div class="modal-ft">
+                <button class="btn btn-outline" onclick="closeModal('gradingModal')">Hủy bỏ</button>
+                <button class="btn btn-primary" onclick="submitMentorGrade()">Lưu & Gửi kết quả</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const AUTH_TOKEN = localStorage.getItem('token');
         const API_BASE = '/api/mentors';
+
+        // BIẾN TOÀN CỤC NHẬN DỮ LIỆU TỪ SUBMISSIONS.HTML GỬI LÊN
+        window.currentSubmissionId = null;
+        window.currentLearnerId = null;
+        window.currentTopic = '';
 
         // 1. Quản lý Sidebar Active
         const navLinks = document.querySelectorAll('.nav-link');
@@ -82,37 +155,82 @@
             });
         });
 
-        // 2. Tải thông tin Profile để hiển thị tên trên Topbar
+        // 2. Đồng bộ Modal (Mở/Đóng)
+        window.openModal = function(id) {
+            document.getElementById(id).style.display = 'flex';
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).style.display = 'none';
+            document.getElementById('audio-player').pause();
+        };
+
+        // 3. API GỬI ĐIỂM CHẤM VỀ SERVER
+        async function submitMentorGrade() {
+            const score = document.getElementById('grade-score').value;
+            const comment = document.getElementById('grade-comment').value;
+
+            if(!score) return alert("Vui lòng nhập điểm số!");
+
+            const payload = {
+                learner_id: window.currentLearnerId,
+                submission_id: window.currentSubmissionId,
+                topic: window.currentTopic,
+                score: score,
+                comment: comment
+            };
+
+            try {
+                const res = await fetch('/api/users/mentors/submissions/grade', {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${AUTH_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("✅ Đã lưu kết quả thành công!");
+                    closeModal('gradingModal');
+                    
+                    // Reset form
+                    document.getElementById('grade-score').value = '';
+                    document.getElementById('grade-comment').value = '';
+
+                    // Load lại danh sách trong iframe
+                    const iframe = document.getElementById('main-iframe');
+                    if(iframe.contentWindow.init_submissions) {
+                        iframe.contentWindow.init_submissions();
+                    }
+                }
+            } catch (e) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
+
+        // 4. Tải thông tin Profile Topbar
         async function fetchTopbarInfo() {
             const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
             const uid = userInfo.id || userInfo.user_id;
-
             try {
                 const res = await fetch(`${API_BASE}/mentor-profile/${uid}`, {
                     headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
                 });
                 const data = await res.json();
-
                 if (res.ok) {
                     const finalName = data.full_name || userInfo.username || 'Mentor';
                     document.getElementById('display-name').innerText = finalName;
                     document.getElementById('display-avatar').innerText = finalName.charAt(0).toUpperCase();
-                    
-                    // Cập nhật lại cache để đảm bảo tên mới nhất
-                    userInfo.username = finalName;
-                    localStorage.setItem('user_info', JSON.stringify(userInfo));
                 }
             } catch (e) {
-                console.error("Lỗi đồng bộ Topbar:", e);
-                // Nếu lỗi thì hiện tên từ localStorage tạm thời
                 document.getElementById('display-name').innerText = userInfo.username || 'Mentor';
             }
         }
 
-        // 3. Click vào Avatar thì nạp trang hồ sơ vào iframe
+        // 5. Avatar click nạp Profile
         document.getElementById('profile-trigger').onclick = () => {
             document.getElementById('main-iframe').src = 'profile-edit.html';
-            // Bỏ active các menu khác
             navLinks.forEach(l => l.classList.remove('active'));
         };
 

@@ -3,198 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/resources.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/resources.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Đảm bảo Modal hiển thị đúng trên iframe */
-        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        /* CSS bổ sung để Modal hoạt động mượt */
+        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-backdrop.show { display: flex; }
-        .modal { background: white; padding: 25px; border-radius: 15px; width: 500px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .form-control { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; margin-top: 5px; box-sizing: border-box; font-family: inherit; }
-        .form-row { margin-bottom: 15px; }
-        .modal-ft { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal { background: white; padding: 30px; border-radius: 20px; width: 500px; max-width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid #e2e8f0; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 6px; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
+        .form-control:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .form-row { margin-bottom: 18px; }
+        .modal-ft { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
+        .btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-primary:hover { background: #4338ca; transform: scale(1.02); }
+        .btn-outline { background: #f1f5f9; color: #475569; }
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div class="page-container" style="padding: 30px;">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
             <div>
-                <h1 class="page-title">Kho Tài Liệu Chuyên Môn</h1>
-                <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">Cung cấp tài liệu bổ trợ cho học viên để cải thiện kỹ năng nói.</p>
+                <h1 style="font-size: 28px; font-weight: 900; color: #1e293b; margin: 0;">Kho Tài Liệu Chuyên Môn</h1>
+                <p style="color: #64748b; font-size: 14px; margin-top: 6px;">Quản lý và chia sẻ giáo trình thực tế cho học viên của bạn.</p>
             </div>
             <button class="btn btn-primary" onclick="openResourceModal()">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải tài liệu lên
             </button>
         </div>
 
-        <div class="filter-bar" style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); display: flex; gap: 15px;">
-            <div class="search-wrapper" style="flex: 1; position: relative;">
-                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                <input type="text" id="resourceSearch" onkeyup="filterResources()" placeholder="Tìm kiếm giáo trình, bài tập..." class="form-control" style="padding-left: 35px; margin: 0;">
+        <div class="filter-bar" style="background: white; padding: 18px; border-radius: 16px; margin-bottom: 30px; border: 1px solid #e2e8f0; display: flex; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div style="flex: 1; position: relative;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="resourceSearch" onkeyup="filterResources()" placeholder="Tìm kiếm tài liệu theo tên..." class="form-control" style="margin: 0; padding-left: 45px;">
             </div>
-            <select id="filterType" class="form-control" style="width: 200px; margin: 0;" onchange="filterResources()">
-                <option value="">Tất cả định dạng</option>
-                <option value="PDF">Tệp PDF</option>
-                <option value="Video">Video bài giảng</option>
-                <option value="Link">Liên kết ngoài</option>
+            <select id="filterType" class="form-control" style="width: 220px; margin: 0;" onchange="filterResources()">
+                <option value="">Tất cả kỹ năng</option>
+                <option value="Vocabulary">Từ vựng</option>
+                <option value="Grammar">Ngữ pháp</option>
+                <option value="Speaking">Luyện nói</option>
+                <option value="Pronunciation">Phát âm</option>
             </select>
         </div>
 
-        <div id="resources-grid" class="resources-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--muted);">
-                <i class="fas fa-spinner fa-spin"></i> Đang tải kho tài liệu...
+        <div id="resources-grid" class="resources-grid-container">
+            <div style="grid-column: 1/-1; text-align: center; padding: 100px; color: #94a3b8;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p style="margin-top: 15px; font-weight: 600;">Đang nạp kho tài liệu...</p>
             </div>
         </div>
     </div>
 
     <div class="modal-backdrop" id="resourceModal">
         <div class="modal">
-            <div class="modal-hd" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                <h3 style="margin:0;"><i class="fa-solid fa-file-circle-plus"></i> Thêm tài liệu mới</h3>
-                <i class="fa-solid fa-xmark" onclick="closeResourceModal()" style="cursor:pointer; color: #94a3b8;"></i>
+            <div class="modal-hd" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;">
+                <h3 style="margin:0; font-size: 20px; font-weight: 800; color: #1e293b;">
+                    <i class="fa-solid fa-file-circle-plus" style="color: #4f46e5; margin-right: 10px;"></i>Thêm tài liệu mới
+                </h3>
+                <i class="fa-solid fa-xmark" onclick="closeResourceModal()" style="cursor:pointer; font-size: 20px; color: #94a3b8;"></i>
             </div>
             <div class="modal-bd" style="padding-top: 20px;">
                 <div class="form-row">
-                    <label style="font-weight: 700;">Tên tài liệu:</label>
-                    <input type="text" id="res-title" class="form-control" placeholder="VD: 100 Collocations thông dụng">
+                    <label style="font-weight: 700; color: #475569;">Tiêu đề hiển thị:</label>
+                    <input type="text" id="res-title" class="form-control" placeholder="VD: 50 Idioms thông dụng trong IELTS">
                 </div>
+                
                 <div class="form-row">
-                    <label style="font-weight: 700;">Loại tài liệu:</label>
-                    <select id="res-type" class="form-control">
-                        <option value="PDF">Tệp PDF (Tài liệu đọc)</option>
-                        <option value="Video">Video (Luyện nghe/phát âm)</option>
-                        <option value="Link">Liên kết ngoài (Websites)</option>
+                    <label style="font-weight: 700; color: #475569;">Chọn tệp từ máy tính:</label>
+                    <input type="file" id="res-file-input" class="form-control" accept=".pdf,.mp4,.png,.jpg,.doc,.docx">
+                    <small style="color: #94a3b8; display: block; margin-top: 5px;">Hỗ trợ: PDF, Video, Word, Hình ảnh...</small>
+                </div>
+
+                <div class="form-row">
+                    <label style="font-weight: 700; color: #475569;">Kỹ năng hỗ trợ:</label>
+                    <select id="res-skill" class="form-control">
+                        <option value="Vocabulary">Từ vựng (Vocabulary)</option>
+                        <option value="Grammar">Ngữ pháp (Grammar)</option>
+                        <option value="Speaking">Luyện nói (Speaking)</option>
+                        <option value="Pronunciation">Phát âm (Pronunciation)</option>
                     </select>
                 </div>
                 <div class="form-row">
-                    <label style="font-weight: 700;">Mô tả ngắn:</label>
-                    <textarea id="res-desc" class="form-control" rows="2" placeholder="Gợi ý cách sử dụng tài liệu này..."></textarea>
-                </div>
-                <div class="form-row">
-                    <label style="font-weight: 700;">Đường dẫn (URL):</label>
-                    <input type="text" id="res-url" class="form-control" placeholder="https://example.com/file.pdf">
+                    <label style="font-weight: 700; color: #475569;">Ghi chú ngắn:</label>
+                    <textarea id="res-desc" class="form-control" rows="2" placeholder="VD: Tài liệu dành cho trình độ B1..."></textarea>
                 </div>
             </div>
             <div class="modal-ft">
                 <button class="btn btn-outline" onclick="closeResourceModal()">Hủy</button>
-                <button id="btn-save-res" class="btn btn-primary" onclick="handleUploadResource()">Lưu vào kho</button>
+                <button id="btn-save-res" class="btn btn-primary" onclick="handleUploadResource()">Bắt đầu tải lên</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_BASE = '/api/mentors';
+        const API_BASE = '/api/mentors'; 
         const token = localStorage.getItem('token');
 
-        // Hàm ẩn hiện Modal nội bộ
         function openResourceModal() { document.getElementById('resourceModal').classList.add('show'); }
         function closeResourceModal() { document.getElementById('resourceModal').classList.remove('show'); }
 
-        // 1. Hàm nạp dữ liệu từ Backend
+        // 1. NẠP DỮ LIỆU
         window.init_resources = async function() {
             const grid = document.getElementById('resources-grid');
             try {
-                // Sử dụng đúng API Mentor Service
                 const res = await fetch(`${API_BASE}/resources`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                if (!res.ok) throw new Error("API Error: " + res.status);
                 const data = await res.json();
-
+                
                 if (!data || data.length === 0) {
-                    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; font-weight:700; color:var(--muted);">📭 Kho tài liệu hiện đang trống.</div>';
+                    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8; font-weight:700;">📭 Hiện chưa có tài liệu nào.</div>';
                     return;
                 }
 
                 grid.innerHTML = data.map(item => {
                     let icon = 'fa-file-pdf';
-                    let color = '#ef4444';
-                    const type = item.skill_type || 'PDF';
-                    if(type === 'Video') { icon = 'fa-circle-play'; color = '#3b82f6'; }
-                    if(type === 'Link') { icon = 'fa-link'; color = '#10b981'; }
+                    let typeClass = 'type-pdf';
+                    const type = (item.file_type || 'PDF').toUpperCase();
+
+                    if(type === 'VIDEO' || type === 'MP4') { icon = 'fa-circle-play'; typeClass = 'type-video'; }
+                    else if(['JPG', 'PNG', 'JPEG'].includes(type)) { icon = 'fa-file-image'; typeClass = 'type-image'; }
 
                     return `
-                    <div class="resource-card" data-type="${type}" style="background:white; padding:20px; border-radius:15px; border:1px solid var(--border); display:flex; gap:15px; transition:0.3s;">
-                        <div class="resource-icon" style="color: ${color}; font-size: 24px; background: #f8fafc; width: 50px; height: 50px; border-radius: 10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                            <i class="fa-solid ${icon}"></i>
-                        </div>
-                        <div class="resource-info" style="flex:1;">
-                            <h4 style="margin:0 0 5px 0; font-size:15px; font-weight:800; color: var(--text-main);">${item.title}</h4>
-                            <p style="font-size:12px; color:var(--muted); margin-bottom:12px; height: 36px; overflow: hidden;">${item.description || 'Tài liệu hỗ trợ luyện nói.'}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:10px; font-weight:900; background:#f1f5f9; color: #475569; padding:2px 8px; border-radius:4px;">${type.toUpperCase()}</span>
-                                <a href="${item.link}" target="_blank" style="color:var(--primary); font-size:12px; font-weight:700; text-decoration:none;">Xem tài liệu <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <div class="resource-card" data-skill="${item.skill_type}">
+                        <div class="resource-header">
+                            <div class="resource-icon ${typeClass}">
+                                <i class="fa-solid ${icon}"></i>
                             </div>
+                            <div class="resource-info">
+                                <h4>${item.title}</h4>
+                                <p>${item.description || 'Tài liệu hỗ trợ học viên.'}</p>
+                            </div>
+                        </div>
+                        <div class="resource-meta">
+                            <span class="res-tag">${item.skill_type}</span>
+                            <a href="${item.link}" target="_blank" class="btn-view">
+                                Tải về <i class="fa-solid fa-download"></i>
+                            </a>
                         </div>
                     </div>`;
                 }).join('');
-            } catch(e) {
-                console.error("Lỗi:", e);
-                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:red; padding:40px; font-weight:900;">⚠️ Không thể kết nối tới máy chủ tài liệu (404).</div>';
-            }
+            } catch(e) { grid.innerHTML = '<p style="color:red; text-align:center;">Lỗi kết nối Server 5002.</p>'; }
         };
 
-        // 2. Xử lý thêm tài liệu mới
+        // 2. GỬI FILE VẬT LÝ (FORMDATA)
         async function handleUploadResource() {
             const btn = document.getElementById('btn-save-res');
-            const payload = {
-                title: document.getElementById('res-title').value,
-                skill_type: document.getElementById('res-type').value,
-                description: document.getElementById('res-desc').value,
-                link: document.getElementById('res-url').value // Sửa: Gửi trường 'link' thay vì 'url' để khớp Backend
-            };
+            const fileInput = document.getElementById('res-file-input');
+            const title = document.getElementById('res-title').value;
+            const skill = document.getElementById('res-skill').value;
+            const desc = document.getElementById('res-desc').value;
 
-            if(!payload.title || !payload.link) return alert("Vui lòng nhập tên và đường dẫn tài liệu!");
+            if(!fileInput.files[0] || !title) return alert("Bảo ơi, nhập tên và chọn file giúp mình nhé!");
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('title', title);
+            formData.append('skill_type', skill);
+            formData.append('description', desc);
+            formData.append('mentor_id', localStorage.getItem('user_id') || 'admin-001');
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
 
             try {
-                const res = await fetch(`${API_BASE}/resources`, {
+                const res = await fetch(`${API_BASE}/resources/upload`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
 
                 if (res.ok) {
-                    alert("✅ Đã thêm tài liệu thành công!");
+                    alert("✅ Tải lên kho thành công!");
                     closeResourceModal();
                     init_resources();
-                    // Reset form
+                    // Reset
                     document.getElementById('res-title').value = '';
-                    document.getElementById('res-url').value = '';
                     document.getElementById('res-desc').value = '';
+                    fileInput.value = '';
                 } else {
-                    alert("❌ Lỗi: Không thể lưu tài liệu. Kiểm tra quyền hạn Mentor.");
+                    alert("❌ Lỗi: Server không nhận được file.");
                 }
-            } catch (e) {
-                alert("❌ Lỗi kết nối hệ thống. Vui lòng thử lại sau.");
-            } finally {
+            } catch (e) { alert("❌ Lỗi kết nối hệ thống."); }
+            finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Lưu vào kho';
+                btn.innerHTML = 'Bắt đầu tải lên';
             }
         }
 
-        // 3. Hàm lọc tài liệu
+        // 3. BỘ LỌC
         function filterResources() {
             const key = document.getElementById('resourceSearch').value.toLowerCase();
-            const type = document.getElementById('filterType').value;
-            const cards = document.querySelectorAll('.resource-card');
-            
-            cards.forEach(c => {
-                const title = c.querySelector('h4').innerText.toLowerCase();
-                const cardType = c.getAttribute('data-type');
-                const matchKey = title.includes(key);
-                const matchType = type === "" || cardType === type;
-                c.style.display = (matchKey && matchType) ? 'flex' : 'none';
+            const skill = document.getElementById('filterType').value;
+            document.querySelectorAll('.resource-card').forEach(c => {
+                const matchKey = c.querySelector('h4').innerText.toLowerCase().includes(key);
+                const matchSkill = skill === "" || c.getAttribute('data-skill') === skill;
+                c.style.display = (matchKey && matchSkill) ? 'block' : 'none';
             });
         }
 
-        // Tự động nạp dữ liệu khi vào trang
         init_resources();
     </script>
 </body>

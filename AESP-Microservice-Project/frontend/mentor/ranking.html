@@ -1,29 +1,33 @@
 <link rel="stylesheet" href="css/ranking.css">
-<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
     <div>
-        <h1 style="font-size: 24px; font-weight: 900; color: var(--text);">🏆 Bảng Xếp Hạng Học Viên</h1>
-        <p style="color: var(--muted); margin-top: 4px; font-size: 13px;">Vinh danh những nỗ lực luyện tập không ngừng nghỉ của học viên AESP.</p>
+        <h1 style="font-size: 28px; font-weight: 900; color: #1e293b; margin: 0;">🏆 Bảng Vàng AESP</h1>
+        <p style="color: #64748b; margin-top: 6px; font-size: 14px;">Vinh danh những học viên chăm chỉ và có thành tích xuất sắc nhất.</p>
     </div>
-    <button class="btn btn-primary" onclick="init_ranking()">
+    <button class="btn btn-primary" onclick="init_ranking()" style="padding: 12px 20px; border-radius: 12px; font-weight: 700; background: #4f46e5; color: white; border: none; cursor: pointer;">
         <i class="fa-solid fa-sync"></i> Tải lại dữ liệu
     </button>
 </div>
 
-<div class="table-card" style="padding: 20px; border-radius: 16px; background: white;">
+
+
+<div class="table-card">
     <table class="data-table">
         <thead>
-            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
-                <th style="padding: 15px;">Hạng</th>
-                <th style="padding: 15px;">Học viên</th>
-                <th style="padding: 15px;">Trình độ</th>
-                <th style="padding: 15px;">Chuỗi ngày</th>
-                <th style="padding: 15px; text-align: right;">Tổng điểm</th>
+            <tr>
+                <th style="width: 100px;">Hạng</th>
+                <th>Học viên</th>
+                <th>Trình độ</th>
+                <th>Chuỗi ngày (Streak)</th>
+                <th style="text-align: right;">Tổng điểm tích lũy</th>
             </tr>
         </thead>
         <tbody id="leaderboard-tbody">
             <tr>
-                <td colspan="5" style="text-align:center; padding: 40px; color: var(--muted);">
-                    <i class="fas fa-spinner fa-spin"></i> Đang tải bảng vàng AESP...
+                <td colspan="5" style="text-align:center; padding: 100px; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p style="margin-top: 15px; font-weight: 600;">Đang tính toán bảng xếp hạng...</p>
                 </td>
             </tr>
         </tbody>
@@ -31,60 +35,75 @@
 </div>
 
 <script>
-    // 1. Hàm khởi tạo nạp dữ liệu xếp hạng
     window.init_ranking = async function() {
         const tbody = document.getElementById('leaderboard-tbody');
+        const token = localStorage.getItem('token');
         
         try {
-            // Gọi đúng endpoint bảng xếp hạng của hệ thống
             const res = await fetch('/api/users/leaderboard', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             
-            if (!res.ok) throw new Error("Không thể tải dữ liệu");
-            
+            if (!res.ok) throw new Error("API Error");
             const users = await res.json();
             
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">Chưa có học viên nào tham gia xếp hạng.</td></tr>';
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; font-weight:700;">📭 Chưa có dữ liệu xếp hạng.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = users.map((user) => {
-                // Xử lý icon hạng Top 3 giống Leaderboard.tsx
-                let rankDisplay = user.rank;
-                if(user.rank === 1) rankDisplay = '🥇';
-                else if(user.rank === 2) rankDisplay = '🥈';
-                else if(user.rank === 3) rankDisplay = '🥉';
+            tbody.innerHTML = users.map((user, index) => {
+                const rank = index + 1;
+                let rankHTML = `<div class="rank-box">${rank}</div>`;
+                let rowBg = '';
 
-                // Nền vàng nhẹ cho Top 3
-                const rowStyle = user.rank <= 3 ? 'background-color: #fffbeb;' : '';
+                if(rank === 1) {
+                    rankHTML = `<div class="rank-box rank-1">🥇</div>`;
+                    rowBg = 'background-color: #fffef3;'; 
+                } else if(rank === 2) {
+                    rankHTML = `<div class="rank-box rank-2">🥈</div>`;
+                } else if(rank === 3) {
+                    rankHTML = `<div class="rank-box rank-3">🥉</div>`;
+                }
+
+                const name = user.username || 'Học viên';
+                const firstLetter = name.charAt(0).toUpperCase();
 
                 return `
-                <tr style="border-bottom: 1px solid #f9f9f9; ${rowStyle}">
-                    <td style="padding: 15px; font-weight: 900; font-size: 1.1rem;">${rankDisplay}</td>
-                    <td style="padding: 15px; font-weight: 700; color: var(--text);">${user.username}</td>
-                    <td style="padding: 15px;">
-                        <span class="badge" style="background:#e0e7ff; color:#4361ee; font-weight:700; padding:4px 12px; border-radius:99px;">
+                <tr style="${rowBg}">
+                    <td style="padding: 15px 20px;">${rankHTML}</td>
+                    <td style="padding: 15px 20px;">
+                        <div class="user-info">
+                            <div class="avatar-circle">${firstLetter}</div>
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-weight: 800; color: #1e293b;">${name}</span>
+                                <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Học viên chính thức</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 15px 20px;">
+                        <span style="background:#e0e7ff; color:#4361ee; font-weight:800; padding:6px 14px; border-radius:12px; font-size:12px;">
                             ${user.level || 'A1'}
                         </span>
                     </td>
-                    <td style="padding: 15px;">
-                        <i class="fas fa-fire" style="color: #ef4444; margin-right: 5px;"></i> 
-                        <strong>${user.streak || 0}</strong>
+                    <td style="padding: 15px 20px;">
+                        <div class="streak-info">
+                            <i class="fas fa-fire"></i>
+                            <span>${user.streak || 0} ngày</span>
+                        </div>
                     </td>
-                    <td style="padding: 15px; font-weight: 900; color: #2563eb; text-align: right;">
-                        ${(user.points || 0).toLocaleString()}
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <div class="point-badge">
+                            ${(user.points || 0).toLocaleString()} <span style="font-size:10px; opacity:0.7; margin-left:2px;">pts</span>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
 
         } catch(e) { 
-            console.error(e);
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Lỗi kết nối API Bảng xếp hạng.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#ef4444; font-weight:800;">⚠️ Lỗi kết nối tới hệ thống dữ liệu.</td></tr>'; 
         }
     }
 
-    // Tự động chạy khi nạp trang
     init_ranking();
 </script>

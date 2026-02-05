@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify, current_app
 from sqlalchemy import create_engine, text
 import json
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
+
 
 mentor_bp = Blueprint('mentor', __name__)
 
@@ -125,23 +128,41 @@ def delete_mentor(user_id):
 # ==================================================
 # 5. API Lấy danh sách Học viên
 # ==================================================
+# Trong mentor_controller.py
 @mentor_bp.route('/learners-list', methods=['GET'])
 def get_learners_list():
     try:
+        # 1. Lấy mentor_id từ thông tin đăng nhập (Bảo có thể dùng JWT ở đây)
+        # Nếu chưa dùng JWT, ta có thể tạm lấy từ query string để test
+        mentor_id = request.args.get('mentor_id') 
+
         engine = get_db_connection()
         learners = []
         with engine.connect() as conn:
-            result = conn.execute(text("SELECT * FROM users WHERE role = 'learner'"))
+            # 2. Sửa câu Query: Chỉ lấy học viên thuộc task/session của Mentor này
+            # Ví dụ: Lấy những học viên mà Mentor này đã từng giao bài tập (tasks)
+            query = text("""
+                SELECT DISTINCT u.id, u.username, u.email, u.user_level, u.status
+                FROM users u
+                JOIN tasks t ON u.id = t.learner_id
+                WHERE t.mentor_id = :mid AND u.role = 'learner'
+            """)
+            
+            # Nếu Bảo muốn lấy danh sách Mentor đã được "duyệt" quản lý học viên:
+            # query = text("SELECT * FROM users WHERE role = 'learner' AND assigned_mentor = :mid")
+
+            result = conn.execute(query, {"mid": mentor_id})
             for row in result: 
                 learners.append({
                     'id': row.id, 
-                    'full_name': row.username or 'No Name', 
+                    'username': row.username or 'Học viên', 
                     'email': row.email, 
                     'level': row.user_level, 
                     'status': row.status
                 })
         return jsonify(learners), 200
-    except Exception as e: return jsonify({'error': str(e)}), 500
+    except Exception as e: 
+        return jsonify({'error': str(e)}), 500
 
 # ==================================================
 # 6. API Gửi tin nhắn
@@ -381,3 +402,137 @@ def delete_topic_api(topic_id):
         return jsonify({'message': 'Đã xóa'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+# API cập nhật trạng thái bài tập
+# API cập nhật trạng thái bài tập
+@mentor_bp.route('/tasks/<int:task_id>/complete', methods=['PUT'])
+def complete_task(task_id):
+    try:
+        engine = get_db_connection()
+        with engine.connect() as conn:
+            conn.execute(text("""
+                UPDATE tasks 
+                SET status = 'Completed' 
+                WHERE id = :tid
+            """), {"tid": task_id})
+            conn.commit()
+        return jsonify({'message': 'Task completed'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# ==============================================================================
+# BỔ SUNG: QUẢN LÝ TÀI LIỆU (UPLOAD/DOWNLOAD) & CHẤM ĐIỂM BÀI NÓI (GRADING)
+# ==============================================================================
+
+# Cấu hình thư mục lưu trữ file vật lý
+UPLOAD_FOLDER = 'static/uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# --- HÀM HỖ TRỢ KẾT NỐI DATABASE XDPM (Dành cho chấm điểm) ---
+def get_xdpm_connection():
+    engine = get_db_connection()
+    # Chuyển đổi URL từ user_db sang xdpm
+    db_url = str(engine.url).replace('user_db', 'xdpm')
+    return create_engine(db_url)
+
+# --------------------------------------------------
+# 15. API Tải tài liệu lên (Lưu file và ghi Database)
+# --------------------------------------------------
+@mentor_bp.route('/resources/upload', methods=['POST'])
+def upload_resource():
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": " chưa chọn file kìa!"}), 400
+            
+        file = request.files['file']
+        title = request.form.get('title')
+        skill_type = request.form.get('skill_type', 'General')
+        description = request.form.get('description', '')
+        mentor_id = request.form.get('mentor_id', 'admin-001')
+
+        if file and title:
+            # Làm sạch tên file và lưu trữ
+            filename = secure_filename(file.filename)
+            # Thêm prefix thời gian để không bị trùng tên file
+            filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+            
+            # Tự động tính toán thông tin file để khớp với Database
+            file_size_kb = os.path.getsize(file_path) / 1024
+            file_size_str = f"{round(file_size_kb, 1)} KB" if file_size_kb < 1024 else f"{round(file_size_kb/1024, 1)} MB"
+            file_type = filename.rsplit('.', 1)[1].upper() if '.' in filename else 'FILE'
+            
+            # Link download (Sẽ được gán vào nút Download ở Frontend)
+            file_url = f"http://localhost:5002/static/uploads/{filename}"
+
+            engine = get_db_connection()
+            with engine.connect() as conn:
+                conn.execute(text("""
+                    INSERT INTO resources (mentor_id, title, link, file_type, file_size, skill_type, description) 
+                    VALUES (:mid, :tit, :lnk, :ft, :fs, :sk, :desc)
+                """), {
+                    "mid": mentor_id, "tit": title, "lnk": file_url, 
+                    "ft": file_type, "fs": file_size_str, "sk": skill_type, "desc": description
+                })
+                conn.commit()
+            
+            return jsonify({"message": "Upload thành công!", "url": file_url}), 201
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --------------------------------------------------
+# 16. API Lấy danh sách bài nói của học viên (Cần chấm điểm)
+# --------------------------------------------------
+@mentor_bp.route('/grading-list', methods=['GET'])
+def get_grading_list():
+    try:
+        engine = get_xdpm_connection()
+        grading_data = []
+        with engine.connect() as conn:
+            # Lấy các bài thực hành có file ghi âm từ database xdpm
+            result = conn.execute(text("""
+                SELECT id, user_id, topic, accuracy_score, audio_url, status, created_at 
+                FROM practice_sessions 
+                WHERE audio_url IS NOT NULL 
+                ORDER BY created_at DESC
+            """)).fetchall()
+            
+            for r in result:
+                grading_data.append({
+                    "id": r.id,
+                    "user_id": r.user_id,
+                    "topic": r.topic,
+                    "ai_score": r.accuracy_score,
+                    "audio_url": r.audio_url, # Link để Mentor nghe trực tiếp
+                    "status": r.status,
+                    "date": r.created_at.strftime('%d/%m/%Y %H:%M')
+                })
+        return jsonify(grading_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --------------------------------------------------
+# 17. API Mentor chấm điểm và nhận xét (Cập nhật xdpm)
+# --------------------------------------------------
+@mentor_bp.route('/grade-session', methods=['POST'])
+def grade_session():
+    try:
+        data = request.json
+        session_id = data.get('session_id')
+        score = data.get('mentor_score')
+        feedback = data.get('mentor_feedback')
+
+        engine = get_xdpm_connection()
+        with engine.connect() as conn:
+            conn.execute(text("""
+                UPDATE practice_sessions 
+                SET mentor_score = :ms, mentor_feedback = :mf, status = 'Graded' 
+                WHERE id = :sid
+            """), {"ms": score, "mf": feedback, "sid": session_id})
+            conn.commit()
+            
+        return jsonify({"message": "Bảo đã chấm điểm thành công!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

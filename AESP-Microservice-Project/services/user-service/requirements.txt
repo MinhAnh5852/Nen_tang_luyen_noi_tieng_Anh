@@ -5,7 +5,7 @@ SQLAlchemy==2.0.23
 Flask-Cors==4.0.0
 Flask-Limiter==3.5.0
 python-dotenv==1.0.0
-
+requests
 # --- MySQL driver & Security ---
 # Thêm các thư viện bổ trợ để pymysql chạy mượt với MySQL 8.0
 pymysql==1.1.0

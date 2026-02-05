@@ -3,91 +3,127 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="page-container">
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
         <div>
-            <h1 class="page-title">Thư Viện Chủ Đề Hội Thoại</h1>
-            <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">Quản lý các tình huống thực tế cho hệ thống luyện tập AI.</p>
+            <h1 class="page-title" style="font-size: 26px; font-weight: 900; color: #1e293b;">Thư Viện Chủ Đề Hội Thoại</h1>
+            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Cung cấp ngữ cảnh thực tế giúp học viên luyện nói với AI hiệu quả hơn.</p>
         </div>
-        <button class="btn btn-primary" onclick="openTopicModal()">
+        <button class="btn btn-primary" onclick="openTopicModal()" style="padding: 12px 24px; display: flex; align-items: center; gap: 10px;">
             <i class="fa-solid fa-plus"></i> Thêm chủ đề mới
         </button>
     </div>
 
     <div id="topics-grid" class="topics-grid-container">
-        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--muted);">
-            <i class="fas fa-spinner fa-spin"></i> Đang nạp danh sách chủ đề...
+        <div style="grid-column: 1/-1; text-align: center; padding: 100px; color: #94a3b8;">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+            <p style="margin-top:15px; font-weight:600;">Đang đồng bộ thư viện...</p>
         </div>
     </div>
 </div>
 
 <div class="modal-backdrop" id="topicModal">
-    <div class="modal" style="max-width: 550px;">
-        <div class="modal-hd" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-            <h3 style="margin:0;"><i class="fa-solid fa-comments"></i> Thêm chủ đề mới</h3>
-            <i class="fa-solid fa-xmark" onclick="closeTopicModal()" style="cursor:pointer; font-size: 20px; color: #999;"></i>
+    <div class="modal" style="max-width: 600px; border-radius: 24px;">
+        <div class="modal-hd" style="padding: 24px; border-bottom: 1px solid #f1f5f9;">
+            <h3 style="margin:0; display:flex; align-items:center; gap:12px; font-weight:800;">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary)"></i> Thiết kế chủ đề AI
+            </h3>
+            <i class="fa-solid fa-xmark" onclick="closeTopicModal()" style="cursor:pointer; color: #64748b;"></i>
         </div>
-        <div class="modal-bd" style="padding-top: 20px;">
-            <div class="form-row" style="margin-bottom: 15px;">
-                <label style="font-weight: 700;">Tên chủ đề (Tiếng Anh):</label>
-                <input type="text" id="topic-name" class="form-control" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;" placeholder="VD: Job Interview at Tech Company">
+        <div class="modal-bd" style="padding: 24px;">
+            <div class="form-row" style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:14px;">Tên tình huống (English):</label>
+                <input type="text" id="topic-name" class="form-control" placeholder="VD: Ordering Food in New York Restaurant">
             </div>
-            <div class="form-row" style="margin-bottom: 15px;">
-                <label style="font-weight: 700;">Nhóm lĩnh vực (Level):</label>
-                <select id="topic-category" class="form-control" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-                    <option value="Work">Công việc (Work)</option>
-                    <option value="Travel">Du lịch (Travel)</option>
-                    <option value="Daily Life">Đời sống (Daily Life)</option>
-                    <option value="Health">Y tế & Sức khỏe (Health)</option>
-                </select>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
+                <div class="form-row">
+                    <label style="display:block; margin-bottom:8px; font-weight:700; font-size:14px;">Lĩnh vực:</label>
+                    <select id="topic-category" class="form-control">
+                        <option value="Work">Công việc (Work)</option>
+                        <option value="Travel">Du lịch (Travel)</option>
+                        <option value="Daily Life">Đời sống (Daily Life)</option>
+                        <option value="Health">Y tế (Health)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label style="display:block; margin-bottom:8px; font-weight:700; font-size:14px;">Độ khó:</label>
+                    <select id="topic-level" class="form-control">
+                        <option value="A1">A1 - Cơ bản</option>
+                        <option value="A2">A2 - Sơ cấp</option>
+                        <option value="B1">B1 - Trung cấp</option>
+                        <option value="B2">B2 - Khá</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-row" style="margin-bottom: 15px;">
-                <label style="font-weight: 700;">Mô tả tình huống:</label>
-                <textarea id="topic-desc" class="form-control" rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;" placeholder="Mô tả bối cảnh chi tiết để AI nhập vai..."></textarea>
+
+            <div class="form-row" style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:14px;">Từ vựng gợi ý (Cách nhau bằng dấu phẩy):</label>
+                <input type="text" id="topic-vocab" class="form-control" placeholder="VD: menu, delicious, bill, server...">
+                <small style="color:#94a3b8; font-size:12px;">* AI sẽ gợi ý các từ này cho học viên khi đang nói.</small>
+            </div>
+
+            <div class="form-row">
+                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:14px;">Mô tả ngữ cảnh (Scenario for AI):</label>
+                <textarea id="topic-desc" class="form-control" rows="3" placeholder="Mô tả bối cảnh để AI biết nên đóng vai nhân viên hay sếp..."></textarea>
             </div>
         </div>
-        <div class="modal-ft" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-            <button class="btn btn-outline" onclick="closeTopicModal()">Hủy</button>
-            <button id="btn-save-topic" class="btn btn-primary" onclick="handleCreateTopic()">Lưu chủ đề</button>
+        <div class="modal-ft" style="padding: 20px 24px; background: #f8fafc; border-top: 1px solid #f1f5f9; border-radius: 0 0 24px 24px;">
+            <button class="btn btn-outline" onclick="closeTopicModal()">Để sau</button>
+            <button id="btn-save-topic" class="btn btn-primary" onclick="handleCreateTopic()">Kích hoạt chủ đề</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ✅ Gọi trực tiếp cổng 5002
     const SERVICE_URL = 'http://localhost:5002/api/mentors'; 
     const token = localStorage.getItem('token');
 
     function openTopicModal() { document.getElementById('topicModal').classList.add('show'); }
     function closeTopicModal() { document.getElementById('topicModal').classList.remove('show'); }
 
-    // --- 🟢 HÀM VẼ GIAO DIỆN (Quan trọng: Sửa lỗi defined) ---
+    // RENDER HÀM VẼ GIAO DIỆN CỰC ĐẸP
     function renderTopics(data) {
         const grid = document.getElementById('topics-grid');
         if (!data || data.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--muted);">📭 Thư viện hiện đang trống.</div>';
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 80px; background: white; border-radius: 24px; border: 2px dashed #e2e8f0;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5058/5058436.png" style="width:100px; opacity:0.3; margin-bottom:20px;">
+                    <h3 style="color:#64748b;">Chưa có chủ đề nào được tạo</h3>
+                    <p style="color:#94a3b8;">Hãy bắt đầu bằng cách thêm một tình huống hội thoại mới!</p>
+                </div>`;
             return;
         }
 
         grid.innerHTML = data.map(t => {
+            const vocabs = t.suggested_vocabulary ? t.suggested_vocabulary.split(',') : [];
             let icon = 'fa-briefcase';
-            if(t.level === 'Travel') icon = 'fa-plane-departure';
-            if(t.level === 'Daily Life') icon = 'fa-house-user';
-            if(t.level === 'Health') icon = 'fa-heart-pulse';
+            let catClass = 'category-work';
+            
+            if(t.level === 'Travel') { icon = 'fa-plane-departure'; catClass = 'category-travel'; }
+            else if(t.level === 'Daily Life') { icon = 'fa-house-user'; catClass = 'category-daily'; }
+            else if(t.level === 'Health') { icon = 'fa-heart-pulse'; catClass = 'category-health'; }
 
             return `
-            <div class="topic-item-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                    <div style="width: 40px; height: 40px; background: #f0f7ff; color: #007bff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fa-solid ${icon}"></i>
+            <div class="topic-item-card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+                            <i class="fa-solid ${icon}" style="color:var(--primary); font-size:18px;"></i>
+                        </div>
+                        <span class="topic-badge ${catClass}">${t.level || 'Work'}</span>
                     </div>
-                    <span style="font-size: 12px; font-weight: 700; color: #007bff; background: #e6f0ff; padding: 4px 8px; border-radius: 4px;">${t.level || 'Work'}</span>
+                    <h3 class="topic-title">${t.topic_name}</h3>
+                    <p class="topic-desc">${t.description || 'Chưa có mô tả chi tiết cho bối cảnh này.'}</p>
+                    
+                    <div class="vocab-tag-container">
+                        ${vocabs.slice(0, 4).map(v => `<span class="vocab-tag">${v.trim()}</span>`).join('')}
+                        ${vocabs.length > 4 ? `<span class="vocab-tag" style="background:none; border:none;">+${vocabs.length - 4}</span>` : ''}
+                    </div>
                 </div>
-                <div class="topic-body-info">
-                    <h4 style="margin: 0 0 8px 0; color: #333;">${t.topic_name}</h4>
-                    <p style="font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 15px;">${t.description || 'Chưa có mô tả.'}</p>
-                </div>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button onclick="deleteTopic('${t.id}')" style="color: #ff4d4f; border: none; background: none; cursor: pointer; font-size: 16px;">
+                
+                <div class="card-footer">
+                    <span style="font-size: 12px; color: #94a3b8; font-weight: 600;">LEVEL: ${t.level || 'B1'}</span>
+                    <button class="btn-delete" onclick="deleteTopic('${t.id}')">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
@@ -95,41 +131,32 @@
         }).join('');
     }
 
-    // 1. Lấy danh sách
     window.init_topics = async function() {
-        const grid = document.getElementById('topics-grid');
         try {
             const res = await fetch(`${SERVICE_URL}/topics`, { 
-                method: 'GET',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (!res.ok) throw new Error(`Lỗi Service: ${res.status}`);
             const data = await res.json();
-            renderTopics(data); // Đã có hàm ở trên, hết lỗi rồi Bảo nhé!
-
+            renderTopics(data);
         } catch(e) {
-            console.error("Lỗi:", e);
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red; padding:40px;">⚠️ Lỗi: ${e.message}</div>`;
+            document.getElementById('topics-grid').innerHTML = `<p style="color:red; text-align:center;">Lỗi kết nối cổng 5002</p>`;
         }
     };
 
-    // 2. Thêm mới
     async function handleCreateTopic() {
         const btn = document.getElementById('btn-save-topic');
         const payload = {
             topic_name: document.getElementById('topic-name').value,
             level: document.getElementById('topic-category').value,
-            description: document.getElementById('topic-desc').value
+            description: document.getElementById('topic-desc').value,
+            suggested_vocabulary: document.getElementById('topic-vocab').value,
+            scenario_context: document.getElementById('topic-desc').value
         };
 
-        if(!payload.topic_name || !payload.description) return alert("Bảo ơi điền đủ thông tin giúp mình nhé!");
+        if(!payload.topic_name) return alert("Bảo ơi, nhập tên chủ đề đã nhé!");
 
         btn.disabled = true;
-        btn.innerHTML = 'Đang lưu...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kích hoạt...';
 
         try {
             const res = await fetch(`${SERVICE_URL}/topics`, {
@@ -142,32 +169,22 @@
             });
 
             if (res.ok) {
-                alert("✅ Thêm chủ đề thành công!");
                 closeTopicModal();
-                init_topics(); 
-                document.getElementById('topic-name').value = '';
-                document.getElementById('topic-desc').value = '';
-            } else {
-                alert("❌ Lỗi: " + res.status);
+                init_topics();
+                // Reset form
+                ['topic-name', 'topic-vocab', 'topic-desc'].forEach(id => document.getElementById(id).value = '');
             }
-        } catch (e) {
-            alert("❌ Lỗi kết nối cổng 5002.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'Lưu chủ đề';
-        }
+        } catch (e) { alert("Lỗi hệ thống!"); }
+        finally { btn.disabled = false; btn.innerHTML = 'Lưu chủ đề'; }
     }
 
-    // 3. Xóa chủ đề
     async function deleteTopic(id) {
         if(!confirm("Bảo có chắc muốn xóa chủ đề này không?")) return;
-        try {
-            const res = await fetch(`${SERVICE_URL}/topics/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if(res.ok) init_topics();
-        } catch(e) { console.error(e); }
+        await fetch(`${SERVICE_URL}/topics/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        init_topics();
     }
 
     init_topics();

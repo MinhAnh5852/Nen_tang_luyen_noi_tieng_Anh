@@ -50,3 +50,18 @@ class Feedback(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     author = db.relationship('User', backref=db.backref('user_feedbacks', lazy=True))
+    # Thêm vào cuối file user-service/models/user.py
+
+# user-service/models/user.py
+
+class MentorSelection(db.Model):
+    __tablename__ = 'mentor_selections'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    learner_id = db.Column(db.String(100), db.ForeignKey('users.id'), nullable=False)
+    mentor_id = db.Column(db.String(100), db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(20), default='active')
+    assigned_at = db.Column(db.DateTime, server_default=func.now()) # Bỏ chữ db. đi vì bạn đã import func ở trên rồi
+    
+    # Thiết lập relationship để dễ dàng truy vấn tên Mentor/Learner
+    mentor = db.relationship('User', foreign_keys=[mentor_id])
+    learner = db.relationship('User', foreign_keys=[learner_id])

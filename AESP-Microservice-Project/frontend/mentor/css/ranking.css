@@ -1,94 +1,125 @@
-/* mentor/css/ranking.css */
-
-/* 1. Header Bảng xếp hạng */
-.leaderboard-header {
-    text-align: center;
-    margin-bottom: 40px;
+/* ranking.css - Premium Leaderboard Design */
+:root {
+    --gold: #f59e0b;
+    --silver: #94a3b8;
+    --bronze: #b45309;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bg-white: #ffffff;
+    --border: #e2e8f0;
 }
 
-.leaderboard-header h1 {
-    font-size: 2.5rem;
-    color: var(--text); /* Sử dụng biến màu hệ thống */
-    margin-bottom: 10px;
-    font-weight: 900;
-}
-
-.leaderboard-header p {
-    color: var(--muted);
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-/* 2. Card chứa bảng dữ liệu */
-.leaderboard-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+/* Thẻ bảng xếp hạng */
+.table-card {
+    background: var(--bg-white);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    animation: slideUpRanking 0.5s ease;
+    animation: fadeIn 0.6s ease-out;
 }
 
-/* 3. Hiệu ứng dòng cho Top 3 */
-/* Top 1 - Vàng */
-.leaderboard-card tr:nth-child(1) { background-color: #fff9db !important; }
-/* Top 2 - Bạc */
-.leaderboard-card tr:nth-child(2) { background-color: #f1f5f9 !important; }
-/* Top 3 - Đồng */
-.leaderboard-card tr:nth-child(3) { background-color: #fff4e6 !important; }
-
-.leaderboard-card tr:hover {
-    filter: brightness(0.98);
-    transition: 0.2s;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* 4. Tùy chỉnh các cột */
-.leaderboard-card td:first-child {
-    font-size: 1.3rem;
-    width: 80px;
-    text-align: center;
-    font-weight: 900;
+/* Cấu trúc Bảng */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
 }
 
-/* Badge trình độ */
-.status-badge.status-active {
-    background: #e0e7ff;
-    color: #4361ee;
-    padding: 6px 14px;
+.data-table thead th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     font-weight: 800;
-    border-radius: 99px;
-    font-size: 12px;
+    padding: 20px;
+    border-bottom: 2px solid #f1f5f9;
 }
 
-/* Biểu tượng ngọn lửa cho Streak */
-.fa-fire {
-    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.3));
+.data-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* 5. Hiệu ứng xuất hiện */
-@keyframes slideUpRanking {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.data-table tbody tr:hover {
+    background-color: #f8fafc !important;
+    transform: scale(1.002);
+    box-shadow: inset 4px 0 0 var(--primary);
 }
 
-/* 6. Responsive cho di động */
-@media (max-width: 768px) {
-    .leaderboard-card {
-        padding: 10px;
-    }
-    
-    .leaderboard-header h1 {
-        font-size: 1.8rem;
-    }
-    
-    /* Ẩn cột trình độ trên mobile để không bị tràn màn hình */
-    .data-table th:nth-child(3), 
-    .data-table td:nth-child(3) {
-        display: none;
-    }
+/* Ô Hạng (Rank) */
+.rank-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.rank-1 { background: #fffbeb; color: var(--gold); border: 2px solid #fde68a; font-size: 24px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.15); }
+.rank-2 { background: #f1f5f9; color: var(--silver); border: 2px solid #e2e8f0; font-size: 24px; }
+.rank-3 { background: #fff7ed; color: var(--bronze); border: 2px solid #ffedd5; font-size: 24px; }
+
+/* Thông tin Người dùng & Avatar */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-circle {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    border: 3px solid white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge Chuỗi ngày (Streak) */
+.streak-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 6px 14px;
+    border-radius: 20px;
+    width: fit-content;
+    font-size: 13px;
+}
+
+.streak-info i {
+    filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.3));
+}
+
+/* Badge Điểm số (Points) */
+.point-badge {
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 15px;
+    display: inline-block;
+    border: 1px solid #e0e7ff;
 }

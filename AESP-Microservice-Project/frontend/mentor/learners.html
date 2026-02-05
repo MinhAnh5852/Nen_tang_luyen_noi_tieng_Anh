@@ -1,16 +1,19 @@
 <link rel="stylesheet" href="css/learners.css">
 <div class="page-container">
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h1 class="page-title">Quản lý Học viên</h1>
+        <h1 class="page-title">Học viên của tôi</h1>
         <button class="btn btn-primary" onclick="init_learners()">
-            <i class="fa-solid fa-sync" id="reload-icon"></i> Tải lại dữ liệu
+            <i class="fa-solid fa-sync" id="reload-icon"></i> Tải lại danh sách
         </button>
     </div>
 
     <div class="filter-bar">
         <div class="search-wrapper">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="mentorSearchInput" onkeyup="filterLearnerTable()" placeholder="Tìm theo email hoặc tên..." class="form-input">
+            <input type="text" id="mentorSearchInput" onkeyup="filterLearnerTable()" placeholder="Tìm học viên trong danh sách..." class="form-input">
+        </div>
+        <div style="margin-left: auto; color: var(--text-light); font-size: 13px; font-weight: 600;">
+            <i class="fa-solid fa-link"></i> <span id="learner-count">0</span> học viên đã kết nối
         </div>
     </div>
 
@@ -28,7 +31,7 @@
             <tbody id="learner-tbody">
                 <tr>
                     <td colspan="5" style="text-align:center; padding: 40px; color: var(--text-light);">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Đang nạp dữ liệu từ hệ thống...
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang lọc danh sách học viên của bạn...
                     </td>
                 </tr>
             </tbody>
@@ -39,29 +42,41 @@
 <script>
     let learnersData = [];
 
-    // Gắn hàm vào window để mentor.html có thể gọi khi chuyển tab
     window.init_learners = async function() {
         const tableBody = document.getElementById('learner-tbody');
         const icon = document.getElementById('reload-icon');
+        const countSpan = document.getElementById('learner-count');
+        
+        // 1. Lấy thông tin Mentor từ LocalStorage (Giống ảnh image_b1ed61.png)
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const mentorId = userInfo.id;
         const token = localStorage.getItem('token');
         
+        if (!mentorId) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Không tìm thấy thông tin Mentor.</td></tr>`;
+            return;
+        }
+
         if (icon) icon.classList.add('fa-spin-custom');
 
         try {
-            // Lấy dữ liệu từ User Service qua API Gateway
-            const response = await fetch('/api/users/all', {
+            // 2. Gọi API lấy danh sách học viên dành riêng cho Mentor này
+            // Endpoint này sẽ trả về những learner có learner_id nằm trong bảng mentor_selections với mentor_id này
+            const response = await fetch(`/api/users/mentors/my-learners/${mentorId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
-            if (!response.ok) throw new Error("Unauthorized");
+            if (!response.ok) throw new Error("Không thể truy cập dữ liệu");
 
-            const data = await response.json();
-            // Lọc chỉ lấy những người dùng có vai trò là learner
-            learnersData = data.filter(u => (u.role || '').toLowerCase() === 'learner');
+            learnersData = await response.json();
+            
+            // Cập nhật số lượng
+            countSpan.innerText = learnersData.length;
+            
             renderLearnerTable(learnersData);
         } catch (error) {
             console.error(error);
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Không thể tải danh sách (Lỗi Gateway hoặc Token)</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:red;">⚠️ Lỗi nạp danh sách học viên đã kết nối.</td></tr>`;
         } finally {
             if (icon) setTimeout(() => icon.classList.remove('fa-spin-custom'), 500);
         }
@@ -72,7 +87,7 @@
         tableBody.innerHTML = '';
 
         if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">📭 Chưa có học viên nào.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">📭 Bạn chưa có học viên nào kết nối.</td></tr>';
             return;
         }
 
@@ -81,27 +96,25 @@
             const status = (user.status || 'active').toLowerCase();
             const level = user.user_level || 'A1';
             
-            // Sử dụng các class CSS từ admin/css/users.css
             tableBody.innerHTML += `
                 <tr>
                     <td class="text-light">#${user.id ? user.id.substring(0, 6) : '---'}</td>
                     <td>
                         <div class="user-info">
-                            <div class="avatar-circle avatar-blue" style="width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                            <div class="avatar-circle avatar-blue" style="width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; background: var(--primary); color: white;">
                                 ${email.substring(0,2).toUpperCase()}
                             </div>
                             <div class="user-text">
-                                <h4 style="margin:0; font-size:14px;">${user.username || email.split('@')[0]}</h4>
-                                <span style="font-size:12px; color:var(--text-light);">${email}</span>
+                                <h4 style="margin:0; font-size:14px; color: var(--text);">${user.username || email.split('@')[0]}</h4>
+                                <span style="font-size:12px; color:var(--muted);">${email}</span>
                             </div>
                         </div>
                     </td>
-                    <td><span class="badge badge-purple-border">${level.toUpperCase()}</span></td>
+                    <td><span class="badge" style="background:#e0e7ff; color:#4361ee; font-weight:700; padding:4px 12px; border-radius:99px;">${level.toUpperCase()}</span></td>
                     <td>
-                        <label class="switch">
-                            <input type="checkbox" ${status === 'active' ? 'checked' : ''} disabled>
-                            <span class="slider round"></span>
-                        </label>
+                        <span class="badge ${status === 'active' ? 'badge-success' : ''}" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            ${status === 'active' ? 'Đang học' : 'Tạm dừng'}
+                        </span>
                     </td>
                     <td class="text-right">
                         <button class="btn btn-primary btn-sm" onclick="window.parent.openModal('gradingModal')" style="padding: 5px 12px; font-size:11px;">
@@ -122,6 +135,6 @@
         renderLearnerTable(filtered);
     }
 
-    // Khởi chạy ngay khi nạp file
+    // Khởi chạy
     init_learners();
 </script>

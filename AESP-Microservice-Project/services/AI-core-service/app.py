@@ -174,7 +174,28 @@ def get_history(user_id):
         return jsonify(results), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+# AI-core-service/app.py
+
+@app.route('/api/ai/submissions/for-mentor/<string:mentor_id>', methods=['GET'])
+def get_submissions_for_mentor(mentor_id):
+    try:
+        from sqlalchemy import text
+        # Lấy danh sách học viên của Mentor này từ user_db thông qua SQL cross-database 
+        # (Hoặc gọi qua User Service nếu bạn muốn tách biệt hoàn toàn)
+        query = text("""
+            SELECT p.id, p.user_id, u.username, p.topic, p.created_at as date, 
+                   p.accuracy_score as ai_score, p.ai_feedback
+            FROM xdpm.practice_sessions p
+            JOIN user_db.mentor_selections ms ON p.user_id = ms.learner_id
+            JOIN user_db.users u ON p.user_id = u.id
+            WHERE ms.mentor_id = :mid AND ms.status = 'active'
+            ORDER BY p.created_at DESC
+        """)
+        
+        result = db.session.execute(query, {"mid": mentor_id}).mappings().all()
+        return jsonify([dict(row) for row in result]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
     
 if __name__ == "__main__":
     # Chạy trên port 5005 để Gateway điều hướng tới

@@ -1,54 +1,101 @@
-/* submissions.css */
+/* mentor/css/submissions.css */
 
-/* Badge trạng thái chấm bài */
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
+/* --- Tối ưu hóa Cuộn trang (Scrolling) --- */
+body {
+    overflow-y: auto !important; /* Đảm bảo trang có thể cuộn khi danh sách dài */
+    scrollbar-gutter: stable;
 }
 
-.status-active { 
-    background: rgba(16, 185, 129, 0.1); 
-    color: #10b981; 
+/* --- Hiệu ứng Loading Skeleton giả lập --- */
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
 }
 
-.status-pending { 
-    background: rgba(245, 158, 11, 0.1); 
-    color: #f59e0b; 
+.loading-skeleton {
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 800px 104px;
+    animation: shimmer 1.2s infinite linear;
 }
 
-/* Nút thao tác chấm bài */
-.btn-grade-action {
-    background: #f8fafc;
-    color: var(--primary);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+/* --- Nâng cấp Thẻ học viên (Learner Cards) --- */
+.learner-group-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.btn-grade-action:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+.learner-group-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.avatar-orange {
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    color: #ea580c;
+/* --- Avatar Circle --- */
+.avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
 }
 
-/* Tùy chỉnh dòng bảng */
-tr:hover td {
-    background-color: #f8fafc;
+/* --- Trạng thái Pill (Status Pill) --- */
+.status-pill i {
+    font-size: 10px;
+    margin-right: 6px;
+}
+
+/* --- Thanh tiến độ AI (AI Score Progress) --- */
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    max-width: 80px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* --- Empty State (Trạng thái trống) --- */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 2px dashed var(--border);
+}
+
+.empty-state img {
+    width: 150px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+/* --- Nút Làm mới (Sync Button) --- */
+.fa-arrows-rotate.spinning {
+    animation: fa-spin 1s infinite linear;
+}
+
+/* --- Tối ưu hiển thị Bảng trên Mobile --- */
+@media (max-width: 768px) {
+    .page-container { padding: 15px; }
+    .learner-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .sub-table th:nth-child(3), 
+    .sub-table td:nth-child(3) { display: none; } /* Ẩn bớt cột ngày trên mobile */
 }

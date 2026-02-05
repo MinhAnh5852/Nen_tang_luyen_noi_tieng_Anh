@@ -1,145 +1,121 @@
-/* frontend/mentor/css/feedback.css */
+/* feedback.css - AESP AI Sentiment Analysis Dashboard */
 
-/* 1. Animation nạp trang mượt mà */
-#feedback-list {
-    animation: fadeInList 0.5s ease-out;
+:root {
+    --primary: #4f46e5;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
 }
 
-@keyframes fadeInList {
+/* Hiệu ứng mượt mà khi nạp danh sách */
+#feedback-list {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
     from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 2. Thẻ chứa bộ lọc học viên */
-.filter-card {
-    background: var(--white);
-    padding: 24px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    margin-bottom: 28px;
-}
-
-/* 3. Tùy chỉnh Select Box cho học viên */
-#feedback-student-select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 16px;
-    padding-right: 40px;
-    font-weight: 600;
-    color: var(--text-main);
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
-    transition: 0.2s;
-}
-
-#feedback-student-select:focus {
-    background-color: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-}
-
-/* 4. Thẻ phản hồi AI (Feedback Cards) */
-.feedback-item-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    padding: 24px;
-    margin-bottom: 16px;
+/* Thiết kế thẻ phản hồi */
+.feedback-item {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
     display: flex;
-    gap: 20px;
-    transition: all 0.3s ease;
+    gap: 24px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    overflow: hidden;
 }
 
-.feedback-item-card:hover {
-    transform: translateX(5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+.feedback-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    border-color: var(--primary);
 }
 
-/* Icon cảm xúc tròn */
-.sentiment-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
+/* Chỉ báo màu sắc theo cảm xúc bên trái thẻ */
+.border-Positive { border-left: 8px solid var(--success) !important; }
+.border-Neutral { border-left: 8px solid var(--warning) !important; }
+.border-Negative { border-left: 8px solid var(--danger) !important; }
+
+/* Vùng chứa biểu tượng cảm xúc */
+.sentiment-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 28px;
     flex-shrink: 0;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
 }
 
-/* 5. Trạng thái Sentiment theo màu sắc chuyên biệt */
-/* Positive - Tích cực */
-.sentiment-positive { border-left: 5px solid #10b981 !important; }
-.icon-positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-
-/* Neutral - Trung lập */
-.sentiment-neutral { border-left: 5px solid #f59e0b !important; }
-.icon-neutral { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-
-/* Negative - Cần chú ý */
-.sentiment-negative { border-left: 5px solid #ef4444 !important; }
-.icon-negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-/* 6. Typography trong thẻ */
-.feedback-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+.feedback-item:hover .sentiment-wrap {
+    transform: rotate(-10deg) scale(1.1);
 }
 
-.sentiment-label {
+.bg-Positive { color: var(--success); background: #ecfdf5; border: 1px solid rgba(16, 185, 129, 0.2); }
+.bg-Neutral { color: var(--warning); background: #fffbeb; border: 1px solid rgba(245, 158, 11, 0.2); }
+.bg-Negative { color: var(--danger); background: #fef2f2; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Huy hiệu hiển thị tên cảm xúc */
+.badge-sentiment {
     font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 4px 10px;
-    border-radius: 6px;
-}
-
-.feedback-date {
-    font-size: 12px;
-    color: var(--text-light);
-    font-weight: 600;
-}
-
-.feedback-target-title {
-    font-size: 16px;
     font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 8px;
-}
-
-.feedback-body-text {
-    font-size: 14px;
-    color: #475569;
-    line-height: 1.6;
-    font-weight: 500;
-}
-
-/* 7. Trạng thái trống (Empty State) */
-.empty-state-container {
-    text-align: center;
-    padding: 80px 20px;
-    background: white;
+    padding: 5px 14px;
     border-radius: 20px;
-    border: 2px dashed #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.empty-state-container i {
-    font-size: 48px;
-    color: #cbd5e1;
+.label-Positive { background: var(--success); color: white; }
+.label-Neutral { background: var(--warning); color: white; }
+.label-Negative { background: var(--danger); color: white; }
+
+/* Nội dung văn bản của AI */
+.feedback-item h4 {
+    margin: 15px 0 8px 0;
+    font-size: 17px;
+    font-weight: 850;
+    color: var(--text-main);
+}
+
+.feedback-item p {
+    color: #475569;
+    line-height: 1.8;
+    margin: 0;
+    font-style: italic;
+    font-size: 15px;
+}
+
+/* Hệ thống sao đánh giá */
+.stars {
+    color: #fbbf24;
+    font-size: 14px;
+    display: flex;
+    gap: 4px;
+}
+
+/* Trạng thái trống (Empty State) */
+.empty-state {
+    text-align: center;
+    padding: 100px 40px;
+    background: white;
+    border-radius: 24px;
+    border: 2px dashed var(--border);
+    color: var(--muted);
+}
+
+.empty-state i {
+    font-size: 56px;
+    opacity: 0.2;
     margin-bottom: 20px;
-}
-
-.empty-state-container p {
-    font-size: 16px;
-    font-weight: 700;
-    color: #64748b;
 }

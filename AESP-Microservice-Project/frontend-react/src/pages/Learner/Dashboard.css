@@ -164,3 +164,102 @@
     border-radius: 16px;
     border: 2px dashed #e2e8f0;
 }
+.mentor-section-dashboard {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.upgrade-link {
+  font-size: 13px;
+  color: #4361ee;
+  text-decoration: underline;
+}
+
+.mentor-scroll-container {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding: 10px 5px;
+}
+
+.mentor-mini-card {
+  min-width: 150px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.mini-avatar, .mentor-avatar-circle {
+  width: 45px;
+  height: 45px;
+  background: #4361ee;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.mentor-mini-card h5 { margin: 5px 0; font-size: 14px; }
+
+.rating-tag {
+  display: block;
+  font-size: 11px;
+  color: #f59e0b;
+  margin-bottom: 10px;
+}
+
+.mentor-mini-card button {
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.mentor-mini-card button:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Card khi đã chọn Mentor */
+.my-mentor-active-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f0f7ff;
+  border-radius: 12px;
+  border: 1px dashed #4361ee;
+}
+
+.mentor-meta h4 { margin: 0; font-size: 16px; }
+.mentor-meta p { margin: 2px 0 0; font-size: 12px; color: #64748b; }
+
+.btn-msg {
+  margin-left: auto;
+  background: white;
+  border: 1px solid #4361ee;
+  color: #4361ee;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
