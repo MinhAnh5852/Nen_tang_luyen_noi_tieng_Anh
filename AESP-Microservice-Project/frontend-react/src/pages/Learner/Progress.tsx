@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Download, Award, Clock, TrendingUp, BookOpen, Send } from 'lucide-react';
+import { Download, Award, Clock, TrendingUp, BookOpen, Send, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import './Progress.css';
 
 interface Task {
@@ -11,6 +11,8 @@ interface Task {
   deadline: string;
   status: string;
   learner_name: string;
+  score: number | null;        // Thêm trường điểm
+  document_url?: string;       // Link tài liệu đính kèm
 }
 
 interface ProgressStats {
@@ -24,7 +26,7 @@ interface ProgressStats {
 }
 
 const Progress: React.FC = () => {
-  const navigate = useNavigate(); // 2. Khởi tạo hook chuyển hướng
+  const navigate = useNavigate();
   const [stats, setStats] = useState<ProgressStats | null>(null);
   const [timeFilter, setTimeFilter] = useState('7 ngày');
   const [loading, setLoading] = useState(true);
@@ -67,10 +69,7 @@ const Progress: React.FC = () => {
     fetchData();
   }, [timeFilter]);
 
-  // 3. Cập nhật hàm xử lý chuyển hướng kèm dữ liệu bài tập
   const handleDoTask = (task: Task) => {
-    // Chuyển hướng sang trang Luyện tập AI (thường là /practice hoặc /ai-chat)
-    // Truyền dữ liệu qua state để AI Core Service nhận diện yêu cầu của Mentor
     navigate('/practice', { 
       state: { 
         taskId: task.id, 
@@ -128,12 +127,38 @@ const Progress: React.FC = () => {
             {stats?.assigned_tasks && stats.assigned_tasks.length > 0 ? (
               stats.assigned_tasks.map(task => (
                 <div key={task.id} className="task-card">
-                  <div className="task-status-tag">{task.status}</div>
+                  <div className="task-header-row">
+                    <span className={`task-status-tag ${task.status === 'Hoàn thành' ? 'done' : 'pending'}`}>
+                      {task.status}
+                    </span>
+                    
+                    {/* Hiển thị điểm hoặc trạng thái đang chấm */}
+                    <div className="grade-badge">
+                      {task.score !== null && task.score !== undefined ? (
+                        <div className="score-box">
+                          <CheckCircle size={14} /> <span>Điểm: {task.score}/100</span>
+                        </div>
+                      ) : (
+                        <div className="grading-box">
+                          <AlertCircle size={14} /> <span>Mentor đang chấm...</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <h3>{task.title}</h3>
-                  <p>{task.description}</p>
+                  <p className="task-description-text">{task.description}</p>
+                  
+                  {/* Khu vực tải tài liệu nếu có */}
+                  {task.document_url && (
+                    <a href={task.document_url} target="_blank" rel="noopener noreferrer" className="mentor-attachment">
+                      <FileText size={16} />
+                      <span>Tài liệu đính kèm từ Mentor.pdf</span>
+                    </a>
+                  )}
+
                   <div className="task-footer">
-                    <span><Clock size={14} /> Hạn: {task.deadline}</span>
-                    {/* 4. Sửa nút bấm để truyền object task vào hàm xử lý */}
+                    <span className="deadline-text"><Clock size={14} /> Hạn: {task.deadline}</span>
                     <button className="btn-do-task" onClick={() => handleDoTask(task)}>
                       Làm bài ngay <Send size={14} />
                     </button>
@@ -177,4 +202,4 @@ const Progress: React.FC = () => {
   );
 };
 
-export default Progress
+export default Progress;

@@ -432,7 +432,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 def get_xdpm_connection():
     engine = get_db_connection()
     # Chuyển đổi URL từ user_db sang xdpm
-    db_url = str(engine.url).replace('user_db', 'xdpm')
+    db_url = 'mysql+pymysql://root:root@user-db:3306/xdpm?charset=utf8mb4'
     return create_engine(db_url)
 
 # --------------------------------------------------
@@ -535,4 +535,134 @@ def grade_session():
             
         return jsonify({"message": "Bảo đã chấm điểm thành công!"}), 200
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# --------------------------------------------------
+# 16. API Lấy danh sách bài nộp (Khớp với Frontend của Bảo)
+# --------------------------------------------------
+@mentor_bp.route('/submissions/for-mentor/<string:mentor_id>', methods=['GET'])
+def get_grading_list_final(mentor_id): 
+    try:
+        engine = get_xdpm_connection()
+        grading_data = []
+        with engine.connect() as conn:
+            # Chỉ lấy dữ liệu từ bảng practice_sessions (Giống code cũ để tránh lỗi 500)
+            query = text("""
+                SELECT id, user_id, topic, accuracy_score, audio_url, status, 
+                       created_at, mentor_feedback, mentor_score 
+                FROM practice_sessions 
+                WHERE audio_url IS NOT NULL 
+                ORDER BY created_at DESC
+            """)
+            result = conn.execute(query).fetchall()
+            
+            for r in result:
+                grading_data.append({
+                    "id": r.id,
+                    "user_id": r.user_id,
+                    "username": f"Học viên {r.user_id[:5]}", # Hiện ID thay vì JOIN tên để không bị lỗi
+                    "topic": r.topic or "Hội thoại tự do",
+                    "ai_score": r.accuracy_score,
+                    "audio_url": r.audio_url, 
+                    "status": r.status,
+                    "mentor_feedback": r.mentor_feedback,
+                    "mentor_score": r.mentor_score,
+                    "date": r.created_at.strftime('%d/%m/%Y %H:%M') if r.created_at else ""
+                })
+        return jsonify(grading_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --------------------------------------------------
+# 17. API Chấm điểm (Khớp với nút Lưu kết quả)
+# --------------------------------------------------
+@mentor_bp.route('/submissions/grade', methods=['POST'])
+def grade_session_final():
+    try:
+        data = request.json
+        session_id = data.get('submission_id') 
+        score = data.get('score')
+        comment = data.get('comment')
+        learner_id = data.get('learner_id')
+
+        if not session_id:
+            return jsonify({"error": "Thiếu ID bài nộp"}), 400
+
+        engine = get_xdpm_connection()
+        with engine.connect() as conn:
+            # 1. Cập nhật bảng kết quả nói (Database xdpm)
+            conn.execute(text("""
+                UPDATE practice_sessions 
+                SET mentor_score = :ms, mentor_feedback = :mf, status = 'Graded' 
+                WHERE id = :sid
+            """), {"ms": score, "mf": comment, "sid": session_id})
+            
+            # 2. Cập nhật bảng Nhiệm vụ (Database user_db/mentor_db) để hiện bên Progress học viên
+            # Lưu ý: title = topic giúp map đúng bài tập
+            try:
+                conn.execute(text("""
+                    UPDATE user_db.tasks 
+                    SET score = :s, status = 'Hoàn thành' 
+                    WHERE learner_id = :lid AND title = :topic
+                """), {"s": score, "lid": learner_id, "topic": data.get('topic')})
+            except:
+                pass # Bỏ qua nếu bảng tasks không nằm trong kết nối này
+
+            conn.commit()
+            
+        return jsonify({"message": "Lưu điểm thành công!"}), 200
+    except Exception as e:
+        print(f"Error Submit Grade: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+# --------------------------------------------------
+# API: Học viên nộp bài ghi âm (Audio Upload)
+# --------------------------------------------------
+# --------------------------------------------------
+# API: Học viên nộp bài ghi âm (Audio Upload)
+# --------------------------------------------------
+import traceback
+
+@mentor_bp.route('/submissions/upload-audio', methods=['POST', 'OPTIONS'])
+def upload_learner_audio():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    try:
+        # 1. Lấy dữ liệu
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file"}), 400
+            
+        file = request.files['audio']
+        user_id = request.form.get('user_id', 'unknown')
+        topic = request.form.get('topic', 'General')
+        transcript = request.form.get('transcript', '')
+
+        # 2. Định nghĩa thư mục lưu trữ (Sửa lỗi NameError)
+        # Đường dẫn tuyệt đối trong container Docker
+        record_dir = "/app/static/recordings"
+        if not os.path.exists(record_dir):
+            os.makedirs(record_dir, mode=0o777, exist_ok=True)
+
+        # 3. Lưu file vật lý
+        filename = secure_filename(f"{user_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.wav")
+        file_path = os.path.join(record_dir, filename)
+        file.save(file_path)
+
+        # 4. Lưu vào Database xdpm
+        audio_url = f"/static/recordings/{filename}"
+        engine = get_xdpm_connection()
+        with engine.connect() as conn:
+            conn.execute(text("""
+                INSERT INTO practice_sessions (user_id, topic, audio_url, ai_feedback, status, created_at)
+                VALUES (:uid, :topic, :url, :txt, 'Pending', NOW())
+            """), {
+                "uid": user_id, "topic": topic, "url": audio_url, "txt": transcript
+            })
+            conn.commit()
+
+        return jsonify({"message": "Lưu thành công", "audio_url": audio_url}), 201
+        
+    except Exception as e:
+        # 🔥 In lỗi chi tiết ra Terminal để Bảo nhìn thấy nguyên nhân thật
+        print("🔥 LỖI CHI TIẾT TẠI BACKEND:")
+        traceback.print_exc() 
         return jsonify({"error": str(e)}), 500

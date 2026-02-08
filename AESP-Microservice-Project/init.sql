@@ -302,4 +302,54 @@ CREATE TABLE IF NOT EXISTS practice_sessions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- ==========================================================
+-- 1. CẤP QUYỀN CHO ROOT (Để các Service Docker kết nối được)
+-- ==========================================================
+-- Tạo user root cho phép kết nối từ xa (%) nếu chưa có
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'root';
+
+-- Cấp toàn quyền quản trị cho user này
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
+-- Lưu thay đổi quyền
+FLUSH PRIVILEGES;
+
+
+-- ==========================================================
+-- 2. CẬP NHẬT DATABASE xdpm (Thêm các cột Mentor cần)
+-- ==========================================================
+USE xdpm;
+
+-- Kiểm tra và tạo bảng practice_sessions bản đầy đủ 
+-- (Nếu bảng đã có, nó sẽ chỉ thêm những cột còn thiếu)
+CREATE TABLE IF NOT EXISTS practice_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(100) NOT NULL, 
+    topic VARCHAR(100),
+    duration_seconds INT DEFAULT 0,
+    accuracy_score FLOAT DEFAULT 0.0,
+    grammar_score FLOAT DEFAULT 0.0,
+    vocabulary_score FLOAT DEFAULT 0.0,
+    ai_feedback TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Thêm các cột phục vụ việc lưu Audio và Chấm điểm của Mentor
+-- Chạy từng dòng này để đảm bảo không bị lỗi nếu cột đã tồn tại
+ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS audio_url VARCHAR(500) AFTER ai_feedback;
+ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS mentor_score FLOAT DEFAULT NULL AFTER audio_url;
+ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS mentor_feedback TEXT DEFAULT NULL AFTER mentor_score;
+ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'Pending' AFTER mentor_feedback;
+
+-- Đảm bảo bảng chat_histories cũng sẵn sàng
+CREATE TABLE IF NOT EXISTS chat_histories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(100) NOT NULL,
+    role VARCHAR(10) NOT NULL, 
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+COMMIT;
+
 COMMIT;

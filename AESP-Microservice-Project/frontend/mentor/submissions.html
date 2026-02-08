@@ -1,34 +1,93 @@
-<link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/submissions.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html { height: auto; overflow-y: auto; background: #f8fafc; font-family: 'Inter', sans-serif; }
+        .page-container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        
+        .learner-group-card {
+            background: white; border-radius: 20px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 30px;
+            overflow: hidden; transition: 0.3s;
+        }
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+        .status-graded { background: #dcfce7; color: #15803d; }
+        .status-waiting { background: #fef3c7; color: #92400e; }
+        tbody tr:hover { background-color: #f9fafb; }
 
-<style>
-    body, html { height: auto; overflow-y: auto; background: #f8fafc; }
-    .page-container { padding: 30px; max-width: 1200px; margin: 0 auto; }
-    
-    .learner-group-card {
-        background: white; border-radius: 20px; border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 30px;
-        overflow: hidden; transition: 0.3s;
-    }
-    .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-    .status-graded { background: #dcfce7; color: #15803d; }
-    .status-waiting { background: #fef3c7; color: #92400e; }
-</style>
+        /* MODAL CHẤM ĐIỂM */
+        .modal-backdrop { 
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); 
+            display: none; align-items: center; justify-content: center; z-index: 9999; 
+            backdrop-filter: blur(8px);
+        }
+        .modal { 
+            background: white; width: 650px; max-width: 95%; border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;
+        }
+        .modal-hd { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .modal-bd { padding: 24px; max-height: 75vh; overflow-y: auto; }
+        .modal-ft { padding: 16px 24px; background: #f8fafc; text-align: right; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 12px; }
+
+        .transcript-container { background: #f0f9ff; padding: 20px; border-radius: 16px; border-left: 6px solid #0284c7; margin-bottom: 24px; }
+        .form-row { margin-bottom: 20px; }
+        .form-row label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13px; color: #475569; }
+        .form-control { width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.2s; font-family: inherit; }
+        .form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        .loading-spinner { text-align: center; padding: 50px; color: #64748b; }
+    </style>
+</head>
+<body>
 
 <div class="page-container">
     <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
         <div>
             <h1 style="font-size: 24px; font-weight: 900; color: #1e293b;">Chấm Điểm Bài Nói</h1>
-            <p style="color: #64748b; font-size: 14px;">Xem transcript và nghe âm thanh để đánh giá học viên.</p>
+            <p style="color: #64748b; font-size: 14px;">Đánh giá kết quả luyện tập trực tiếp từ học viên.</p>
         </div>
-        <button class="btn btn-primary" onclick="init_submissions()">
+        <button class="btn btn-primary" onclick="init_submissions()" style="background:#2563eb; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">
             <i class="fa-solid fa-sync"></i> Làm mới
         </button>
     </div>
 
     <div id="submissions-list">
+        <div class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Đang tải danh sách...</p></div>
+    </div>
+</div>
+
+<div id="gradingModal" class="modal-backdrop">
+    <div class="modal">
+        <div class="modal-hd">
+            <h3 style="margin:0; color:#1e293b;"><i class="fa-solid fa-pen-nib" style="color:#2563eb"></i> Chấm điểm bài thực hành</h3>
+            <i class="fa-solid fa-xmark" onclick="closeModal()" style="cursor:pointer; color:#64748b;"></i>
         </div>
+        <div class="modal-bd">
+            <div class="transcript-container">
+                <label style="font-weight:900; font-size:11px; color:#0369a1; text-transform:uppercase;">Nội dung học viên nói:</label>
+                <p id="display-transcript" style="margin:8px 0 0 0; font-style:italic; color:#1e293b; line-height:1.6; white-space:pre-wrap;">Đang tải...</p>
+            </div>
+            <div class="form-row">
+                <label>Nghe lại bài nói:</label>
+                <audio id="audio-player" controls style="width:100%"></audio>
+            </div>
+            <div class="form-row">
+                <label>Điểm số (0-100):</label>
+                <input type="number" id="grade-score" class="form-control" placeholder="Nhập điểm số..." min="0" max="100">
+            </div>
+            <div class="form-row">
+                <label>Nhận xét chuyên môn:</label>
+                <textarea id="grade-comment" class="form-control" rows="4" placeholder="Viết nhận xét..."></textarea>
+            </div>
+        </div>
+        <div class="modal-ft">
+            <button onclick="closeModal()" style="background:white; border:1px solid #e2e8f0; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600; color:#64748b;">Hủy bỏ</button>
+            <button id="submitBtn" onclick="submitGrade()" style="background:#2563eb; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">Lưu & Gửi kết quả</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -37,21 +96,28 @@
     const mentorId = userInfo.id || userInfo.user_id;
 
     let currentSubmissionsData = [];
+    let activeSessionId = null;
+    let activeLearnerId = null;
+    let activeTopic = '';
 
+    // 1. Tải danh sách bài nộp
     window.init_submissions = async function() {
         const container = document.getElementById('submissions-list');
+        container.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Đang tải danh sách...</p></div>';
+        
         try {
-            const res = await fetch(`/api/ai/submissions/for-mentor/${mentorId}`, {
+            // Sử dụng đường dẫn chuẩn của mentor service
+            const res = await fetch(`/api/mentors/submissions/for-mentor/${mentorId}?t=${new Date().getTime()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const rawData = await res.json();
-            currentSubmissionsData = rawData;
-
-            if (!rawData || rawData.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px;">📭 Chưa có bài nộp nào.</div>`;
+            
+            if (!Array.isArray(rawData) || rawData.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:50px; color:#64748b;">📭 Hiện tại chưa có bài nộp nào cần chấm.</div>`;
                 return;
             }
 
+            currentSubmissionsData = rawData;
             const groupedData = rawData.reduce((groups, item, index) => {
                 const name = item.username || 'Học viên';
                 if (!groups[name]) groups[name] = [];
@@ -64,33 +130,32 @@
             for (const [learnerName, submissions] of Object.entries(groupedData)) {
                 html += `
                 <div class="learner-group-card">
-                    <div class="learner-header" style="padding:15px 25px; background:#f8fafc; display:flex; justify-content:space-between; border-bottom:1px solid #eee;">
-                        <strong style="font-size:16px;">${learnerName}</strong>
-                        <span>${submissions.length} bài tập</span>
+                    <div class="learner-header" style="padding:15px 25px; background:#f8fafc; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color:#1e293b;">${learnerName}</strong>
+                        <span style="font-size:12px; color:#64748b; font-weight:600;">${submissions.length} bài nộp</span>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="background:#fcfcfd; font-size:12px; color:#94a3b8; text-transform:uppercase;">
-                                <th style="padding:12px 25px; text-align:left;">Chủ đề</th>
-                                <th style="padding:12px 25px; text-align:left;">Trạng thái</th>
-                                <th style="padding:12px 25px; text-align:right;">Thao tác</th>
-                            </tr>
-                        </thead>
                         <tbody>
                             ${submissions.map(s => {
-                                const isGraded = s.mentor_feedback !== null && s.status === 'Graded';
+                                // Logic check bài đã chấm: Có status Graded hoặc có feedback/score
+                                const isGraded = (s.status === 'Graded' || (s.mentor_feedback !== null && s.mentor_feedback !== "") || s.mentor_score > 0);
                                 return `
                                 <tr style="border-top:1px solid #f1f5f9;">
-                                    <td style="padding:12px 25px;"><strong>${s.topic || 'Hội thoại'}</strong></td>
-                                    <td style="padding:12px 25px;">
+                                    <td style="padding:15px 25px;"><strong style="color:#334155;">${s.topic || 'Hội thoại'}</strong></td>
+                                    <td style="padding:15px 25px;">
                                         <span class="status-pill ${isGraded ? 'status-graded' : 'status-waiting'}">
-                                            ${isGraded ? 'Đã chấm' : 'Chờ chấm'}
+                                            ${isGraded ? '<i class="fas fa-check"></i> Đã chấm' : '<i class="fas fa-clock"></i> Chờ chấm'}
                                         </span>
                                     </td>
-                                    <td style="padding:12px 25px; text-align:right;">
-                                        <button class="btn-action-sm" onclick="openGradingModal(${s.originalIndex})" style="background:#2563eb; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
-                                            Chấm ngay
-                                        </button>
+                                    <td style="padding:15px 25px; text-align:right;">
+                                        ${isGraded ? 
+                                            `<span style="color:#94a3b8; font-weight:800; font-size:12px; padding-right:15px;">
+                                                <i class="fas fa-check-double"></i> HOÀN THÀNH
+                                             </span>` : 
+                                            `<button onclick="openModal(${s.originalIndex})" style="background:#2563eb; color:white; border:none; padding:8px 18px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px;">
+                                                Chấm ngay
+                                            </button>`
+                                        }
                                     </td>
                                 </tr>`;
                             }).join('')}
@@ -99,35 +164,76 @@
                 </div>`;
             }
             container.innerHTML = html;
-        } catch(e) { container.innerHTML = "Lỗi nạp dữ liệu."; }
+        } catch(e) { 
+            console.error("Fetch error:", e);
+            container.innerHTML = `<div style='text-align:center; padding:30px; color:#ef4444;'>⚠️ Lỗi kết nối máy chủ hoặc dịch vụ đang bảo trì.</div>`; 
+        }
     };
 
-    window.openGradingModal = function(index) {
+    // 2. Mở Modal
+    window.openModal = function(index) {
         const data = currentSubmissionsData[index];
-        const parentDoc = window.parent.document;
+        activeSessionId = data.id;
+        activeLearnerId = data.user_id;
+        activeTopic = data.topic;
+
+        document.getElementById('display-transcript').innerText = data.ai_feedback || data.transcript || "Không có nội dung văn bản.";
         
-        // Gán Transcript (Đây là phần bạn chưa thấy nút xem - nó sẽ hiện ngay trong Modal)
-        const transcriptDisplay = parentDoc.getElementById('display-transcript');
-        if (transcriptDisplay) {
-            // Hiển thị AI feedback hoặc nội dung bài học viên
-            transcriptDisplay.innerText = data.ai_feedback || data.transcript || "Không có nội dung văn bản.";
+        const player = document.getElementById('audio-player');
+        if (data.audio_url) {
+            player.src = data.audio_url;
+            player.load();
+        } else {
+            player.src = "";
         }
 
-        // Gán Audio
-        const audioPlayer = parentDoc.getElementById('audio-player');
-        if (audioPlayer) {
-            audioPlayer.src = data.audio_url || "";
-            audioPlayer.load();
-        }
-        
-        // Lưu ID cho trang cha
-        window.parent.currentSubmissionId = data.id;
-        window.parent.currentLearnerId = data.user_id;
-        window.parent.currentTopic = data.topic;
-        
-        // Gọi lệnh mở Modal ở trang cha
-        window.parent.openModal('gradingModal');
+        document.getElementById('gradingModal').style.display = 'flex';
+    };
+
+    window.closeModal = function() {
+        document.getElementById('gradingModal').style.display = 'none';
+        document.getElementById('audio-player').pause();
+        document.getElementById('grade-score').value = "";
+        document.getElementById('grade-comment').value = "";
+    };
+
+    // 3. Gửi điểm
+    window.submitGrade = async function() {
+        const scoreVal = document.getElementById('grade-score').value;
+        const commentVal = document.getElementById('grade-comment').value;
+
+        if(scoreVal === "" || scoreVal < 0 || scoreVal > 100) return alert("Nhập điểm hợp lệ (0-100)!");
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Đang lưu...";
+
+        try {
+            const res = await fetch('/api/mentors/submissions/grade', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    submission_id: activeSessionId,
+                    learner_id: activeLearnerId,
+                    topic: activeTopic,
+                    score: parseInt(scoreVal),
+                    comment: commentVal,
+                    status: 'Graded'
+                })
+            });
+
+            if (res.ok) {
+                alert("✅ Chấm điểm thành công!");
+                closeModal();
+                init_submissions(); // Refresh danh sách
+            } else {
+                alert("Lỗi server khi lưu điểm.");
+            }
+        } catch (e) { alert("Lỗi kết nối!"); }
+        finally { btn.disabled = false; btn.innerText = "Lưu & Gửi kết quả"; }
     };
 
     init_submissions();
 </script>
+</body>
+</html>

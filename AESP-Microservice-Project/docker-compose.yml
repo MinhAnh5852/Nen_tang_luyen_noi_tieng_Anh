@@ -85,8 +85,10 @@ services:
     ports:
       - "5005:5005"
     environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
       - DATABASE_URL=mysql+pymysql://root:root@user-db:3306/xdpm?charset=utf8mb4
-      - GROQ_API_KEY=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
+      - GROQ_API_KEY=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
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
     depends_on:
       user-db:
@@ -104,6 +106,7 @@ services:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - JWT_SECRET_KEY=AESP_Secret_Key_2026_Trong_Pro_AESP_2026_Upgrade
     volumes:
+      - ./mentor-management-service/static/recordings:/app/static/recordings
       - ./services/mentor-management-service/static/uploads:/app/static/uploads
     depends_on:
       user-db:

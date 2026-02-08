@@ -3,17 +3,19 @@ from services.payment_service import PaymentService
 from sqlalchemy import text
 from database import db
 import requests
+import traceback
 
-payment_bp = Blueprint('payment_bp', __name__)
+# Blueprint có url_prefix='/api/payments'
+payment_bp = Blueprint('payment_bp', __name__, url_prefix='/api/payments')
 
 @payment_bp.route("/create", methods=["POST"])
 def create_payment():
     """Tạo giao dịch thanh toán mới"""
     data = request.json
     user_id = data.get('user_id')
-    package_id = data.get('package_id')     # Dùng để logic so sánh ở React
-    package_name = data.get('package_name') # Dùng để hiển thị tên gói
-    method = data.get('method')
+    package_id = data.get('package_id')
+    package_name = data.get('package_name')
+    method = data.get('method', 'qr_code')
     
     if not all([user_id, package_id, package_name]):
         return jsonify({"error": "Thiếu thông tin user_id, package_id hoặc package_name"}), 400
@@ -30,10 +32,7 @@ def create_payment():
         if amount <= 0:
             return jsonify({"error": "Gói này mặc định miễn phí, không cần tạo giao dịch"}), 400
 
-    except Exception as e:
-        return jsonify({"error": f"Lỗi truy vấn database subscription: {str(e)}"}), 500
-
-    try:
+        # Tạo giao dịch qua Service
         new_tx = PaymentService.create_payment(
             user_id=user_id,
             amount=amount,
@@ -53,55 +52,79 @@ def create_payment():
         if method == 'qr_code':
             qr_url = f"https://img.vietqr.io/image/MB-123456789-compact2.jpg?amount={int(amount)}&addInfo=AESP_PAY_{new_tx.id}"
             response_data["qr_url"] = qr_url
-            return jsonify(response_data), 201
-        
-        response_data["message"] = "Vui lòng thanh toán tiền mặt tại quầy"
+        else:
+            response_data["message"] = "Vui lòng thanh toán tiền mặt tại quầy"
+            
         return jsonify(response_data), 201
         
     except Exception as e:
-        return jsonify({"error": f"Lỗi tạo giao dịch: {str(e)}"}), 500
+        print(traceback.format_exc())
+        return jsonify({"error": f"Lỗi hệ thống: {str(e)}"}), 500
 
 @payment_bp.route("/confirm/<int:tx_id>", methods=["POST"])
 def confirm_payment(tx_id):
-    """Xác nhận thanh toán và gọi User Service nâng cấp gói"""
-    payment, message = PaymentService.update_payment_status(
-        payment_id=tx_id, 
-        status="SUCCESS"
-    )
-
-    if message == "UPDATED":
-        # GỌI SANG USER SERVICE ĐỂ NÂNG CẤP GÓI
-        try:
-            # Lưu ý: 'user-service' là tên container trong docker-compose
-            requests.post("http://user-service:5000/api/users/internal/upgrade-package", json={
-                "user_id": payment.user_id,
-                "package_name": payment.package_name
-            })
-        except Exception as e:
-            print(f"Lỗi gọi User Service: {e}")
-
-        return jsonify({
-            "message": f"Thành công! Tài khoản đã được nâng cấp lên {payment.package_name}",
-            "status": payment.status
-        }), 200
-    
-    return jsonify({"error": "Lỗi hệ thống khi xác nhận thanh toán"}), 500
-
-@payment_bp.route("/history/<string:user_id>", methods=["GET"])
-def get_payment_history(user_id):
-    """SỬA LỖI 404: Trả về danh sách giao dịch JSON chuẩn cho React"""
+    """Xác nhận thanh toán (Admin duyệt)"""
     try:
-        from models.transaction import Transaction
-        transactions = Transaction.query.filter_by(user_id=user_id).order_by(Transaction.created_at.desc()).all()
-        return jsonify([tx.to_dict() for tx in transactions]), 200
+        payment, message = PaymentService.update_payment_status(
+            payment_id=tx_id, 
+            status="SUCCESS"
+        )
+
+        if message == "UPDATED":
+            # GỌI SANG USER SERVICE ĐỂ NÂNG CẤP GÓI (Sửa path nội bộ cho chuẩn)
+            try:
+                requests.post("http://user-service:5000/api/users/internal/upgrade-package", json={
+                    "user_id": payment.user_id,
+                    "package_name": payment.package_name
+                }, timeout=5)
+            except Exception as e:
+                print(f"⚠️ Cảnh báo: Giao dịch OK nhưng chưa gọi được User Service: {e}")
+
+            return jsonify({
+                "message": f"Thành công! Đã duyệt đơn #INV-{tx_id}",
+                "status": payment.status
+            }), 200
+        
+        return jsonify({"error": "Không thể cập nhật trạng thái đơn hàng"}), 400
     except Exception as e:
-        return jsonify({"error": f"Lỗi lấy lịch sử: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 @payment_bp.route("/all", methods=["GET"])
 def get_all_payments():
+    """Lấy toàn bộ lịch sử cho Admin"""
     try:
         from models.transaction import Transaction
         transactions = Transaction.query.order_by(Transaction.created_at.desc()).all()
-        return jsonify([tx.to_dict() for tx in transactions]), 200
+        
+        result = []
+        for tx in transactions:
+            data = tx.to_dict()
+            # 🔥 Fix mapping cho HTML: Gán payment_method vào key 'method'
+            data['method'] = tx.payment_method
+            # Format lại thời gian cho JS dễ hiển thị
+            if data['created_at']:
+                data['created_at'] = tx.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            result.append(data)
+            
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@payment_bp.route("/history/<string:user_id>", methods=["GET"])
+def get_payment_history(user_id):
+    """Lấy lịch sử cho 1 User cụ thể"""
+    try:
+        from models.transaction import Transaction
+        transactions = Transaction.query.filter_by(user_id=user_id).order_by(Transaction.created_at.desc()).all()
+        
+        result = []
+        for tx in transactions:
+            data = tx.to_dict()
+            data['method'] = tx.payment_method
+            if data['created_at']:
+                data['created_at'] = tx.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            result.append(data)
+            
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -1,196 +1,6 @@
-// import React, { useState, useEffect, useRef } from 'react';
-// import './Practice.css';
-
-// interface Message {
-//   sender: 'ai' | 'user';
-//   text: string;
-//   accuracy?: number;
-//   correction?: string;
-// }
-
-// const Practice: React.FC = () => {
-//   const [messages, setMessages] = useState<Message[]>([
-//     { sender: 'ai', text: "Hello! I'm your AESP assistant. Please select a topic and click the microphone to start our conversation." }
-//   ]);
-//   const [isListening, setIsListening] = useState(false);
-//   const [status, setStatus] = useState("Nhấn mic để bắt đầu nói");
-//   const [selectedTopic, setSelectedTopic] = useState("Daily Life");
-//   const [userLevel, setUserLevel] = useState("A1");
-  
-//   // Ref để quản lý khung chat và đối tượng nhận diện ổn định
-//   const chatContainerRef = useRef<HTMLDivElement>(null);
-//   const recognitionRef = useRef<any>(null);
-
-//   // 1. Tự động nạp lịch sử và khởi tạo Micro khi vào trang
-//   useEffect(() => {
-//     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-//     if (userInfo.user_level) setUserLevel(userInfo.user_level);
-
-//     // Lấy lịch sử cũ (Nếu bạn đã thêm endpoint /api/ai/history ở Backend)
-//     const fetchHistory = async () => {
-//       if (userInfo.id) {
-//         try {
-//           const response = await fetch(`/api/ai/history/${userInfo.id}`);
-//           const data = await response.json();
-//           if (Array.isArray(data) && data.length > 0) setMessages(data);
-//         } catch (e) { console.error("Lỗi nạp lịch sử:", e); }
-//       }
-//     };
-//     fetchHistory();
-
-//     // Khởi tạo SpeechRecognition
-//     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-//     if (SpeechRecognition) {
-//       recognitionRef.current = new SpeechRecognition();
-//       recognitionRef.current.lang = 'en-US';
-//       recognitionRef.current.continuous = false; // Ngắt sau mỗi câu để gửi API xử lý
-
-//       recognitionRef.current.onresult = (event: any) => {
-//         const transcript = event.results[0][0].transcript;
-//         if (transcript.trim()) handleSendMessage(transcript);
-//       };
-
-//       recognitionRef.current.onend = () => setIsListening(false);
-//       recognitionRef.current.onerror = (event: any) => {
-//         console.error("Speech Recognition Error:", event.error);
-//         setIsListening(false);
-//         setStatus("Không nghe rõ, vui lòng thử lại.");
-//       };
-//     }
-//   }, []);
-
-//   // 2. Tự động cuộn khung chat nội bộ
-//   useEffect(() => {
-//     if (messages.length > 1 && chatContainerRef.current) {
-//       chatContainerRef.current.scrollTo({
-//         top: chatContainerRef.current.scrollHeight,
-//         behavior: 'smooth'
-//       });
-//     }
-//   }, [messages]);
-
-//   const toggleMic = () => {
-//     if (!recognitionRef.current) return alert("Trình duyệt không hỗ trợ nhận diện giọng nói.");
-
-//     if (!isListening) {
-//       try {
-//         recognitionRef.current.start();
-//         setIsListening(true);
-//         setStatus(`Đang lắng nghe chủ đề: ${selectedTopic}...`);
-//       } catch (e) { recognitionRef.current.stop(); }
-//     } else {
-//       recognitionRef.current.stop();
-//       setIsListening(false);
-//     }
-//   };
-
-//   const handleSendMessage = async (text: string) => {
-//     const token = localStorage.getItem('token');
-//     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-    
-//     setMessages(prev => [...prev, { sender: 'user', text }]);
-//     setStatus("AI đang phân tích...");
-
-//     try {
-//       const response = await fetch('/api/ai/chat', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ 
-//           text, 
-//           topic: selectedTopic, // ✅ Đảm bảo chủ đề hiện tại được gửi đi
-//           user_id: userInfo.id,
-//           level: userLevel 
-//         })
-//       });
-
-//       const data = await response.json();
-//       setMessages(prev => [...prev, { 
-//         sender: 'ai', 
-//         text: data.reply, 
-//         accuracy: data.accuracy, 
-//         correction: data.correction 
-//       }]);
-
-//       // Cập nhật tiến độ vào User Service
-//       if (data.accuracy > 50) {
-//         await fetch('/api/users/profile/update-progress', {
-//           method: 'POST',
-//           headers: { 
-//             'Authorization': `Bearer ${token}`,
-//             'Content-Type': 'application/json' 
-//           },
-//           body: JSON.stringify({ accuracy: data.accuracy })
-//         });
-//       }
-//       setStatus(`Độ chính xác: ${data.accuracy}%`);
-//     } catch (e) {
-//       setStatus("Lỗi kết nối.");
-//     }
-//   };
-
-//   return (
-//     <main className="container">
-//       <div className="practice-header" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-//         <h1>AESP AI Speaking</h1>
-//         <div className="user-level-tag" style={{ background: '#e0e7ff', color: '#4361ee', padding: '5px 15px', borderRadius: '20px', fontWeight: 'bold' }}>
-//           Trình độ: {userLevel}
-//         </div>
-//       </div>
-
-//       <div className="content-card" style={{ background: 'white', padding: '20px', borderRadius: '12px', margin: '20px 0' }}>
-//         <h3>1. Chọn chủ đề hội thoại</h3>
-//         <div className="topic-grid" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-//           {['Work', 'Travel', 'Daily Life', 'Health'].map(topic => (
-//             <div 
-//               key={topic}
-//               className={`topic-card ${selectedTopic === topic ? 'selected' : ''}`}
-//               onClick={() => setSelectedTopic(topic)}
-//               style={{ 
-//                 padding: '10px 20px', 
-//                 border: selectedTopic === topic ? '2px solid #4361ee' : '1px solid #ccc', 
-//                 background: selectedTopic === topic ? '#f0f4ff' : 'white',
-//                 borderRadius: '8px', 
-//                 cursor: 'pointer' 
-//               }}
-//             >
-//               {topic}
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-
-//       <div className="practice-area">
-//         {/* Khung chat có thanh cuộn nội bộ */}
-//         <div className="conversation-box" ref={chatContainerRef} style={{ height: '400px', overflowY: 'auto' }}>
-//           {messages.map((msg, i) => (
-//             <div key={i} className={`message ${msg.sender}`}>
-//               <div className="message-content">
-//                 <strong>{msg.sender === 'ai' ? 'AI' : 'Bạn'}:</strong> {msg.text}
-//               </div>
-//               {msg.accuracy !== undefined && (
-//                 <div className="feedback-note">
-//                   📊 Điểm: {msg.accuracy}% | 💡 Gợi ý: {msg.correction}
-//                 </div>
-//               )}
-//             </div>
-//           ))}
-//         </div>
-
-//         <div className="controls-container" style={{ textAlign: 'center', marginTop: '20px' }}>
-//           <button className={`recording-button ${isListening ? 'recording' : ''}`} onClick={toggleMic}>
-//             <i className={`fas fa-${isListening ? 'stop' : 'microphone'}`}></i>
-//           </button>
-//           <p>{status}</p>
-//         </div>
-//       </div>
-//     </main>
-//   );
-// };
-
-// export default Practice;
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, Mic, Square } from 'lucide-react';
+import { CheckCircle, Mic, Square, Volume2, MessageSquare, Award, Loader2 } from 'lucide-react';
 import './Practice.css';
 
 interface Message {
@@ -203,188 +13,230 @@ interface Message {
 const Practice: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const taskData = location.state; // Nhận taskId, topic, description từ Progress
+  const taskData = location.state;
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis>(window.speechSynthesis);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const [userLevel] = useState(() => {
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    return userInfo.level || userInfo.user_level || "A1"; 
+  });
 
   const [messages, setMessages] = useState<Message[]>([
     { 
       sender: 'ai', 
       text: taskData?.isFromTask 
         ? `Hello! Mentor assigned you a task: "${taskData.topic}". ${taskData.description}. Let's start!` 
-        : "Hello! I'm your AESP assistant. Select a topic and start talking." 
+        : `Hi! I'm your AI Coach. Your current level is ${userLevel}. What topic would you like to practice today?` 
     }
   ]);
+
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState(taskData?.isFromTask ? "Hệ thống đã nạp nhiệm vụ của Mentor" : "Nhấn mic để bắt đầu");
-  const [selectedTopic, setSelectedTopic] = useState(taskData?.topic || "Daily Life");
-  const [userLevel, setUserLevel] = useState("A1");
-  
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const [status, setStatus] = useState(taskData?.isFromTask ? "Task Mode Active" : "Press mic to speak");
+  const [selectedTopic] = useState(taskData?.topic || "Daily Life");
+  const [isAiThinking, setIsAiThinking] = useState(false);
 
   useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-    if (userInfo.user_level) setUserLevel(userInfo.user_level);
-
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.interimResults = false;
+
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        if (transcript.trim()) handleSendMessage(transcript);
+        if (transcript.trim()) {
+          // 🔥 Quan trọng: Dừng recorder trước để kích hoạt sự kiện onstop
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+            mediaRecorderRef.current.onstop = () => {
+              const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+              handleProcessExchange(transcript, audioBlob);
+              stopStream(); // Tắt đèn micro trên trình duyệt
+            };
+            mediaRecorderRef.current.stop();
+          }
+        }
       };
+
       recognitionRef.current.onend = () => setIsListening(false);
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+        setStatus("Could not hear you. Try again.");
+        stopStream();
+      };
     }
-  }, []);
+  }, [selectedTopic]);
 
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const toggleMic = () => {
-    if (!isListening) {
-      recognitionRef.current.start();
-      setIsListening(true);
-      setStatus("Đang lắng nghe...");
-    } else {
-      recognitionRef.current.stop();
+  const stopStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
   };
 
-  const handleSendMessage = async (text: string) => {
-    const token = localStorage.getItem('token');
+  const speak = (text: string) => {
+    synthRef.current.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    const voices = synthRef.current.getVoices();
+    const voice = voices.find(v => v.lang.includes('en') && v.name.includes('Google')) || voices[0];
+    if (voice) utterance.voice = voice;
+    synthRef.current.speak(utterance);
+  };
+
+  const toggleMic = async () => {
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.start();
+        recognitionRef.current.start();
+        setIsListening(true);
+        setStatus("Listening...");
+      } catch (err) {
+        setStatus("Mic access denied");
+      }
+    }
+  };
+
+  const handleProcessExchange = async (text: string, audioBlob: Blob) => {
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const userId = userInfo.id || userInfo.user_id;
+    
     setMessages(prev => [...prev, { sender: 'user', text }]);
+    setIsAiThinking(true);
+    setStatus("Syncing data to mentor...");
 
     try {
-      const response = await fetch('/api/ai/chat', {
+      // 1. GỬI AUDIO + TRANSCRIPT CHO MENTOR
+      const audioFormData = new FormData();
+      audioFormData.append('audio', audioBlob, 'voice_record.wav');
+      audioFormData.append('user_id', userId);
+      audioFormData.append('topic', selectedTopic);
+      audioFormData.append('transcript', text); // Gửi chữ để Mentor chấm bài
+
+      const audioPromise = fetch('/api/mentors/submissions/upload-audio', {
+        method: 'POST',
+        body: audioFormData
+      });
+
+      // 2. GỬI TEXT CHO AI CHAT
+      const aiPromise = fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text, 
-          topic: selectedTopic, 
-          user_id: userInfo.id,
-          level: userLevel 
-        })
+        body: JSON.stringify({ text, topic: selectedTopic, user_id: userId, level: userLevel })
       });
 
-      const data = await response.json();
-      setMessages(prev => [...prev, { 
-        sender: 'ai', text: data.reply, accuracy: data.accuracy, correction: data.correction 
-      }]);
+      const [aiRes] = await Promise.all([aiPromise, audioPromise]);
+      const data = await aiRes.json();
 
-      // Cập nhật tiến độ tổng quát
-      await fetch('/api/users/profile/update-progress', {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ accuracy: data.accuracy })
-      });
-      
-      setStatus(`Độ chính xác: ${data.accuracy}%`);
-    } catch (e) { 
-      setStatus("Lỗi kết nối."); 
+      if (data.reply) {
+        setMessages(prev => [...prev, { sender: 'ai', text: data.reply, accuracy: data.accuracy, correction: data.correction }]);
+        speak(data.reply);
+        setStatus(`Accuracy: ${data.accuracy}%`);
+      }
+    } catch (e) {
+      setStatus("Error saving voice.");
+    } finally {
+      setIsAiThinking(false);
     }
   };
 
-  // HÀM QUAN TRỌNG: XỬ LÝ NỘP BÀI ĐỂ HOÀN THÀNH TASK
   const handleFinishTask = async () => {
     if (!taskData?.taskId) return;
     const token = localStorage.getItem('token');
-    
     try {
-      // Gọi API đến Mentor Service để cập nhật trạng thái Task sang 'Completed'
-      // Route này bạn cần thêm vào Backend trong mentor_controller.py
-      const response = await fetch(`/api/mentors/tasks/${taskData.taskId}/complete`, {
+      const res = await fetch(`/api/mentors/tasks/${taskData.taskId}/complete`, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json' 
-        }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
-
-      if (response.ok) {
-        alert("Chúc mừng! Bạn đã hoàn thành bài tập từ Mentor.");
-        navigate('/progress'); // Quay lại trang Tiến độ để xem Task đã xong
-      }
-    } catch (e) {
-      console.error("Lỗi nộp bài:", e);
-      alert("Nộp bài thất bại. Vui lòng thử lại.");
-    }
+      if (res.ok) navigate('/progress');
+    } catch (e) { alert("Submit failed."); }
   };
 
   return (
-    <main className="container">
-      <div className="practice-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-        <h1>AESP AI Speaking {taskData?.isFromTask && "(Task Mode)"}</h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div className="user-level-tag">Trình độ: {userLevel}</div>
-          
-          {/* HIỆN NÚT NỘP BÀI KHI ĐANG LÀM TASK VÀ ĐÃ CÓ ÍT NHẤT 2 TIN NHẮN */}
-          {taskData?.isFromTask && messages.length > 2 && (
-            <button 
-              onClick={handleFinishTask} 
-              className="btn-finish-task" 
-              style={{ 
-                backgroundColor: '#22c55e', 
-                color: 'white', 
-                border: 'none', 
-                padding: '10px 15px', 
-                borderRadius: '8px', 
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '5px',
-                fontWeight: 'bold'
-              }}
-            >
-              <CheckCircle size={18} /> Nộp bài & Hoàn thành
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="content-card">
-        <h3>{taskData?.isFromTask ? `Đang thực hiện Task: ${taskData.topic}` : "1. Chọn chủ đề hội thoại"}</h3>
-        {!taskData?.isFromTask && (
-          <div className="topic-grid">
-            {['Work', 'Travel', 'Daily Life', 'Health'].map(topic => (
-              <div 
-                key={topic} 
-                className={`topic-card ${selectedTopic === topic ? 'selected' : ''}`} 
-                onClick={() => setSelectedTopic(topic)}
-              >
-                {topic}
-              </div>
-            ))}
+    <main className="practice-container">
+      <div className="practice-sidebar">
+        <div className="sidebar-top">
+          <div className="level-badge">
+            <Award size={20} className="icon-gold" />
+            <span>Level: {userLevel}</span>
           </div>
+          <div className="topic-section">
+            <p className="section-label">Topic</p>
+            <div className="topic-card-fixed active">
+              <MessageSquare size={16} /> {selectedTopic}
+            </div>
+          </div>
+        </div>
+        {taskData?.isFromTask && messages.length > 2 && (
+          <button onClick={handleFinishTask} className="finish-btn">
+            <CheckCircle size={18} /> Submit Task
+          </button>
         )}
       </div>
 
-      <div className="practice-area">
-        <div className="conversation-box" ref={chatContainerRef} style={{ height: '400px', overflowY: 'auto' }}>
+      <div className="chat-main">
+        <div className="chat-history" ref={chatContainerRef}>
           {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.sender}`}>
-              <div className="message-content">
-                <strong>{msg.sender === 'ai' ? 'AI' : 'Bạn'}:</strong> {msg.text}
+            <div key={i} className={`chat-bubble-wrapper ${msg.sender}`}>
+              <div className="chat-bubble">
+                <p>{msg.text}</p>
+                {msg.sender === 'ai' && (
+                  <button className="tts-btn" onClick={() => speak(msg.text)}>
+                    <Volume2 size={16} />
+                  </button>
+                )}
               </div>
               {msg.accuracy !== undefined && (
-                <div className="feedback-note">
-                  📊 Điểm: {msg.accuracy}% | 💡 Gợi ý: {msg.correction}
+                <div className="score-badge animate-in">
+                  <span className="accuracy">Score: {msg.accuracy}%</span>
+                  {msg.correction && msg.correction !== 'Perfect' && (
+                    <span className="correction">💡 {msg.correction}</span>
+                  )}
                 </div>
               )}
             </div>
           ))}
+          {isAiThinking && (
+            <div className="chat-bubble-wrapper ai">
+              <div className="chat-bubble typing">
+                <Loader2 size={18} className="spin" />
+                <span>AI evaluating...</span>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="controls-container" style={{ textAlign: 'center', marginTop: '20px' }}>
-          <button className={`recording-button ${isListening ? 'recording' : ''}`} onClick={toggleMic}>
-            {isListening ? <Square size={24} fill="white" /> : <Mic size={24} />}
+
+        <div className="input-area">
+          <div className="input-status-group">
+            <div className={`visualizer ${isListening ? 'active' : ''}`}>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <p className="status-msg">{status}</p>
+          </div>
+          <button 
+            className={`mic-main-btn ${isListening ? 'recording' : ''}`} 
+            onClick={toggleMic}
+            disabled={isAiThinking}
+          >
+            {isListening ? <Square size={24} fill="white" /> : <Mic size={32} />}
           </button>
-          <p>{status}</p>
         </div>
       </div>
     </main>

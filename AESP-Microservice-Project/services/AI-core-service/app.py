@@ -3,8 +3,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import time
-import pika  # Thêm thư viện để kết nối RabbitMQ
-import json  # Thêm thư viện để xử lý dữ liệu gửi đi
+import pika
+import json
 
 # Import các service và database
 from services.ai_analysis import analyze_speech
@@ -12,149 +12,133 @@ from services.speech_to_text import transcribe_audio
 from database import db
 from models import PracticeSession, ChatHistory
 
-# 1. Load biến môi trường
 load_dotenv()
 
 app = Flask(__name__)
-# Bật CORS cho toàn bộ ứng dụng để Gateway/Frontend có thể truy cập
 CORS(app)
 
-# 2. Cấu hình kết nối Database
+# --- CẤU HÌNH DATABASE ---
 db_url = os.environ.get("DATABASE_URL")
-if not db_url:
-    print("WARNING: DATABASE_URL not found in .env")
-
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# 3. Khởi tạo Database
 db.init_app(app)
 
-# --- PHẦN THÊM MỚI 1: HÀM GỬI SỰ KIỆN QUA RABBITMQ ---
+# --- PHẦN 1: TỐI ƯU RABBITMQ (SỬA LỖI TREO API) ---
 def send_practice_event(data):
-    """Gửi thông tin luyện tập sang Analytics Service qua RabbitMQ"""
+    """Gửi sự kiện sang Analytics Service. Không được làm sập hàm chat chính."""
     try:
-        # Lấy URL RabbitMQ từ .env (đã được cấu hình trong Docker)
-        rabbitmq_url = os.environ.get('RABBITMQ_URL', 'amqp://admin:admin123@app-rabbitmq:5672/')
+        # Lấy URL từ env, mặc định trỏ về service 'rabbitmq' trong docker-compose
+        rabbitmq_url = os.environ.get('RABBITMQ_URL', 'amqp://guest:guest@rabbitmq:5672/')
+        
+        # Thiết lập timeout 2 giây để tránh treo API Chat nếu RabbitMQ sập
         params = pika.URLParameters(rabbitmq_url)
+        params.socket_timeout = 2 
+        
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         
-        # Khai báo hàng đợi để lưu tin nhắn
         channel.queue_declare(queue='practice_events', durable=True)
         
-        # Gửi dữ liệu dưới dạng chuỗi JSON
         channel.basic_publish(
             exchange='',
             routing_key='practice_events',
             body=json.dumps(data),
-            properties=pika.BasicProperties(delivery_mode=2) # Đảm bảo tin nhắn không mất khi restart RabbitMQ
+            properties=pika.BasicProperties(delivery_mode=2)
         )
         connection.close()
-        print(f" [MQ] Đã gửi sự kiện luyện tập cho User {data['user_id']}")
+        print(f" [MQ Success] User {data['user_id']} event sent.")
     except Exception as e:
-        print(f" [MQ Error] Không thể gửi message: {e}")
+        # Quan trọng: Chỉ in lỗi ra log, vẫn để hàm chat() chạy tiếp
+        print(f" [MQ Error] RabbitMQ connection failed: {e}")
 
-# Tự động tạo bảng với cơ chế chờ đợi Database sẵn sàng
+# Tự động tạo bảng (Retry logic)
 with app.app_context():
-    for i in range(5):  # Thử lại 5 lần
+    for i in range(5):
         try:
             db.create_all()
-            print("Database connected and tables created.")
+            print("Database connected successfully.")
             break
         except Exception as e:
-            print(f"Waiting for database... ({i+1}/5). Error: {e}")
+            print(f"Waiting for database... ({i+1}/5)")
             time.sleep(3)
 
-# ✅ SỬA ĐỔI QUAN TRỌNG: Thêm tiền tố /api/ai để khớp với Nginx Gateway
+# --- PHẦN 2: CÁC ENDPOINT API ---
+
 @app.route("/api/ai/chat", methods=["POST"])
 def chat():
-    """
-    Endpoint xử lý hội thoại văn bản và lưu lịch sử.
-    """
     try:
         data = request.json
         if not data:
-            return jsonify({"error": "No JSON data provided"}), 400
+            return jsonify({"error": "No JSON provided"}), 400
 
         user_text = data.get("text", "")
         topic = data.get("topic", "General English")
-        
-        # Lấy user_id dưới dạng UUID/String từ Frontend
-        user_id = data.get("user_id", "1")
+        user_id = str(data.get("user_id", "1"))
 
         if not user_text:
             return jsonify({"error": "No text provided"}), 400
             
-        # --- BƯỚC 1: Lưu tin nhắn của User vào DB ---
-        user_msg = ChatHistory(user_id=user_id, role="user", message=user_text)
-        db.session.add(user_msg)
-        
-        # --- BƯỚC 2: Gọi AI xử lý ---
+        # 1. Gọi AI xử lý trước (Để nếu AI lỗi thì chưa lưu DB vội)
         result = analyze_speech(user_text, topic)
-        
         if "error" in result:
-            db.session.rollback()
-            return jsonify(result), 500
+             return jsonify(result), 500
+
+        # 2. Lưu lịch sử và kết quả vào DB
+        try:
+            # Tin nhắn của User
+            user_msg = ChatHistory(user_id=user_id, role="user", message=user_text)
+            db.session.add(user_msg)
             
-        # --- BƯỚC 3: Lưu phản hồi của AI vào DB ---
-        ai_reply = result.get("reply", "")
-        ai_msg = ChatHistory(user_id=user_id, role="ai", message=ai_reply)
-        db.session.add(ai_msg)
+            # Phản hồi của AI
+            ai_reply = result.get("reply", "")
+            ai_msg = ChatHistory(user_id=user_id, role="ai", message=ai_reply)
+            db.session.add(ai_msg)
 
-        # --- BƯỚC 4: Lưu kết quả luyện tập (Score) ---
-        accuracy = result.get("accuracy", 0)
-        practice = PracticeSession(
-            user_id=user_id, 
-            topic=topic, 
-            accuracy_score=float(accuracy)
-        )
-        db.session.add(practice)
+            # Kết quả luyện tập
+            accuracy = result.get("accuracy", 0)
+            practice = PracticeSession(
+                user_id=user_id, 
+                topic=topic, 
+                accuracy_score=float(accuracy)
+            )
+            db.session.add(practice)
+            
+            db.session.commit()
+        except Exception as db_e:
+            db.session.rollback()
+            print(f"Database Error: {db_e}")
+            # Vẫn trả về kết quả AI cho người dùng dù lưu DB lỗi
         
-        # Lưu tất cả thay đổi vào MySQL
-        db.session.commit()
-
-        # --- PHẦN THÊM MỚI 2: GỬI SỰ KIỆN SANG ANALYTICS SERVICE ---
-        # Ngay sau khi lưu DB thành công, gửi tin nhắn đi để đồng bộ Dashboard
+        # 3. Gửi sự kiện Async sang Analytics (Chạy ngầm)
         send_practice_event({
             "event": "PRACTICE_COMPLETED",
             "user_id": user_id,
-            "accuracy": float(accuracy),
+            "accuracy": float(result.get("accuracy", 0)),
             "topic": topic,
-            "duration": 60, # Giả định mỗi lượt chat là 1 phút để tính total_time
+            "duration": 60,
             "timestamp": time.time()
         })
             
         return jsonify(result), 200
         
     except Exception as e:
-        db.session.rollback()
-        print(f"Chat error: {e}")
-        return jsonify({"error": str(e)}), 500
+        print(f"!!! CRITICAL CHAT ERROR: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
 
-# ✅ SỬA ĐỔI QUAN TRỌNG: Thêm tiền tố /api/ai để khớp với Nginx Gateway
 @app.route("/api/ai/transcribe", methods=["POST"])
 def transcribe():
-    """
-    Endpoint nhận file âm thanh và chuyển thành văn bản qua Whisper.
-    """
     try:
         if 'file' not in request.files:
             return jsonify({"error": "No file part"}), 400
-            
         file = request.files['file']
-        
         if file.filename == '':
             return jsonify({"error": "No selected file"}), 400
 
-        if file:
-            result_text = transcribe_audio(file)
-            
-            if isinstance(result_text, dict) and "error" in result_text:
-                return jsonify(result_text), 500
-                
-            return jsonify({"text": result_text}), 200
-            
+        result_text = transcribe_audio(file)
+        if isinstance(result_text, dict) and "error" in result_text:
+            return jsonify(result_text), 500
+        return jsonify({"text": result_text}), 200
     except Exception as e:
         print(f"Transcribe error: {e}")
         return jsonify({"error": str(e)}), 500
@@ -162,26 +146,19 @@ def transcribe():
 @app.route("/api/ai/history/<string:user_id>", methods=["GET"])
 def get_history(user_id):
     try:
-        # Lấy tối đa 30 tin nhắn gần nhất của đúng user_id
         history = ChatHistory.query.filter_by(user_id=user_id)\
             .order_by(ChatHistory.created_at.asc())\
             .limit(30).all()
-            
-        results = [
-            {"sender": h.role, "text": h.message} 
-            for h in history
-        ]
+        results = [{"sender": h.role, "text": h.message} for h in history]
         return jsonify(results), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-# AI-core-service/app.py
 
 @app.route('/api/ai/submissions/for-mentor/<string:mentor_id>', methods=['GET'])
 def get_submissions_for_mentor(mentor_id):
     try:
         from sqlalchemy import text
-        # Lấy danh sách học viên của Mentor này từ user_db thông qua SQL cross-database 
-        # (Hoặc gọi qua User Service nếu bạn muốn tách biệt hoàn toàn)
+        # Lưu ý: Truy vấn cross-db yêu cầu user-db và xdpm nằm cùng instance MySQL
         query = text("""
             SELECT p.id, p.user_id, u.username, p.topic, p.created_at as date, 
                    p.accuracy_score as ai_score, p.ai_feedback
@@ -191,12 +168,11 @@ def get_submissions_for_mentor(mentor_id):
             WHERE ms.mentor_id = :mid AND ms.status = 'active'
             ORDER BY p.created_at DESC
         """)
-        
         result = db.session.execute(query, {"mid": mentor_id}).mappings().all()
         return jsonify([dict(row) for row in result]), 200
     except Exception as e:
+        print(f"Mentor Submissions Error: {e}")
         return jsonify({"error": str(e)}), 500 
-    
+
 if __name__ == "__main__":
-    # Chạy trên port 5005 để Gateway điều hướng tới
     app.run(host="0.0.0.0", port=5005)

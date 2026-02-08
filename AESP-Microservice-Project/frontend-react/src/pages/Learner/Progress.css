@@ -1,272 +1,225 @@
-/* Progress.css */
-
 .aesp-progress-wrapper {
-    animation: fadeIn 0.5s ease-in-out;
-    /* Đảm bảo nội dung luôn có khoảng cách với Header nếu main-content chưa xử lý */
-    width: 100%;
+  padding: 20px;
+  background-color: #f8fafc;
+  min-height: 100vh;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.progress-content-inner {
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* Header trang Progress */
+/* Header & Filter */
 .progress-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
-.progress-top-bar h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0;
+.header-title h1 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 5px;
 }
 
-.progress-top-bar p {
-    color: #64748b;
-    margin: 5px 0 0 0;
-}
-
-/* Bộ lọc thời gian */
 .time-filter-container {
-    display: flex;
-    background: #e2e8f0;
-    padding: 4px;
-    border-radius: 12px;
+  display: flex;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 8px;
 }
 
 .filter-btn-item {
-    padding: 8px 16px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-weight: 600;
-    color: #64748b;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s;
 }
 
 .filter-btn-item.active {
-    background: white;
-    color: #4361ee;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background: white;
+  color: #4361ee;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Lưới Metrics */
+/* Metrics Cards */
 .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
 .metric-card {
-    background: white;
-    padding: 24px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-}
-
-.metric-card:hover {
-    transform: translateY(-5px);
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .metric-icon-bg {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.metric-info h3 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #1e293b;
+/* Tasks Grid & Card */
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.metric-info p {
-    margin: 0;
-    color: #64748b;
-    font-size: 14px;
+.task-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: 0.3s;
 }
 
-/* Section Biểu đồ */
+.task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.task-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-status-tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.task-status-tag.pending { background: #fef3c7; color: #92400e; }
+.task-status-tag.done { background: #dcfce7; color: #166534; }
+
+/* Score & Grading Styles */
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.grading-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.task-description-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Mentor Attachment Button */
+.mentor-attachment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 10px;
+  border-radius: 8px;
+  color: #4361ee;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.mentor-attachment:hover {
+  background: #eff6ff;
+  border-color: #4361ee;
+}
+
+.task-footer {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deadline-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-do-task {
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.btn-do-task:hover { background: #3730a3; }
+
+/* Chart Section */
 .analysis-chart-section {
-    background: white;
-    padding: 24px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  margin-top: 40px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.analysis-chart-section h2 {
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #1e293b;
-}
+.analysis-chart-section h2 { margin-bottom: 20px; font-size: 1.2rem; }
 
-.chart-render-container {
-    padding-top: 10px;
-}
-
-/* Layout chi tiết (Từ vựng & Cột mốc) */
-.details-layout-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.detail-box {
-    background: white;
-    padding: 24px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.detail-box h3 {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #475569;
-}
-
-.main-stat-number {
-    font-size: 32px;
-    font-weight: 800;
-    color: #4361ee;
-    margin-bottom: 15px;
-}
-
-/* Progress bar cho từ vựng */
-.progress-line-bg {
-    height: 10px;
-    background: #f1f5f9;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.progress-line-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4361ee, #4cc9f0);
-    border-radius: 10px;
-    transition: width 1s ease-in-out;
-}
-
-.goal-text {
-    font-size: 13px;
-    color: #94a3b8;
-}
-
-/* Danh sách cột mốc */
-.milestone-check-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.milestone-check-list li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0; /* Tăng nhẹ padding cho dễ nhìn */
-    color: #475569;
-    font-size: 14px;
-    border-bottom: 1px solid #f8fafc; /* ✅ ĐÃ SỬA LỖI VIẾT LẶP Ở ĐÂY */
-}
-
-.milestone-check-list li:last-child {
-    border-bottom: none;
-}
-
-.dot-indicator {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #cbd5e1;
-    border-radius: 50%;
-}
-
-/* Nút bấm ở Footer */
+/* Footer Action */
 .report-action-btns {
-    display: flex;
-    gap: 15px;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-.btn-download-pdf, .btn-share-mentor {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  margin-top: 40px;
+  text-align: center;
 }
 
 .btn-download-pdf {
-    background: #1e293b;
-    color: white;
-    border: none;
+  background: #1e293b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
 
-.btn-share-mentor {
-    background: white;
-    color: #4361ee;
-    border: 2px solid #4361ee;
-}
-
-.btn-download-pdf:hover {
-    background: #334155;
-    transform: translateY(-2px);
-}
-
-.btn-share-mentor:hover {
-    background: #f8faff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.1);
-}
-
-.no-data-placeholder {
-    height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    font-style: italic;
-    background: #fcfcfc;
-    border-radius: 12px;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .details-layout-grid {
-        grid-template-columns: 1fr;
-    }
-    .progress-top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .report-action-btns {
-        flex-direction: column;
-    }
-    .btn-download-pdf, .btn-share-mentor {
-        width: 100%;
-        justify-content: center;
-    }
+@media print {
+  .time-filter-container, .btn-do-task, .btn-download-pdf { display: none; }
 }
